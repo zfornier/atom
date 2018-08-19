@@ -604,16 +604,22 @@ __device__ void writeCurrentComponent(CellDouble *J,
 
 }
 
-__device__ void multiWriteCurrentComponent(CellDouble *J,CellDouble *J1,
+__device__ void multiWriteCurrentComponent(CellDouble *J,CellDouble *J1,CellDouble *J2,
 		CurrentTensorComponent *t1,CurrentTensorComponent *t2,int pqr2,int i)
 {
-    if(i % 2 == 0)
+    if(i % 3 == 0)
     {
     	writeCurrentComponent(J,t1,t2,pqr2);
     }
-    else
+
+    if(i %3 == 1)
     {
     	writeCurrentComponent(J1,t1,t2,pqr2);
+    }
+
+    if(i %3 == 2)
+    {
+    	writeCurrentComponent(J2,t1,t2,pqr2);
     }
 }
 
@@ -839,7 +845,7 @@ __device__ void AccumulateCurrentWithParticlesInCell(
     {
         c->AccumulateCurrentSingleParticle    (index,&pqr2,&dt);
 
-        multiWriteCurrentComponent(c_jx,&cd,&(dt.t1.Jx),&(dt.t2.Jx),pqr2,index);
+        multiWriteCurrentComponent(c_jx,&cd,&cd1,&(dt.t1.Jx),&(dt.t2.Jx),pqr2,index);
         writeCurrentComponent(c_jy,&(dt.t1.Jy),&(dt.t2.Jy),pqr2);
         writeCurrentComponent(c_jz,&(dt.t1.Jz),&(dt.t2.Jz),pqr2);
 

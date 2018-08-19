@@ -803,6 +803,7 @@ __device__ void set_cell_double_array_to_zero(CellDouble *arr,int size)
 	}
 }
 
+
 __device__ void AccumulateCurrentWithParticlesInCell(
 									 CellDouble *c_jx,
 									 CellDouble *c_jy,
@@ -813,51 +814,18 @@ __device__ void AccumulateCurrentWithParticlesInCell(
 		                             int nt
 		                             )
 {
-	CurrentTensor t1,t2;
-	DoubleCurrentTensor dt,dt1;;
+//	CurrentTensor t1,t2;
+	DoubleCurrentTensor dt;
     int pqr2;
-//    __shared__ CellDouble jxt[CURRENT_SUM_BUFFER_LENGTH];//
-//    CellDouble *J;
-//    __shared__ CellDouble tmp_jx;
-//    int jxt_num;
-////
-//    set_cell_double_array_to_zero(jxt,CURRENT_SUM_BUFFER_LENGTH);
-//    assign_cell_double(&tmp_jx,c_jx);
-//
-//    double a;
+    CellDouble cd;
+
+    set_cell_double_array_to_zero(&cd,1);
 
     while(index < c->number_of_particles)
     {
         c->AccumulateCurrentSingleParticle    (index,&pqr2,&dt);
 
-//        dt1 = dt;
-//
-//        jxt_num = index % CURRENT_SUM_BUFFER_LENGTH;
-//
-//        J = &(jxt[jxt_num]);
-//        writeCurrentComponent(J,&(dt.t1.Jx),&(dt.t2.Jx),pqr2);
-//        if((c->i == 28) && (c->l == 2) && (c->k == 3)
-//        		&& fabs(a = checkCurrentComponentImpact(&(dt.t1.Jx),&(dt.t2.Jx),2,2,2,pqr2)) > 1e-15
-//
-//    		&& (nt == 1))
-//        {
-//            printf("jxt_num %d J222 %25.15e  ",jxt_num,J->M[2][2][2]);
-//            for(int n = 0;n < CURRENT_SUM_BUFFER_LENGTH;n++)
-//            {
-//            	printf("%10.3e ",jxt[n].M[2][2][2]);
-//            }
-//        }
-//        double t_before = c_jx->M[2][2][2];
         writeCurrentComponent(c_jx,&(dt.t1.Jx),&(dt.t2.Jx),pqr2);
-//        if((c->i == 28) && (c->l == 2) && (c->k == 3)
-////            		&& (threadIdx.x == 0) && (threadIdx.y == 0) && (threadIdx.z == 0)
-//            		&& fabs(a = checkCurrentComponentImpact(&(dt.t1.Jx),&(dt.t2.Jx),2,2,2,pqr2)) > 1e-15
-//        		    && (nt == 1))
-//        {
-//            printf("(%3d,%3d,%3d) c_jx-add before %25.15e + %25.15e = %25.15e ind %3d \n",
-//            		threadIdx.x,threadIdx.y,threadIdx.z,
-//            		t_before,a,c_jx->M[2][2][2],index);
-//        }
         writeCurrentComponent(c_jy,&(dt.t1.Jy),&(dt.t2.Jy),pqr2);
         writeCurrentComponent(c_jz,&(dt.t1.Jz),&(dt.t2.Jz),pqr2);
 
@@ -865,17 +833,7 @@ __device__ void AccumulateCurrentWithParticlesInCell(
     }
     __syncthreads();
 
-//    for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
-//    {
-//    	J = &(jxt[i]);
-//    	add_cell_double(c_jx,J);
-//    	if((c->i == 28) && (c->l == 2) && (c->k == 3)// && (c->l > 0) && (c->l <= 3)&& (c->k > 0) && (c->k <= 3))
-//    		&& (threadIdx.x == 0) && (threadIdx.y == 0) && (threadIdx.z == 0) && (nt == 1))
-//    	{
-//    	    printf("cur-SUM i %2d J %25.15e c_jx %25.15e \n",
-//    			            i,c_jx->M[2][2][2],J->M[2][2][2]);
-//    	}
-//    }
+    add_cell_double(c_jx,&cd);
 }
 
 

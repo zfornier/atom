@@ -607,7 +607,7 @@ __device__ void writeCurrentComponent(CellDouble *J,
 __device__ void multiWriteCurrentComponent(CellDouble *J,CellDouble *J1,
 		CurrentTensorComponent *t1,CurrentTensorComponent *t2,int pqr2,int i)
 {
-    if(i % 1 == 0)
+    if(i % 2 == 0)
     {
     	writeCurrentComponent(J,t1,t2,pqr2);
     }
@@ -830,7 +830,7 @@ __device__ void AccumulateCurrentWithParticlesInCell(
 //	CurrentTensor t1,t2;
 	DoubleCurrentTensor dt;
     int pqr2;
-    CellDouble cd;
+    __shared__ CellDouble cd;
 
     set_cell_double_array_to_zero(&cd,1);
 

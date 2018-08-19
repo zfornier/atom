@@ -607,20 +607,21 @@ __device__ void writeCurrentComponent(CellDouble *J,
 __device__ void multiWriteCurrentComponent(CellDouble *J,
 		CurrentTensorComponent *t1,CurrentTensorComponent *t2,int pqr2,int i)
 {
-    if(i % 3 == 0)
-    {
-    	writeCurrentComponent(&(J[0]),t1,t2,pqr2);
-    }
-
-    if(i %3 == 1)
-    {
-    	writeCurrentComponent(&(J[1]),t1,t2,pqr2);
-    }
-
-    if(i %3 == 2)
-    {
-    	writeCurrentComponent(&(J[2]),t1,t2,pqr2);
-    }
+	writeCurrentComponent(&(J[i % 3]),t1,t2,pqr2);
+//    if(i % 3 == 0)
+//    {
+//    	writeCurrentComponent(&(J[0]),t1,t2,pqr2);
+//    }
+//
+//    if(i %3 == 1)
+//    {
+//    	writeCurrentComponent(&(J[1]),t1,t2,pqr2);
+//    }
+//
+//    if(i %3 == 2)
+//    {
+//    	writeCurrentComponent(&(J[2]),t1,t2,pqr2);
+//    }
 }
 
 __device__ void copyCellDouble(CellDouble *dst,CellDouble *src,unsigned int n,uint3 block)

@@ -830,9 +830,10 @@ __device__ void AccumulateCurrentWithParticlesInCell(
 //	CurrentTensor t1,t2;
 	DoubleCurrentTensor dt;
     int pqr2;
-    __shared__ CellDouble cd;
+    __shared__ CellDouble cd,cd1;
 
     set_cell_double_array_to_zero(&cd,1);
+    set_cell_double_array_to_zero(&cd1,1);
 
     while(index < c->number_of_particles)
     {
@@ -847,6 +848,7 @@ __device__ void AccumulateCurrentWithParticlesInCell(
     __syncthreads();
 
     add_cell_double(c_jx,&cd);
+    add_cell_double(c_jx,&cd1);
 }
 
 

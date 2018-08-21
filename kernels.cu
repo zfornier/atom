@@ -838,10 +838,11 @@ __device__ void AccumulateCurrentWithParticlesInCell(
     int pqr2;
     __shared__ CellDouble cd[CURRENT_SUM_BUFFER_LENGTH];
     __shared__ CellDouble cdy[CURRENT_SUM_BUFFER_LENGTH];
-//    __shared__ CellDouble cd[CURRENT_SUM_BUFFER_LENGTH];
+    __shared__ CellDouble cdz[CURRENT_SUM_BUFFER_LENGTH];
 
     set_cell_double_array_to_zero(cd,CURRENT_SUM_BUFFER_LENGTH);
     set_cell_double_array_to_zero(cdy,CURRENT_SUM_BUFFER_LENGTH);
+    set_cell_double_array_to_zero(cdz,CURRENT_SUM_BUFFER_LENGTH);
 
     while(index < c->number_of_particles)
     {
@@ -849,9 +850,10 @@ __device__ void AccumulateCurrentWithParticlesInCell(
 
         multiWriteCurrentComponent(cd,&(dt.t1.Jx),&(dt.t2.Jx),pqr2,index);
         multiWriteCurrentComponent(cdy,&(dt.t1.Jy),&(dt.t2.Jy),pqr2,index);
+        multiWriteCurrentComponent(cdz,&(dt.t1.Jz),&(dt.t2.Jz),pqr2,index);
 
 //        writeCurrentComponent(c_jy,&(dt.t1.Jy),&(dt.t2.Jy),pqr2);
-        writeCurrentComponent(c_jz,&(dt.t1.Jz),&(dt.t2.Jz),pqr2);
+//        writeCurrentComponent(c_jz,&(dt.t1.Jz),&(dt.t2.Jz),pqr2);
 
         index += blockDimX;
     }
@@ -861,6 +863,7 @@ __device__ void AccumulateCurrentWithParticlesInCell(
     {
         add_cell_double(c_jx,&(cd[i]));
         add_cell_double(c_jy,&(cdy[i]));
+        add_cell_double(c_jz,&(cdz[i]));
     }
 
 }

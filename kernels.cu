@@ -831,7 +831,10 @@ __device__ void AccumulateCurrentWithParticlesInCell(
 									 Cell  *c,
 		                             int index,
 		                             int blockDimX,
-		                             int nt
+		                             int nt,
+									 CellDouble *m_c_jx,
+									 CellDouble *m_c_jy,
+									 CellDouble *m_c_jz
 		                             )
 {
 	DoubleCurrentTensor dt;
@@ -893,6 +896,29 @@ __device__ void copyFromSharedMemoryToCell(
     c->busyParticleArray = 0;
 }
 
+//__device__ void copyFromSharedMemoryToCellDoubleArrays(
+//					                         CellDouble *m_c_jx,
+//					                         CellDouble *m_c_jy,
+//					                         CellDouble *m_c_jz,
+//					                         int size,
+//		                                     CellDouble *c_jx,
+//											 CellDouble *c_jy,
+//											 CellDouble *c_jz,
+//				                             int index,
+//				                             int blockDimX,
+//				                             dim3 blockId
+//		)
+//{
+//	while(index < CellExtent*CellExtent*CellExtent)
+//	{
+//      	copyCellDouble(c->Jx,c_jx,index,blockIdx);
+//    	copyCellDouble(c->Jy,c_jy,index,blockIdx);
+//    	copyCellDouble(c->Jz,c_jz,index,blockIdx);
+//
+//    	index += blockDim.x;
+//    }
+//}
+
 
 __global__ void GPU_StepAllCells(GPUCell  **cells//,
 //		                         int i,
@@ -948,6 +974,10 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 //	CurrentTensor t1,t2;
 //	int pqr2;
 //	Particle p;
+	CellDouble cdx[CURRENT_SUM_BUFFER_LENGTH];
+	CellDouble cdy[CURRENT_SUM_BUFFER_LENGTH];
+	CellDouble cdz[CURRENT_SUM_BUFFER_LENGTH];
+
 
 	c = cells[ c0->getGlobalCellNumber(blockIdx.x,blockIdx.y,blockIdx.z)];
 
@@ -960,32 +990,32 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 			threadIdx.x,blockIdx,blockDim.x);
 
 	AccumulateCurrentWithParticlesInCell(c_jx,c_jy,c_jz,
-							 c,threadIdx.x,blockDim.x,nt);
+							 c,threadIdx.x,blockDim.x,nt,cdx,cdy,cdz);
 
 
 
     copyFromSharedMemoryToCell(c_jx,c_jy,c_jz,c,threadIdx.x,blockDim.x,blockIdx);
-
-    if((c->i == 28) && (c->l == 3) && (c->k == 2) && (nt == 1))
-    	{
-    		for(int i = 0;i < CellExtent;i++)
-    		{
-    			for(int l = 0;l < CellExtent;l++)
-    			{
-    				for(int k = 0;k < CellExtent;k++)
-    				{
-    					if(fabs(c_jx->M[i][l][k]) > 1e-15)
-    					{
-    						printf("c_jx %5d %3d %3d %25.15e thread %5d %3d %3d block %5d %3d %3d nt %3d\n",
-    								i,l,k,
-    								c_jx->M[i][l][k],
-    								threadIdx.x,threadIdx.y, threadIdx.z,
-    								blockIdx.x,blockIdx.y,blockIdx.z,nt);
-    					}
-    				}
-    			}
-    		}
-    	}
+//
+//    if((c->i == 28) && (c->l == 3) && (c->k == 2) && (nt == 1))
+//    	{
+//    		for(int i = 0;i < CellExtent;i++)
+//    		{
+//    			for(int l = 0;l < CellExtent;l++)
+//    			{
+//    				for(int k = 0;k < CellExtent;k++)
+//    				{
+//    					if(fabs(c_jx->M[i][l][k]) > 1e-15)
+//    					{
+//    						printf("c_jx %5d %3d %3d %25.15e thread %5d %3d %3d block %5d %3d %3d nt %3d\n",
+//    								i,l,k,
+//    								c_jx->M[i][l][k],
+//    								threadIdx.x,threadIdx.y, threadIdx.z,
+//    								blockIdx.x,blockIdx.y,blockIdx.z,nt);
+//    					}
+//    				}
+//    			}
+//    		}
+//    	}
 
 }
 

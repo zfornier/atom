@@ -882,23 +882,14 @@ __device__ void AccumulateCurrentWithParticlesInCell(
     for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
        {
         copy_cell_double(&(m_c_jx[i]),&(cd[i]));
+//        copyCellDouble(&(m_c_jx[i]),&(cd[i]),index,blockIdx);
+//        copyCellDouble(&(m_c_jy[i]),&(cdy[i]),index,blockIdx);
+//        copyCellDouble(&(m_c_jz[i]),&(cdz[i]),index,blockIdx);
+
+//
         copy_cell_double(&(m_c_jy[i]),&(cdy[i]));
         copy_cell_double(&(m_c_jz[i]),&(cdz[i]));
        }
-//
-//    for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
-//       {
-//        copy_cell_double(&(cd[i]), &(m_c_jx[i]));
-//        copy_cell_double(&(cdy[i]),&(m_c_jy[i]));
-//        copy_cell_double(&(cdz[i]),&(m_c_jz[i]));
-//       }
-
-//    for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
-//    {
-//        add_cell_double(c_jx,&(cd[i]));
-//        add_cell_double(c_jy,&(cdy[i]));
-//        add_cell_double(c_jz,&(cdz[i]));
-//    }
 
 }
 

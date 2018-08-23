@@ -1014,9 +1014,9 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 //	CurrentTensor t1,t2;
 //	int pqr2;
 //	Particle p;
-	CellDouble cdx[CURRENT_SUM_BUFFER_LENGTH];
-	CellDouble cdy[CURRENT_SUM_BUFFER_LENGTH];
-	CellDouble cdz[CURRENT_SUM_BUFFER_LENGTH];
+	__shared__ CellDouble cdx[CURRENT_SUM_BUFFER_LENGTH];
+	__shared__ CellDouble cdy[CURRENT_SUM_BUFFER_LENGTH];
+	__shared__ CellDouble cdz[CURRENT_SUM_BUFFER_LENGTH];
 
 
 	c = cells[ c0->getGlobalCellNumber(blockIdx.x,blockIdx.y,blockIdx.z)];

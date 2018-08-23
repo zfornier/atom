@@ -802,6 +802,22 @@ __device__ void add_cell_double(CellDouble *a,CellDouble *b)
 	}
 }
 
+__device__ void copy_cell_double(CellDouble *a,CellDouble *b)
+{
+	int i,l,k;
+
+	for(i = 0;i < CellExtent;i++)
+	{
+		for(l = 0;l < CellExtent;l++)
+		{
+			for(k = 0;k < CellExtent;k++)
+			{
+				a->M[i][l][k] = b->M[i][l][k];
+			}
+		}
+	}
+}
+
 __device__ void set_cell_double_array_to_zero(CellDouble *arr,int size)
 {
 	int i,l,k;
@@ -861,6 +877,21 @@ __device__ void AccumulateCurrentWithParticlesInCell(
         index += blockDimX;
     }
     __syncthreads();
+
+
+    for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
+       {
+        copy_cell_double(&(m_c_jx[i]),&(cd[i]));
+        copy_cell_double(&(m_c_jy[i]),&(cdy[i]));
+        copy_cell_double(&(m_c_jz[i]),&(cdz[i]));
+       }
+
+    for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
+       {
+        copy_cell_double(&(cd[i]), &(m_c_jx[i]));
+        copy_cell_double(&(cdy[i]),&(m_c_jy[i]));
+        copy_cell_double(&(cdz[i]),&(m_c_jz[i]));
+       }
 
     for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
     {

@@ -885,23 +885,41 @@ __device__ void AccumulateCurrentWithParticlesInCell(
         copy_cell_double(&(m_c_jy[i]),&(cdy[i]));
         copy_cell_double(&(m_c_jz[i]),&(cdz[i]));
        }
+//
+//    for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
+//       {
+//        copy_cell_double(&(cd[i]), &(m_c_jx[i]));
+//        copy_cell_double(&(cdy[i]),&(m_c_jy[i]));
+//        copy_cell_double(&(cdz[i]),&(m_c_jz[i]));
+//       }
 
-    for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
-       {
-        copy_cell_double(&(cd[i]), &(m_c_jx[i]));
-        copy_cell_double(&(cdy[i]),&(m_c_jy[i]));
-        copy_cell_double(&(cdz[i]),&(m_c_jz[i]));
-       }
-
-    for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
-    {
-        add_cell_double(c_jx,&(cd[i]));
-        add_cell_double(c_jy,&(cdy[i]));
-        add_cell_double(c_jz,&(cdz[i]));
-    }
+//    for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
+//    {
+//        add_cell_double(c_jx,&(cd[i]));
+//        add_cell_double(c_jy,&(cdy[i]));
+//        add_cell_double(c_jz,&(cdz[i]));
+//    }
 
 }
 
+__device__ void AccumulateCurrentFromBuffer(
+									 CellDouble *c_jx,
+									 CellDouble *c_jy,
+									 CellDouble *c_jz,
+	    							 CellDouble *m_c_jx,
+									 CellDouble *m_c_jy,
+									 CellDouble *m_c_jz
+		                             )
+{
+
+    for(int i = 0;i < CURRENT_SUM_BUFFER_LENGTH;i++)
+    {
+        add_cell_double(c_jx,&(m_c_jx[i]));
+        add_cell_double(c_jy,&(m_c_jy[i]));
+        add_cell_double(c_jz,&(m_c_jz[i]));
+    }
+
+}
 
 
 
@@ -1023,7 +1041,7 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 	AccumulateCurrentWithParticlesInCell(c_jx,c_jy,c_jz,
 							 c,threadIdx.x,blockDim.x,nt,cdx,cdy,cdz);
 
-
+	 AccumulateCurrentFromBuffer(c_jx,c_jy,c_jz,cdx,cdy,cdz);
 
     copyFromSharedMemoryToCell(c_jx,c_jy,c_jz,c,threadIdx.x,blockDim.x,blockIdx);
 //

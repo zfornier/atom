@@ -732,7 +732,7 @@ __device__ void set_cell_double_arrays_to_zero(
 		)
 {
 	//int index  = threadIdx.x;
-	for(int i = 0;i < 2;i++)
+	for(int i = 0;i < size;i++)
 	        {
 	setCellDoubleToZero(&(m_c_jx[i]),index,blockId);
 	        }

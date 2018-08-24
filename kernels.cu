@@ -624,6 +624,26 @@ __device__ void copyCellDouble(CellDouble *dst,CellDouble *src,unsigned int n,ui
 	}
 }
 
+__device__ void setCellDoubleToZero(CellDouble *dst,unsigned int n,uint3 block)
+{
+	if(n < CellExtent*CellExtent*CellExtent)
+	{
+		double *d_dst;//*d_src;//,t;
+
+		d_dst = (double *)(dst->M);
+//		d_src = (double *)(src->M);
+
+//		t = d_dst[n];
+//
+//		if(fabs(d_dst[n] - d_src[n]) > 1e-15)
+//		{
+//     		printf("block %5d %3d %3d thread %5d CCD t %15.5e dst %15.5e src %15.5e dst %p src %p d_dst[n] %p d_src[n] %p \n",
+//     				block.x,block.y,block.z,threadIdx.x,t,d_dst[n],d_src[n],dst,src,&(d_dst[n]),&(d_src[n]));
+//		}
+		d_dst[n] = 0.0;
+	}
+}
+
 
 __global__ void GPU_GetCellNumbers(Cell **cells,
 		                         int *numbers)
@@ -694,6 +714,35 @@ __device__ void copyFieldsToSharedMemory(
 		copyCellDouble(c_jy,c->Jy,index,blockId);
 		copyCellDouble(c_jz,c->Jz,index,blockId);
 		//}
+		index += blockDimX;
+	}
+
+	__syncthreads();
+
+}
+
+__device__ void set_cell_double_arrays_to_zero(
+		 CellDouble *m_c_jx,
+		 CellDouble *m_c_jy,
+		 CellDouble *m_c_jz,
+		 int size,
+		 int index,
+		 dim3 blockId,
+		 int blockDimX
+		)
+{
+	//int index  = threadIdx.x;
+	setCellDoubleToZero(&(m_c_jx[0]),index,blockId);
+
+	while(index < CellExtent*CellExtent*CellExtent)
+	{
+//		if(index < 125) {
+        for(int i = 0;i < size;i++)
+        {
+//		    setCellDoubleToZero(&(m_c_jx[i]),index,blockId);
+//		    setCellDoubleToZero(&(m_c_jy[i]),index,blockId);
+//		    setCellDoubleToZero(&(m_c_jz[i]),index,blockId);
+        }
 		index += blockDimX;
 	}
 
@@ -958,6 +1007,10 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 //	CurrentTensor t1,t2;
 //	int pqr2;
 //	Particle p;
+	__shared__ CellDouble m_c_jx[CURRENT_SUM_BUFFER_LENGTH];
+	__shared__ CellDouble m_c_jy[CURRENT_SUM_BUFFER_LENGTH];
+	__shared__ CellDouble m_c_jz[CURRENT_SUM_BUFFER_LENGTH];
+
 
 	c = cells[ c0->getGlobalCellNumber(blockIdx.x,blockIdx.y,blockIdx.z)];
 
@@ -969,6 +1022,9 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 	copyFieldsToSharedMemory(c_jx,c_jy,c_jz,c_ex,c_ey,c_ez,c_hx,c_hy,c_hz,c,
 			threadIdx.x,blockIdx,blockDim.x);
 
+	set_cell_double_arrays_to_zero(m_c_jx,m_c_jy,m_c_jz,CURRENT_SUM_BUFFER_LENGTH,
+			threadIdx.x,blockIdx,blockDim.x);
+
 	AccumulateCurrentWithParticlesInCell(c_jx,c_jy,c_jz,
 							 c,threadIdx.x,blockDim.x,nt);
 
@@ -976,26 +1032,26 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 
     copyFromSharedMemoryToCell(c_jx,c_jy,c_jz,c,threadIdx.x,blockDim.x,blockIdx);
 
-    if((c->i == 28) && (c->l == 3) && (c->k == 2) && (nt == 1))
-    	{
-    		for(int i = 0;i < CellExtent;i++)
-    		{
-    			for(int l = 0;l < CellExtent;l++)
-    			{
-    				for(int k = 0;k < CellExtent;k++)
-    				{
-    					if(fabs(c_jx->M[i][l][k]) > 1e-15)
-    					{
-    						printf("c_jx %5d %3d %3d %25.15e thread %5d %3d %3d block %5d %3d %3d nt %3d\n",
-    								i,l,k,
-    								c_jx->M[i][l][k],
-    								threadIdx.x,threadIdx.y, threadIdx.z,
-    								blockIdx.x,blockIdx.y,blockIdx.z,nt);
-    					}
-    				}
-    			}
-    		}
-    	}
+//    if((c->i == 28) && (c->l == 3) && (c->k == 2) && (nt == 1))
+//    	{
+//    		for(int i = 0;i < CellExtent;i++)
+//    		{
+//    			for(int l = 0;l < CellExtent;l++)
+//    			{
+//    				for(int k = 0;k < CellExtent;k++)
+//    				{
+//    					if(fabs(c_jx->M[i][l][k]) > 1e-15)
+//    					{
+//    						printf("c_jx %5d %3d %3d %25.15e thread %5d %3d %3d block %5d %3d %3d nt %3d\n",
+//    								i,l,k,
+//    								c_jx->M[i][l][k],
+//    								threadIdx.x,threadIdx.y, threadIdx.z,
+//    								blockIdx.x,blockIdx.y,blockIdx.z,nt);
+//    					}
+//    				}
+//    			}
+//    		}
+//    	}
 
 }
 

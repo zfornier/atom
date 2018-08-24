@@ -735,6 +735,8 @@ __device__ void set_cell_double_arrays_to_zero(
 	for(int i = 0;i < size;i++)
 	        {
 	setCellDoubleToZero(&(m_c_jx[i]),index,blockId);
+	setCellDoubleToZero(&(m_c_jy[i]),index,blockId);
+	setCellDoubleToZero(&(m_c_jz[i]),index,blockId);
 	        }
 //	setCellDoubleToZero(&(m_c_jx[1]),index,blockId);
 //	setCellDoubleToZero(&(m_c_jx[0]),index,blockId);

@@ -22,7 +22,7 @@ void GPU_getCellEnergy(
 	//int i,l,k;
 	Cell *c0 = cells[0],nc;
 	double t,ex,ey,ez;
-	__shared__ extern CellDouble fd[9];
+//	__shared__ extern CellDouble fd[9];
 	//double *src;//,*dst;
 	int n  = c0->getGlobalCellNumber(i,l,k);
 

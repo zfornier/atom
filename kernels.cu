@@ -15,7 +15,7 @@ void GPU_SetAllCurrentsToZero(GPUCell  **cells)
 	//int i,l,k;
 	Cell *c,*c0 = cells[0],nc;
 	//double t;
-	__shared__ extern CellDouble fd[9];
+//	__shared__ extern CellDouble fd[9];
 	//double *src;//,*dst;
 
 	c = cells[ c0->getGlobalCellNumber(nx,ny,nz)];
@@ -87,7 +87,7 @@ __global__ void GPU_WriteAllCurrents(GPUCell **cells,int n0,
 	unsigned int ny = blockIdx.y;
 	unsigned int nz = blockIdx.z;
 	Cell  *c,*c0 = cells[0];
-	__shared__ extern CellDouble fd[9];
+//	__shared__ extern CellDouble fd[9];
 
 	c = cells[ c0->getGlobalCellNumber(nx,ny,nz)];
 
@@ -119,7 +119,7 @@ __global__ void GPU_WriteControlSystem(Cell **cells)
 //	int i,l,k;
 	Cell  *c,*c0 = cells[0],nc;
 	//double t;
-	__shared__ extern CellDouble fd[9];
+//	__shared__ extern CellDouble fd[9];
 	//double *src; //,*dst;
 //	int pqr2;
 	//CurrentTensor t1,t2;
@@ -624,7 +624,7 @@ __device__ void copyCellDouble(CellDouble *dst,CellDouble *src,unsigned int n,ui
 	}
 }
 
-__device__ void setCellDoubleToZero(CellDouble *dst,unsigned int n,uint3 block)
+__device__ void setCellDoubleToZero(CellDouble *dst,unsigned int n)
 {
 	if(n < CellExtent*CellExtent*CellExtent)
 	{
@@ -727,16 +727,15 @@ __device__ void set_cell_double_arrays_to_zero(
 		 CellDouble *m_c_jz,
 		 int size,
 		 int index,
-		 dim3 blockId,
 		 int blockDimX
 		)
 {
 	//int index  = threadIdx.x;
 	for(int i = 0;i < size;i++)
 	        {
-	setCellDoubleToZero(&(m_c_jx[i]),index,blockId);
-	setCellDoubleToZero(&(m_c_jy[i]),index,blockId);
-	setCellDoubleToZero(&(m_c_jz[i]),index,blockId);
+	setCellDoubleToZero(&(m_c_jx[i]),index);
+	setCellDoubleToZero(&(m_c_jy[i]),index);
+	setCellDoubleToZero(&(m_c_jz[i]),index);
 	        }
 //	setCellDoubleToZero(&(m_c_jx[1]),index,blockId);
 //	setCellDoubleToZero(&(m_c_jx[0]),index,blockId);
@@ -969,7 +968,7 @@ __global__ void GPU_StepAllCells(GPUCell  **cells//,
 		                         )
 {
 	Cell  *c,*c0 = cells[0];
-	__shared__ extern CellDouble fd[9];
+	__shared__  CellDouble fd[9];
 	CellDouble *c_jx,*c_jy,*c_jz,*c_ex,*c_ey,*c_ez,*c_hx,*c_hy,*c_hz;
 //	CurrentTensor t1,t2;
 //	int pqr2;
@@ -1007,10 +1006,11 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 //		                         double *global_jx,
 //		                         double mass,
 //		                         double q_mass
+//		                         CellDouble *
 		                         )
 {
 	Cell  *c,*c0 = cells[0];
-	__shared__ extern CellDouble fd[9];
+	__shared__  CellDouble fd[9];
 	CellDouble *c_jx,*c_jy,*c_jz,*c_ex,*c_ey,*c_ez,*c_hx,*c_hy,*c_hz;
 //	CurrentTensor t1,t2;
 //	int pqr2;
@@ -1031,7 +1031,7 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 			threadIdx.x,blockIdx,blockDim.x);
 
 	set_cell_double_arrays_to_zero(m_c_jx,m_c_jy,m_c_jz,CURRENT_SUM_BUFFER_LENGTH,
-			threadIdx.x,blockIdx,blockDim.x);
+			threadIdx.x,blockDim.x);
 
 	AccumulateCurrentWithParticlesInCell(c_jx,c_jy,c_jz,
 							 c,threadIdx.x,blockDim.x,nt);
@@ -1072,7 +1072,7 @@ __global__ void GPU_ControlAllCellsCurrents(Cell  **cells,int n,int i,CellDouble
 //	int i,l,k;
 	Cell  *c,*c0 = cells[0],nc;
 	//double t;
-	__shared__ extern CellDouble fd[9];
+//	__shared__ extern CellDouble fd[9];
 	//double *src;
 	//int pqr2;
 //	CurrentTensor t1,t2;

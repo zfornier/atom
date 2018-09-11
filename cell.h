@@ -59,7 +59,7 @@ const int MAX_particles_per_cell = MAX_PPC;
 
 surface<void, 2> particle_surface;
 
-__shared__ CellDouble fd[9];
+//__shared__ CellDouble fd[9];
 
 
 /*

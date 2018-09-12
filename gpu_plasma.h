@@ -1100,7 +1100,11 @@ void readControlPoint(FILE **f1,char *fncpy,int num,int nt,int part_read,int fie
 	sprintf(fn,"mumu%03d%08d.dat",num,nt);
 	strcpy(fncpy,fn);
 	sprintf(fn_next,"mumu%03d%05d.dat",num,nt+1);
-	if((f = fopen(fn,"rb")) == NULL) return;
+	if((f = fopen(fn,"rb")) == NULL)
+	{
+		std::cerr<<"Error: file "<<fn<<" not found"<<std::endl;
+		return;
+	}
 	if(part_read)
 	{
 	   *f1 = f;

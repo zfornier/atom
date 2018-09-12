@@ -463,7 +463,7 @@ __global__ void GPU_CollectStrayParticles(Cell **cells,int nt
 
 //	int busy;
 	Particle p;
-	int n;
+        int n;
 //	int i,l,k;
 	Cell  *c,*c0 = cells[0],nc,*new_c;
 	//int first = 1;
@@ -781,9 +781,6 @@ __device__ void MoveParticlesInCell(
 //		                             double q_mass
 		                             )
 {
-//	CurrentTensor t1,t2;
-    int pqr2;
-//	Particle p;
     CellTotalField cf;
 
     while(index < c->number_of_particles)
@@ -869,8 +866,7 @@ __device__ void AccumulateCurrentWithParticlesInCell(
 		                             int nt
 		                             )
 {
-	CurrentTensor t1,t2;
-	DoubleCurrentTensor dt,dt1;;
+	DoubleCurrentTensor dt;
     int pqr2;
 //    __shared__ CellDouble jxt[CURRENT_SUM_BUFFER_LENGTH];//
 //    CellDouble *J;

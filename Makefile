@@ -15,38 +15,18 @@ CFLAGS=
 OBJ = main.o mpi_shortcut.o service_functions.o compare.o maxwell.o load_data.o archAPI.o 
 #plasma.o
             
-main.o: main.cu $(DEPS)
-	$(CUDACC) -g -c -o $@ $< $(CUDAFLAGS) 
-	
-kernels.o: kernels.cu $(DEPS)
-	$(CUDACC) -g -c -o $@ $< $(CUDAFLAGS) 	--relocatable-device-code=true
-	
-#compare.o: compare.cu $(DEPS)
-#	$(CUDACC) -g -c -o $@ $< $(CUDAFLAGS)
-	
-load_data.o: load_data.cu $(DEPS)
-	$(CUDACC) -g -c -o $@ $< $(CUDAFLAGS)	
-	
-
-service_functions.o: service_functions.cu $(DEPS)
-	$(CUDACC) -g -c -o $@ $< $(CUDAFLAGS)	
-
-archAPI.o: archAPI.cu $(DEPS)
-	$(CUDACC) -g -c -o $@ $< $(CUDAFLAGS)	
-#kernels.o: kernels.cu $(DEPS)
-#	$(CUDACC) -g -c -o $@ $< $(CUDAFLAGS) 		 	
-                    
-#plasma.o: plasma.cu $(DEPS)
-#	$(CUDACC) -g -c -o $@ $< $(CUDAFLAGS)                     
-                    
-%.o: %.cxx $(DEPS)
-	$(CXX) -g -c -o $@ $< $(MPIFLAGS) 
-
-%.o: %.cpp $(DEPS)
-	$(CPP) -g -c -o $@ $< $(CBFLAGS) 
-                            
 all: $(OBJ)
 	$(LD) -g -o $@ $^ $(CFLAGS) $(DBFLAGS) $(CUDALIBS) 
 
+main.o: main.cu                    
+%.o: %.cu 
+	$(CUDACC) -g -c -o $@ $< $(CUDAFLAGS)
+
+%.o: %.cxx 
+	$(CXX) -g -c -o $@ $< $(MPIFLAGS) 
+
+%.o: %.cpp 
+	$(CPP) -g -c -o $@ $< $(CBFLAGS) 
+                            
 clean:
 	rm *.o all    

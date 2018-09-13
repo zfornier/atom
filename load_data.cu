@@ -146,7 +146,7 @@ void debugPrintParticleCharacteristicArray(double *p_ch,int np,int nt,std::strin
 	   fclose(f);
 #endif
 }
-
+#define CHK_FILE_ERR(f) {int err = ferror(f); if(err != 0) return err;}
 int readBinaryParticleArraysOneSort(
 		  FILE *f,
 		  double **dbg_x,
@@ -166,45 +166,30 @@ int readBinaryParticleArraysOneSort(
 	     int t;
 //		     Cell<Particle> c0 = (*AllCells)[0];
 	     int total_particles;
-	     int err;
+	     int err = 0;
 
-	     if((err = ferror(f)) != 0)
+	     if(NULL == f || (err = ferror(f)) != 0)
 	     {
 	     	 return err ;
 	     }
 	     //Reading extra number placed by Fortran
 	     fread(&t,sizeof(int),1,f);
-	     if((err = ferror(f)) != 0)
-	    	 {
-	    	 	 return err ;
-	    	 }
+	     CHK_FILE_ERR(f);           // FIXME: it's not correct as one need to check what fread returns.
 	     //Reading number of particles of sort "sort"
 	     fread(&tp,sizeof(double),1,f);
-	     if((err = ferror(f)) != 0)
-	    	 {
-	    	 	 return err ;
-	    	 }
+	     CHK_FILE_ERR(f);
 
 	     //Reading charge for sort "sort"
 	     total_particles = (int)tp;
 	     fread(&q_m,sizeof(double),1,f);
-	     if((err = ferror(f)) != 0)
-	    	 {
-	    	 	 return err ;
-	    	 }
-         //Reading mass for sort "sort"
+	     CHK_FILE_ERR(f);
+             //Reading mass for sort "sort"
 	     fread(&m,sizeof(double),1,f);
-	     if((err = ferror(f)) != 0)
-	    	 {
-	    	 	 return err ;
-	    	 }
+	     CHK_FILE_ERR(f);
 
 	     // Reading extra number placed by Fortran
 	     fread(&t,sizeof(int),1,f);
-	     if((err = ferror(f)) != 0)
-	    	 {
-	    	 	 return err ;
-	    	 }
+	     CHK_FILE_ERR(f);
 
        *dbg_x = (double *)malloc(sizeof(double)*total_particles);
 
@@ -274,7 +259,8 @@ int getParticlesOneSortFromFile(
 	    		                                             &dbg_px,&dbg_py,&dbg_pz,q_m,m,nt,
 	    		                                             sort);
 
-	    // real_number_of_particle[(int)sort] = total_particles;
+	     // FIXME: why don't you check 'total_particles'? how wil you distinguish if it is number of particls or an error
+	     // real_number_of_particle[(int)sort] = total_particles;
 
 	     if((ferror(f)) != 0) return 1;
 	     convertParticleArraysToSTLvector(dbg_x,dbg_y,dbg_z,dbg_px,dbg_py,dbg_pz,*q_m,*m,

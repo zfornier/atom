@@ -624,6 +624,26 @@ __device__ void copyCellDouble(CellDouble *dst,CellDouble *src,unsigned int n,ui
 	}
 }
 
+__device__ void addCellDouble(CellDouble *dst,CellDouble *src,unsigned int n,uint3 block)
+{
+	if(n < CellExtent*CellExtent*CellExtent)
+	{
+		double *d_dst,*d_src;//,t;
+
+		d_dst = (double *)(dst->M);
+		d_src = (double *)(src->M);
+
+//		t = d_dst[n];
+//
+//		if(fabs(d_dst[n] - d_src[n]) > 1e-15)
+//		{
+//     		printf("block %5d %3d %3d thread %5d CCD t %15.5e dst %15.5e src %15.5e dst %p src %p d_dst[n] %p d_src[n] %p \n",
+//     				block.x,block.y,block.z,threadIdx.x,t,d_dst[n],d_src[n],dst,src,&(d_dst[n]),&(d_src[n]));
+//		}
+		d_dst[n] += d_src[n];
+	}
+}
+
 __device__ void setCellDoubleToZero(CellDouble *dst,unsigned int n)
 {
 	if(n < CellExtent*CellExtent*CellExtent)
@@ -861,6 +881,7 @@ __device__ void set_cell_double_array_to_zero(CellDouble *arr,int size)
 
 __device__ void AccumulateCurrentWithParticlesInCell(
 									 CellDouble *c_jx,
+									 CellDouble *c_jx1,
 									 CellDouble *c_jy,
 									 CellDouble *c_jz,
 									 Cell  *c,
@@ -989,10 +1010,10 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 	set_cell_double_arrays_to_zero(m_c_jx,m_c_jy,m_c_jz,CURRENT_SUM_BUFFER_LENGTH,
 			threadIdx.x,blockDim.x);
 
-	AccumulateCurrentWithParticlesInCell(c_jx,c_jy,c_jz,
+	AccumulateCurrentWithParticlesInCell(c_jx,&(m_c_jx[0]),c_jy,c_jz,
 							 c,threadIdx.x,blockDim.x,nt);
 
-
+	addCellDouble(c_jx,&(m_c_jx[0]),threadIdx.x,blockIdx);
 
     copyFromSharedMemoryToCell(c_jx,c_jy,c_jz,c,threadIdx.x,blockDim.x,blockIdx);
 

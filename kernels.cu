@@ -624,7 +624,7 @@ __device__ void copyCellDouble(CellDouble *dst,CellDouble *src,unsigned int n,ui
 	}
 }
 
-__device__ void addCellDouble(CellDouble *dst,CellDouble *src,unsigned int n,uint3 block)
+__device__ void addCellDouble(CellDouble *dst,CellDouble *src,unsigned int n,uint3 block,int dim)
 {
 	if(n < CellExtent*CellExtent*CellExtent)
 	{
@@ -640,7 +640,13 @@ __device__ void addCellDouble(CellDouble *dst,CellDouble *src,unsigned int n,uin
 //     		printf("block %5d %3d %3d thread %5d CCD t %15.5e dst %15.5e src %15.5e dst %p src %p d_dst[n] %p d_src[n] %p \n",
 //     				block.x,block.y,block.z,threadIdx.x,t,d_dst[n],d_src[n],dst,src,&(d_dst[n]),&(d_src[n]));
 //		}
-		d_dst[n] += d_src[n];
+		for (int i = 0;i < dim;i++)
+		{
+			CellDouble *t = &(src[i]);
+			d_src         = (double *)(t->M);
+
+		    d_dst[n] += d_src[n];
+		}
 	}
 }
 
@@ -1027,9 +1033,9 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 	AccumulateCurrentWithParticlesInCell(m_c_jx,3,c_jy,c_jz,
 		  					 c,threadIdx.x,blockDim.x,nt);
 
-	addCellDouble(c_jx,&(m_c_jx[0]),threadIdx.x,blockIdx);
-	addCellDouble(c_jx,&(m_c_jx[1]),threadIdx.x,blockIdx);
-	addCellDouble(c_jx,&(m_c_jx[2]),threadIdx.x,blockIdx);
+	addCellDouble(c_jx,&(m_c_jx[0]),threadIdx.x,blockIdx,3);
+//	addCellDouble(c_jx,&(m_c_jx[1]),threadIdx.x,blockIdx,3);
+//	addCellDouble(c_jx,&(m_c_jx[2]),threadIdx.x,blockIdx,3);
 
     copyFromSharedMemoryToCell(c_jx,c_jy,c_jz,c,threadIdx.x,blockDim.x,blockIdx);
 

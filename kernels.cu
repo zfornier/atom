@@ -1030,10 +1030,10 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 	set_cell_double_arrays_to_zero(m_c_jx,m_c_jy,m_c_jz,CURRENT_SUM_BUFFER_LENGTH,
 			threadIdx.x,blockDim.x);
 
-	AccumulateCurrentWithParticlesInCell(m_c_jx,3,c_jy,c_jz,
+	AccumulateCurrentWithParticlesInCell(m_c_jx,CURRENT_SUM_BUFFER_LENGTH,c_jy,c_jz,
 		  					 c,threadIdx.x,blockDim.x,nt);
 
-	addCellDouble(c_jx,&(m_c_jx[0]),threadIdx.x,blockIdx,3);
+	addCellDouble(c_jx,&(m_c_jx[0]),threadIdx.x,blockIdx,CURRENT_SUM_BUFFER_LENGTH);
 //	addCellDouble(c_jx,&(m_c_jx[1]),threadIdx.x,blockIdx,3);
 //	addCellDouble(c_jx,&(m_c_jx[2]),threadIdx.x,blockIdx,3);
 

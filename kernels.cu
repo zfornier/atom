@@ -881,8 +881,7 @@ __device__ void set_cell_double_array_to_zero(CellDouble *arr,int size)
 
 __device__ void AccumulateCurrentWithParticlesInCell(
 									 CellDouble *c_jx,
-									 CellDouble *c_jx1,
-									 CellDouble *c_jx2,
+									 int CellDouble_array_dim,
 									 CellDouble *c_jy,
 									 CellDouble *c_jz,
 									 Cell  *c,
@@ -899,7 +898,7 @@ __device__ void AccumulateCurrentWithParticlesInCell(
     while(index < c->number_of_particles)
     {
         c->AccumulateCurrentSingleParticle    (index,&pqr2,&dt);
-        writeCurrentComponent(&(c_jx[index%3]),&(dt.t1.Jx),&(dt.t2.Jx),pqr2);
+        writeCurrentComponent(&(c_jx[index%CellDouble_array_dim]),&(dt.t1.Jx),&(dt.t2.Jx),pqr2);
 //        if(index%2 == 0)
 //        {
 //
@@ -1025,7 +1024,7 @@ __global__ void GPU_CurrentsAllCells(GPUCell  **cells,int nt
 	set_cell_double_arrays_to_zero(m_c_jx,m_c_jy,m_c_jz,CURRENT_SUM_BUFFER_LENGTH,
 			threadIdx.x,blockDim.x);
 
-	AccumulateCurrentWithParticlesInCell(m_c_jx,&(m_c_jx[1]),&(m_c_jx[2]),c_jy,c_jz,
+	AccumulateCurrentWithParticlesInCell(m_c_jx,3,c_jy,c_jz,
 		  					 c,threadIdx.x,blockDim.x,nt);
 
 	addCellDouble(c_jx,&(m_c_jx[0]),threadIdx.x,blockIdx);

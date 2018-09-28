@@ -154,24 +154,9 @@ __global__ void GPU_MakeDepartureLists(GPUCell  **cells,int nt,int *d_stage)
 		Cell  *c,*c0 = cells[0],nc;//,*new_c;
 		c = cells[c0->getGlobalCellNumber(nx,ny,nz)];
 
-#ifdef FLY_PRINTS
-
-//		printf("GPU_MakeDepartureDim gridDim %3u %3u %3u  nx %3u ny %3u nz %3u \n",
-//				gridDim.x,gridDim.y,gridDim.z,
-//				nx,ny,nz);
-//		d_stage[n] = 1;
-
-
-#endif
 
 
 
-#ifdef FLY_PRINTS
-
-//		printf("GPU_MakeDepartureLists %5d %3d %3d nx %3u ny %3u nz %3u n %5d\n",c->i,c->l,c->k,nx,ny,nz,n);
-
-//		c->printCellParticles("Make-BEGIN",nt);
-#endif
 
 
 		c->departureListLength = 0;
@@ -186,41 +171,11 @@ __global__ void GPU_MakeDepartureLists(GPUCell  **cells,int nt,int *d_stage)
 				}
 			}
 		}
-//        d_stage[n] = 2;
 		c->departureListLength  = 0;
-        //printf("GPU_MakeDepartureLists nt %d number %d \n",nt,c->number_of_particles);
-        //return;
 		for(int num = 0;num < c->number_of_particles; num++)
 			{
 			p = c->readParticleFromSurfaceDevice(num);
-#ifdef FLY_PRINTS
 
-//					printf("resident-begin step %3d %5d %3d %3d p %10d sort %2d num %5d size %5d nx %3u ny %3u nz %3u\n",nt,
-//							                                                       c->i,c->l,c->k,
-//							                                                       p.fortran_number,
-//							                                                       (int)p.sort,
-//							                                                       num,
-//							                           							   c->number_of_particles,
-//							                           							   nx,ny,nz
-//							                           							   );
-
-#endif
-//				c->readParticleFromSurfaceDevice(num,&p);
-
-#ifdef FLY_PRINTS
-
-//					printf("RESIDENT STEP %d %5d %3d %3d p %10d sort %2d num %5d size %5d %15.5e < %15.5e < %15.5e\n",
-//							nt,
-//							c->i,c->l,c->k,
-//							                                                       p.fortran_number,
-//							                                                       (int)p.sort,
-//							                                                       num,
-//							                           							   c->number_of_particles,
-//
-//							c->x0,p.x,c->x0+c->hx
-//							                           							   );
-
-#endif
 
 				if(!c->isPointInCell(p.GetX()))   //check Paricle = operator !!!!!!!!!!!!!!!!!!!!!!!!!!!
 				{
@@ -232,43 +187,6 @@ __global__ void GPU_MakeDepartureLists(GPUCell  **cells,int nt,int *d_stage)
 						d_stage[1] = iy;
 						d_stage[2] = iz;
 					}
-#ifdef FLY_PRINTS
-//					printf("%5d %3d %3d resident-remove step %3d fn %10d sort %d x %25.15e count %3d length %3d num %3d number %5d ix %2d iy %2d iz %2d\n",
-//							c->i,c->l,c->k,
-//							nt,
-//							p.fortran_number,
-//							p.sort,
-//							p.x,
-//							c->departure[ix][iy][iz],
-//					//		c->departureIndex[ix][iy][iz],
-//							c->departureListLength,
-//							num,c->number_of_particles,
-//							ix,iy,iz
-//							);
-
-#endif
-//TODO: mke FINAL print at STRAY function.
-//					Make 3x3x3x20(50) particle fly array at each cell
-
-					//departureList[departureListLength++] = p;
-
-
-#ifdef FLY_PRINTS
-#endif
-
-//					if(c->i == 1 && c->l == 1 && c->k == 1)
-//					{
-#ifdef FLY_PRINTS
-//					   printf("cell %5d %2d %2d part %3d fn %10d fly %d%d%d x:%15.5e < %15.5e < %15.5e y:%15.5e < %15.5e < %15.5e z::%15.5e < %15.5e < %15.5e\n",
-//							   c->i,c->l,c->k,num,p.fortran_number,ix,iy,iz,
-//							   c->x0,p.x,c->x0+c->hx,
-//							   c->y0,p.y,c->y0+c->hy,
-//							   c->z0,p.z,c->z0+c->hz
-//							   );
-#endif
-//					}
-
-					//if(c->departure[ix][iy][iz] == 0) c->departureIndex[ix][iy][iz] = c->departureListLength;
 
 
                     if(c->departureListLength == PARTICLES_FLYING_ONE_DIRECTION)
@@ -293,51 +211,10 @@ __global__ void GPU_MakeDepartureLists(GPUCell  **cells,int nt,int *d_stage)
 					}
 
 					c->departure[ix][iy][iz] += 1;
-#ifdef FLY_PRINTS
-//					Particle new_p;
-//
-//					new_p = c->departureList[ix][iy][iz][num1];
-//					printf(" %5d %2d %2d departureC fn %10d count %3d length %3d num %3d number %5d\n",
-//							c->i,c->l,c->k,new_p.fortran_number,c->departure[ix][iy][iz],
-//							//c->departureIndex[ix][iy][iz],
-//							c->departureListLength,
-//							num1,c->number_of_particles);
-#endif
+
 					num--;
 				}
-#ifdef FLY_PRINTS
-//					printf("resident-final %5d %3d %3d fn %10d length %3d num %3d number %5d\n",
-//							c->i,c->l,c->k,p.fortran_number,
-//							c->departureListLength,
-//							num,c->number_of_particles);
-//
-#endif
 			}
-//		d_stage[n] = 3;
-#ifdef FLY_PRINTS
-					//printf("resident-end\n");
-#endif
-		//char s[1000],s1[10];
-		//printf(s,"DEPARTURE cell %5d %2d %2d ",c->i,c->l,c->k);
-		for(ix = 0;ix < 3;ix++)
-			for(iy = 0;iy < 3;iy++)
-				for(iz = 0;iz < 3;iz++)
-				{
-#ifdef FLY_PRINTS
-				//	printf("DEPARTURE step %d cell %5d %2d %2d %d%d%d num %3d \n",nt,c->i,c->l,c->k,ix,iy,iz,
-				//			c->departure[ix][iy][iz]);//,c->departureIndex[ix][iy][iz]);
-//					int num = c->departure[ix][iy][iz];
-//					for(int ip = 0;ip < num;ip++)
-//					{
-//						p = c->departureList[ix][iy][iz][ip];
-//						printf("%10d ",p.fortran_number);
-//					}
-//					printf("\n");
-#endif
-//					strcat(s,s1);
-				}
-		//printf("%s \n",s);
-//        d_stage[n] = 5;
 }
 
 

@@ -662,6 +662,7 @@ int convertParticleArraysToSTLvector(
 
 		  p.fortran_number = i+1;
 		  p.sort = sort;
+		  p.direction = 0;
 
 		  vp.push_back(p);
 

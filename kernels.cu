@@ -226,6 +226,7 @@ __global__ void GPU_MakeDepartureLists(GPUCell  **cells,int nt,int *d_stage)
 				{
 					c->removeParticleFromSurfaceDevice(num,&p,&(c->number_of_particles));
 					c->flyDirection(&p,&ix,&iy,&iz);
+
 					if(p.fortran_number == 325041 && p.sort == 2) {
 						d_stage[0] = ix;
 						d_stage[1] = iy;

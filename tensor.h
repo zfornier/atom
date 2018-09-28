@@ -14,6 +14,14 @@
 #define __forceinline__
 #endif
 
+class LiteCurrentTensorComponent {
+public:
+	char i11, i12, i13,
+	 i21, i22, i23,
+	 i31, i32, i33,
+	 i41, i42, i43;
+};
+
 
 class CurrentTensorComponent {
 public:
@@ -52,6 +60,11 @@ public:
 		return a;
 	}
 
+};
+
+class LiteCurrentTensor {
+public:
+	LiteCurrentTensorComponent Jx,Jy,Jz;
 };
 
 class CurrentTensor {

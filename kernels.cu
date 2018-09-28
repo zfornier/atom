@@ -227,11 +227,7 @@ __global__ void GPU_ArrangeFlights(GPUCell  **cells,int nt, int *d_stage)
 	Particle p;
 
 	Cell  *c,*c0 = cells[0],nc,*snd_c;
-		//int first = 1;
 
-
-	//printf("GPU_ArrangeFlights \n");
-//	return;
 
 		c = cells[ n = c0->getGlobalCellNumber(nx,ny,nz)];
 
@@ -252,76 +248,24 @@ __global__ void GPU_ArrangeFlights(GPUCell  **cells,int nt, int *d_stage)
 						d_stage[index*4+3] = snd_c->departureListLength;
 					}
 
-//#ifdef FLY_PRINTS
-//					printf("arrange %5d %2d %2d  %d%d%d nx %5d %3d %3d n %5d snd %p \n",c->i,c->l,c->k,ix,iy,iz,nx+ix-1,ny+iy-1,nz+iz-1,n,snd_c);
-//#endif
 
-
-
-					//printf("arrangge %5d %2d %2d  %d%d%d snd_c %p \n",c->i,c->l,c->k,ix,iy,iz,snd_c);
-
-	//				continue;
 					snd_ix = ix;
 					snd_iy = iy;
 					snd_iz = iz;
-					//printf("arrannge %5d %2d %2d  %d%d%d \n",c->i,c->l,c->k,ix,iy,iz);
 
-
-					//printf("arrrange %5d %2d %2d  %d%d%d \n",c->i,c->l,c->k,ix,iy,iz);
 					c->inverseDirection(&snd_ix,&snd_iy,&snd_iz);
-//					printf("inverse %5d %2d %2d  %d%d%d \n",c->i,c->l,c->k,ix,iy,iz);
-//#ifdef FLY_PRINTS
-//
-//					printf("cell %5d %2d %2d direction %d%d%d from %5d %2d %2d snd dir %d%d%d \n", //);from %5d %2d %2d snd dir %d%d%d\n",
-//													 c->i,c->l,c->k,ix,iy,iz,
-//                                                     snd_c->i,snd_c->l,snd_c->k,snd_ix,snd_iy,snd_iz);
-//#endif
-					//continue;
 
 					num = snd_c->departure[snd_ix][snd_iy][snd_iz];
-//					if(nx == 24 && ny == 2 && nz == 2)
-//					{
-//						d_stage[index*4+3] = num;
-//					}
-					//pos = snd_c->departureIndex[ix][iy][iz];
-//#ifdef FLY_PRINTS
-//					printf("BEFORE_ARR step %d cell %5d %2d %2d num %3d direction %d%d%d from %d%d%d donor %5d %2d %2d\n",nt,
-//							c->i,c->l,c->k,num,ix,iy,iz,snd_ix,snd_iy,snd_iz,
-//							snd_c->i,snd_c->l,snd_c->k
-//							);
-//#endif
 
 					for(int i = 0;i < num;i++)
 					{
 						p = snd_c->departureList[snd_ix][snd_iy][snd_iz][i];
-//#ifdef FLY_PRINTS
-                      if(nx == 24 && ny == 2 && nz == 2)
-						{
-//                    	    if(snd_c->i == 23 && snd_c->k == 2 && snd_c->l == 1)
-//                    	    {
-// 							   d_stage[0] = num;
-//							   d_stage[1] = p.fortran_number;
-//                    	    }
-						}
-//						printf("step %3d sort %d ARRIVAL cell %5d %2d %2d part %3d (total %3d ) pos %d fn %10d to %d%d%d from %d%d%d numInCell %3d x %15.5e %15.5e %15.5e m %15.5e q_m %15.5e px %15.5e %15.5e %15.5e\n",
-//								                       nt,p.sort,
-//													   c->i,c->l,c->k,i,snd_c->departure[snd_ix][snd_iy][snd_iz],
-//													   pos,p.fortran_number,snd_ix,snd_iy,snd_iz,ix,iy,iz,
-//													   c->number_of_particles,
-//													   p.x,p.y,p.z,p.m,p.q_m,p.pu,p.pv,p.pw
-//													   );
-//#endif
 						c->Insert(p);
 
 					}
 
 
-					//new_c->arrival[new_ix][new_iy][new_iz] = c->departure[ix][iy][iz];
 				}
-//#ifdef FLY_PRINTS
-//		c->printCellParticles("FINAL",nt);
-//#endif
-
 }
 
 

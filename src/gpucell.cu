@@ -5,7 +5,7 @@
  *      Author: snytav
  */
 
-#include "cell.h"
+#include "../include/cell.h"
 
 
 void dbgPrintGPUParticleAttribute(Cell *d_c,int n_particle,int attribute,char *name )

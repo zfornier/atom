@@ -70,10 +70,10 @@
 
 #include "memory_control.h"
 
-#include "add.cu"
-#include "wrap_kernel.cu"
+#include "../src/add.cu"
+#include "../src/wrap_kernel.cu"
 //#include "run_control.h"
-#include "kernels.cu"
+#include "../src/kernels.cu"
 
 #include <vector>
 
@@ -715,11 +715,10 @@ int readStartPoint(int nt)
 
 	  int getBoundaryLimit(int dir){return ((dir == 0)*Nx  + (dir == 1)*Ny + (dir == 2)*Nz + 2);}
 
-#include "init.cu"
+#include "../src/init.cu"
 
 
-
-	int getMagneticFieldTraceShifts(int dir,int3 &d1,int3 &d2)
+    int getMagneticFieldTraceShifts(int dir,int3 &d1,int3 &d2)
 	{
 	      d1.x = (dir == 0)*0 + (dir == 1)*1 + (dir == 2)*0;
 	      d1.y = (dir == 0)*0 + (dir == 1)*0 + (dir == 2)*1;

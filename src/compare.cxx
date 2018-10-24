@@ -1,5 +1,5 @@
 
-#include "compare.h"
+#include "../include/compare.h"
 
 #include <string>
 

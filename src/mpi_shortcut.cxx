@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "archAPI.h"
+#include "../include/archAPI.h"
 
 int InitMPI(int argc,char *argv[])
 {

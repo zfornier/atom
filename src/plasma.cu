@@ -1,6 +1,6 @@
-#include "gpu_plasma.h"
+#include "../include/gpu_plasma.h"
 #include <stdlib.h>
-#include "mpi_shortcut.h"
+#include "../include/mpi_shortcut.h"
 
 
 

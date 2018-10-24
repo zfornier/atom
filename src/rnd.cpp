@@ -10,9 +10,9 @@
 		http://www.netlib.org/f2c/libf2c.zip
 */
 
-#include "f2c.h"
+#include "../include/f2c.h"
 #include <stdio.h>
-#include "run_control.h"
+#include "../include/run_control.h"
 
 /* Common Block Declarations */
 

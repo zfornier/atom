@@ -2,7 +2,7 @@
 #include <string>
 #include <stdio.h>
 
-#include "archAPI.h"
+#include "../include/archAPI.h"
 
 #include <stdlib.h>
 #include<string.h>
@@ -13,7 +13,7 @@
 #include <sys/sysinfo.h>
 #include <sys/time.h>
 
-#include "particle.h"
+#include "../include/particle.h"
 
 //#include<cuda.h>
 

@@ -1,11 +1,13 @@
-#include "gpu_plasma.h"
+#include "../include/gpu_plasma.h"
 #include <stdlib.h>
-#include "mpi_shortcut.h"
+#include "../include/mpi_shortcut.h"
 //TODO: gpu cell in the global array at copy from there appears to be not initialized
 
 int main(int argc,char*argv[])
 {
    Plasma *plasma;
+
+   InitMPI(argc,argv);
 
    printf("begin Particle size %d \n", sizeof(Particle));
 
@@ -14,6 +16,8 @@ int main(int argc,char*argv[])
    plasma->Initialize();
 
    plasma->Compute();
+
+   CloseMPI();
 
    delete plasma;
    

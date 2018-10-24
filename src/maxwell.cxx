@@ -4,18 +4,18 @@
 
 //#include "rnd.h"
 
-#include "read_particles.h"
+#include "../include/read_particles.h"
 
-#include "run_control.h"
+#include "../include/run_control.h"
 
 #include <vector>
 
-#include "particle.h"
+#include "../include/particle.h"
 
-#include "maxwell.h"
+#include "../include/maxwell.h"
 
 
-#include "f2c.h"
+#include "../include/f2c.h"
 #include <stdio.h>
 //#include "rnd.h"
 // #include "run_control.h"

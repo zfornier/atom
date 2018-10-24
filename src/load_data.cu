@@ -17,7 +17,7 @@
 #include <string>
 
 
-#include "load_data.h"
+#include "../include/load_data.h"
 
 std::string getMumuFileName(int nt)
 	  {

@@ -236,27 +236,27 @@ int* readInt(ifstream& ifs)
 
 	
 
-int main(int argc, char** argv) {
-	
-	
-	int result;
-    char* name_file_in = NULL;
-    char* name_file_out = NULL;
-    int c;
- 
-    while ((c = getopt (argc, argv, "i:o:")) != -1){
-            switch(c)
-           {
-                  case 'i':
-                           name_file_in = optarg;
-                           break;
-                   case 'o':
-                           name_file_out = optarg;
-                           break;
-           }
-    }
-   result = copyFile(name_file_in, name_file_out);
-
-	cout << "File exported in NetCDF format with success" << endl;
-
-}
+//int main(int argc, char** argv) {
+//
+//
+//	int result;
+//    char* name_file_in = NULL;
+//    char* name_file_out = NULL;
+//    int c;
+//
+//    while ((c = getopt (argc, argv, "i:o:")) != -1){
+//            switch(c)
+//           {
+//                  case 'i':
+//                           name_file_in = optarg;
+//                           break;
+//                   case 'o':
+//                           name_file_out = optarg;
+//                           break;
+//           }
+//    }
+//   result = copyFile(name_file_in, name_file_out);
+//
+//	cout << "File exported in NetCDF format with success" << endl;
+//
+//}

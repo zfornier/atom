@@ -1,7 +1,7 @@
 #include "../include/gpu_plasma.h"
 #include <stdlib.h>
 #include "../include/mpi_shortcut.h"
-#include "NetCdf/read_file.cpp"
+//#include "NetCdf/read_file.cpp"
 //TODO: gpu cell in the global array at copy from there appears to be not initialized
 
 int main(int argc,char*argv[])
@@ -43,6 +43,16 @@ int main(int argc,char*argv[])
 //   result = copyFile(name_file_in, name_file_out);
 //
 //   cout << "File exported in NetCDF format with success" << endl;
+
+//   double* array = (double *)malloc(sizeof(double) * (NX + 2) * (NY + 2) * (NZ + 2));
+//
+//   readVar("mumu60000000005.nc", "Ex", (void*)array);
+//   for(int i = 0; i < 20; i++) {
+//      cout << array[i] << endl;
+//   }
+//   free(array);
+//
+//   cout << "Get variable Ex success" << endl;
 
    return 0;
 }

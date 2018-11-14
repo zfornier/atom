@@ -89,6 +89,7 @@ int copyOneSortParticle(ifstream& ifs, const char* netCdfFileName, string label)
 
 int copyFile(const char* binaryFileName, const char* netCdfFileName);
 
+void readVar(const char* fileName, const char * name, void* array);
 
 #endif
 

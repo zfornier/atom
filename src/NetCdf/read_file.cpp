@@ -235,7 +235,9 @@ int* readInt(ifstream& ifs)
 }
 
 	
-
+void readVar(const char* fileName, const char * name, void* array) {
+    NetCDFManipulator::plsm_get_var(fileName, name, array);
+}
 //int main(int argc, char** argv) {
 //
 //

@@ -14,10 +14,12 @@
 #include <sys/sysinfo.h>
 #include <sys/time.h>
 
+#include <iostream>
 #include <string>
 
 
 #include "../include/load_data.h"
+//#include "./NetCdf/read_file.cpp"
 
 std::string getMumuFileName(int nt)
 	  {
@@ -172,72 +174,155 @@ int readBinaryParticleArraysOneSort(
 	     {
 	     	 return err ;
 	     }
+	std::cout << 10000 << std::endl;
+
+	     /*
+     * name + sort
+     * names:
+         * Extra_number_    int
+         * Nb_particles_    int
+         * Charge_  	     double
+         * Mass_            double
+         * Coordinates_x    double
+         * Coordinates_y	 double
+         * Coordinates_z	 double
+         * Impulses_x		 double
+         * Impulses_y		 double
+         * Impulses_z		 double
+	 * func: 	readVar("filename.nc", (std::to_string("Name") +  std::to_string(sort)).c_str(), &var);
+	 * filename: mumu60000000005.nc
+     */
+
+//	int tp1;
+//	readVar("mumu60000000005.nc", (std::to_string("Extra_number_") +  std::to_string(sort)).c_str(), &tp1);
+//	std::cout << tp1 << std::endl;
+//
+//	readVar("mumu60000000005.nc", (std::to_string("Nb_particles_") +  std::to_string(sort)).c_str(), &tp1);
+//	std::cout << tp1 << std::endl;
+
 	     //Reading extra number placed by Fortran
-	     fread(&t,sizeof(int),1,f);
-	     if((err = ferror(f)) != 0)
-	    	 {
-	    	 	 return err ;
-	    	 }
+
+	readVar("mumu60000000005.nc", (std::string("Extra_number_") +  std::to_string(sort)).c_str(), &t);
+
+//	     fread(&t,sizeof(int),1,f);
+//	     if((err = ferror(f)) != 0)
+//	    	 {
+//	    	 	 return err ;
+//	    	 }
 	     //Reading number of particles of sort "sort"
-	     fread(&tp,sizeof(double),1,f);
-	     if((err = ferror(f)) != 0)
-	    	 {
-	    	 	 return err ;
-	    	 }
+	readVar("mumu60000000005.nc", (std::string("Nb_particles_") +  std::to_string(sort)).c_str(), &total_particles);
+
+//	fread(&tp,sizeof(double),1,f);
+//	     if((err = ferror(f)) != 0)
+//	    	 {
+//	    	 	 return err ;
+//	    	 }
 
 	     //Reading charge for sort "sort"
-	     total_particles = (int)tp;
-	     fread(&q_m,sizeof(double),1,f);
-	     if((err = ferror(f)) != 0)
-	    	 {
-	    	 	 return err ;
-	    	 }
+//	     total_particles = (int)tp;
+
+	readVar("mumu60000000005.nc", (std::string("Charge_") +  std::to_string(sort)).c_str(), &q_m);
+
+//	fread(&q_m,sizeof(double),1,f);
+//	     if((err = ferror(f)) != 0)
+//	    	 {
+//	    	 	 return err ;
+//	    	 }
+
          //Reading mass for sort "sort"
-	     fread(&m,sizeof(double),1,f);
-	     if((err = ferror(f)) != 0)
-	    	 {
-	    	 	 return err ;
-	    	 }
+	readVar("mumu60000000005.nc", (std::string("Mass_") +  std::to_string(sort)).c_str(), &m);
+
+//	fread(&m,sizeof(double),1,f);
+//	     if((err = ferror(f)) != 0)
+//	    	 {
+//	    	 	 return err ;
+//	    	 }
 
 	     // Reading extra number placed by Fortran
-	     fread(&t,sizeof(int),1,f);
-	     if((err = ferror(f)) != 0)
-	    	 {
-	    	 	 return err ;
-	    	 }
+	readVar("mumu60000000005.nc", (std::string("Extra_number_") +  std::to_string(sort)).c_str(), &t);
 
-       *dbg_x = (double *)malloc(sizeof(double)*total_particles);
+//	fread(&t,sizeof(int),1,f);
+//	     if((err = ferror(f)) != 0)
+//	    	 {
+//	    	 	 return err ;
+//	    	 }
+	std::cout << 10001 << std::endl;
 
-       *dbg_y = (double *)malloc(sizeof(double)*total_particles);
+//       *dbg_x = (double *)malloc(sizeof(double)*total_particles);
 
-       *dbg_z = (double *)malloc(sizeof(double)*total_particles);
+//       *dbg_y = (double *)malloc(sizeof(double)*total_particles);
 
-
-       *dbg_px = (double *)malloc(sizeof(double)*total_particles);
-
-       *dbg_py = (double *)malloc(sizeof(double)*total_particles);
+//       *dbg_z = (double *)malloc(sizeof(double)*total_particles);
 
 
-       *dbg_pz = (double *)malloc(sizeof(double)*total_particles);
+//       *dbg_px = (double *)malloc(sizeof(double)*total_particles);
+
+//       *dbg_py = (double *)malloc(sizeof(double)*total_particles);
+
+
+//       *dbg_pz = (double *)malloc(sizeof(double)*total_particles);
+	std::cout << total_particles << std::endl;
+	double *dbg_x1 = (double *)malloc(sizeof(double)*total_particles);
+
+	double *dbg_y1 = (double *)malloc(sizeof(double)*total_particles);
+
+	double *dbg_z1 = (double *)malloc(sizeof(double)*total_particles);
+
+	double *dbg_px1 = (double *)malloc(sizeof(double)*total_particles);
+
+	double *dbg_py1 = (double *)malloc(sizeof(double)*total_particles);
+
+	double *dbg_pz1 = (double *)malloc(sizeof(double)*total_particles);
+
+	std::cout << 10002 << std::endl;
 
         //Reading X coordinates for particles of sort "sort"
-	 	readFortranBinaryArray(f,*dbg_x);
+	readVar("mumu60000000005.nc", (std::string("Coordinates_x") +  std::to_string(sort)).c_str(), (void*)dbg_x1);
+	std::cout << 10003 << std::endl;
+
+//	readFortranBinaryArray(f,*dbg_x);
 	 	//Reading Y coordinates for particles of sort "sort"
-	 	readFortranBinaryArray(f,*dbg_y);
+	readVar("mumu60000000005.nc", (std::string("Coordinates_y") +  std::to_string(sort)).c_str(), (void*)dbg_y1);
+	std::cout << 10004 << std::endl;
+
+//	readFortranBinaryArray(f,*dbg_y);
 	 	//Reading Z coordinates for particles of sort "sort"
-	 	readFortranBinaryArray(f,*dbg_z);
+	readVar("mumu60000000005.nc", (std::string("Coordinates_z") +  std::to_string(sort)).c_str(), (void*)dbg_z1);
+	std::cout << 10005 << std::endl;
+
+//	readFortranBinaryArray(f,*dbg_z);
 	 	//Reading X impulses for particles of sort "sort"
-	 	readFortranBinaryArray(f,*dbg_px);
+	readVar("mumu60000000005.nc", (std::string("Impulses_x") +  std::to_string(sort)).c_str(), (void*)dbg_px1);
+	std::cout << 10006 << std::endl;
+
+//	readFortranBinaryArray(f,*dbg_px);
 	 	//Reading Y impulses for particles of sort "sort"
-	 	readFortranBinaryArray(f,*dbg_py);
+	readVar("mumu60000000005.nc", (std::string("Impulses_y") +  std::to_string(sort)).c_str(), (void*)dbg_py1);
+	std::cout << 10007 << std::endl;
+
+//	readFortranBinaryArray(f,*dbg_py);
 	 	//Reading Z impulses for particles of sort "sort"
-	 	readFortranBinaryArray(f,*dbg_pz);
+	readVar("mumu60000000005.nc", (std::string("Impulses_z") +  std::to_string(sort)).c_str(), (void*)dbg_pz1);
+	std::cout << 10008 << std::endl;
+
+	*dbg_x = dbg_x1;
+	*dbg_y = dbg_y1;
+	*dbg_z = dbg_z1;
+
+
+	*dbg_px = dbg_px1;
+	*dbg_py = dbg_py1;
+	*dbg_pz = dbg_pz1;
+
+
+//	readFortranBinaryArray(f,*dbg_pz);
 	 	debugPrintParticleCharacteristicArray(*dbg_x,total_particles,nt,"x",sort);
         debugPrintParticleCharacteristicArray(*dbg_y,total_particles,nt,"y",sort);
         debugPrintParticleCharacteristicArray(*dbg_z,total_particles,nt,"z",sort);
         debugPrintParticleCharacteristicArray(*dbg_px,total_particles,nt,"px",sort);
         debugPrintParticleCharacteristicArray(*dbg_py,total_particles,nt,"py",sort);
         debugPrintParticleCharacteristicArray(*dbg_pz,total_particles,nt,"pz",sort);
+	std::cout << 10009 << std::endl;
 
 	 	//printf("particle 79943 %25.15e \n",(*dbg_x)[79943]);
 

@@ -74,6 +74,8 @@
 #include "../src/wrap_kernel.cu"
 //#include "run_control.h"
 #include "../src/kernels.cu"
+#include "../src/NetCdf/read_file.cpp"
+//#include "NetCdf/read_file.h"
 
 #include <vector>
 
@@ -1096,9 +1098,9 @@ void readControlPoint(FILE **f1,char *fncpy,int num,int nt,int part_read,int fie
 	char fn[100],fn_next[100];
 	FILE *f;
 
-	sprintf(fn,"mumu%03d%08d.dat",num,nt);
+	sprintf(fn,"mumu%03d%08d.nc",num,nt);
 	strcpy(fncpy,fn);
-	sprintf(fn_next,"mumu%03d%05d.dat",num,nt+1);
+	sprintf(fn_next,"mumu%03d%05d.nc",num,nt+1);
 	if((f = fopen(fn,"rb")) == NULL)
 	{
 		std::cerr<<"Error: file "<<fn<<" not found"<<std::endl;
@@ -1109,19 +1111,37 @@ void readControlPoint(FILE **f1,char *fncpy,int num,int nt,int part_read,int fie
 	   *f1 = f;
 	}
 
-	readFortranBinaryArray(f,ex);
-	readFortranBinaryArray(f,ey);
-	readFortranBinaryArray(f,ez);
-	readFortranBinaryArray(f,hx);
-	readFortranBinaryArray(f,hy);
-	readFortranBinaryArray(f,hz);
-	readFortranBinaryArray(f,jx);
-	readFortranBinaryArray(f,jy);
-	readFortranBinaryArray(f,jz);
+	std::cout << fn << std::endl;
+	readVar(fn, "Ex", (void*)ex);
+	readVar(fn, "Ey", (void*)ey);
+	readVar(fn, "Ez", (void*)ez);
 
-	readFortranBinaryArray(f,qx);
-	readFortranBinaryArray(f,qy);
-	readFortranBinaryArray(f,qz);
+	readVar(fn, "Mx", (void*)hx);
+	readVar(fn, "My", (void*)hy);
+	readVar(fn, "Mz", (void*)hz);
+
+	readVar(fn, "Jx", (void*)jx);
+	readVar(fn, "Jy", (void*)jy);
+	readVar(fn, "Jz", (void*)jz);
+
+	readVar(fn, "Qx", (void*)qx);
+	readVar(fn, "Qy", (void*)qy);
+	readVar(fn, "Qz", (void*)qz);
+	std::cout << fn << std::endl;
+
+//	readFortranBinaryArray(f,ex);
+//	readFortranBinaryArray(f,ey);
+//	readFortranBinaryArray(f,ez);
+//	readFortranBinaryArray(f,hx);
+//	readFortranBinaryArray(f,hy);
+//	readFortranBinaryArray(f,hz);
+//	readFortranBinaryArray(f,jx);
+//	readFortranBinaryArray(f,jy);
+//	readFortranBinaryArray(f,jz);
+
+//	readFortranBinaryArray(f,qx);
+//	readFortranBinaryArray(f,qy);
+//	readFortranBinaryArray(f,qz);
 
 	if(field_assign == 1) AssignArraysToCells();
 
@@ -1170,7 +1190,7 @@ void checkCurrentControlPoint(int j,int nt)
      printf("Jx %15.5e Jy %15.5e Jz %15.5e \n",t_jx,t_jy,t_jz);
 }
 
-void checkControlPoint(int num,int nt,int check_part)
+void 	checkControlPoint(int num,int nt,int check_part)
 {
 	 double t_ex,t_ey,t_ez,t_hx,t_hy,t_hz,t_jx,t_jy,t_jz;
 	 double t_qx,t_qy,t_qz;//,t_njx,t_njy,t_njz;
@@ -1222,9 +1242,11 @@ void checkControlPoint(int num,int nt,int check_part)
 	 t_qx = CheckGPUArraySilent(dbg_Qx,d_Qx);
 	 t_qy = CheckGPUArraySilent(dbg_Qy,d_Qy);
 	 t_qz = CheckGPUArraySilent(dbg_Qz,d_Qz);
-
+	 std::cout << 0 << std::endl;
 	 if(num >= 500)
 	 {
+		 std::cout << 1 << std::endl;
+
 		 char wh[100];
 
 		 sprintf(wh,"%d",num);
@@ -1236,28 +1258,36 @@ void checkControlPoint(int num,int nt,int check_part)
 		 t_ex = checkGPUArray(dbgEx,d_Ex,"Ex",wh,nt); //checkGPUArrayСomponent(dbgEx,d_Ex,"Ex",num);
 		 t_ey = checkGPUArray(dbgEy,d_Ey,"Ey",wh,nt);
 		 t_ez = checkGPUArray(dbgEz,d_Ez,"Ez",wh,nt);
+		 std::cout << 2 << std::endl;
 
 	 }
 	 else
 	 {
+		 std::cout << 3 << std::endl;
+
 		 t_ex = CheckGPUArraySilent(dbgEx,d_Ex);
 		 t_ey = CheckGPUArraySilent(dbgEy,d_Ey);
 		 t_ez = CheckGPUArraySilent(dbgEz,d_Ez);
+		 std::cout << 4 << std::endl;
 	 }
+	std::cout << 5 << std::endl;
 
 	 t_jx = CheckGPUArraySilent(dbgJx,d_Jx);
 	 t_jy = CheckGPUArraySilent(dbgJy,d_Jy);
 	 t_jz = CheckGPUArraySilent(dbgJz,d_Jz);
+	std::cout << 6 << std::endl;
 
 //	 t_njx = CheckGPUArraySilent(dbgJx,d_Jx);
 //	 t_njy = CheckGPUArraySilent(dbgJy,d_Jy);
 //	 t_njz = CheckGPUArraySilent(dbgJz,d_Jz);
 
 	 memory_monitor("checkControlPoint5",nt);
+	std::cout << 7 << std::endl;
 
 	 double t_cmp_jx = checkGPUArray(dbgJx,d_Jx,"Jx","step",nt);
 	 double t_cmp_jy = checkGPUArray(dbgJy,d_Jy,"Jy","step",nt);
 	 double t_cmp_jz = checkGPUArray(dbgJz,d_Jz,"Jz","step",nt);
+	std::cout << 8 << std::endl;
 
 #ifdef CONTROL_DIFF_GPU_PRINTS
      printf("GPU: Ex %15.5e Ey %15.5e Ez %15.5e \n",t_ex,t_ey,t_ez);
@@ -1265,13 +1295,17 @@ void checkControlPoint(int num,int nt,int check_part)
      printf("GPU: Jx %15.5e Jy %15.5e Jz %15.5e \n",t_jx,t_jy,t_jz);
      printf("GPU compare : Jx %15.5e Jy %15.5e Jz %15.5e \n",t_cmp_jx,t_cmp_jy,t_cmp_jz);
 #endif
+	std::cout << 9 << std::endl;
 
      memory_monitor("checkControlPoint6",nt);
 
-     double cp = checkControlPointParticles(num,f,fn_copy,nt);
+	std::cout << 10 << std::endl;
+	double cp = checkControlPointParticles(num,f,fn_copy,nt);
+	std::cout << 11 << std::endl;
 
-     f_prec_report = fopen("control_points.dat","at");
-     fprintf(f_prec_report,"nt %5d num %3d Ex %15.5e Ey %15.5e Ez %15.5e Hx %15.5e Hy %15.5e Hz %15.5e Jx %15.5e Jy %15.5e Jz %15.5e Qx %15.5e Qy %15.5e Qz %15.5e particles %15.5e\n",
+	f_prec_report = fopen("control_points.dat","at");
+	std::cout << 12 << std::endl;
+	fprintf(f_prec_report,"nt %5d num %3d Ex %15.5e Ey %15.5e Ez %15.5e Hx %15.5e Hy %15.5e Hz %15.5e Jx %15.5e Jy %15.5e Jz %15.5e Qx %15.5e Qy %15.5e Qz %15.5e particles %15.5e\n",
     		 nt,num,
     		 t_ex,t_ey,t_ez,
     		 t_hx,t_hy,t_hz,
@@ -1279,11 +1313,17 @@ void checkControlPoint(int num,int nt,int check_part)
     		 t_qx,t_qy,t_qz,
     		 cp
     		 );
-     fclose(f_prec_report);
+	std::cout << 13 << std::endl;
 
-     memory_monitor("checkControlPoint7",nt);
+	fclose(f_prec_report);
+	std::cout << 14 << std::endl;
 
-     fclose(f);
+	memory_monitor("checkControlPoint7",nt);
+	std::cout << 15 << std::endl;
+
+	fclose(f);
+	std::cout << 16 << std::endl;
+
 }
 
 
@@ -2060,10 +2100,11 @@ double checkControlPointParticlesOneSort(int check_point_num,FILE *f,GPUCell **c
 
     Cell c0 = (*AllCells)[0];
     //int pn_min/*,pn_ave,pn_max*/;
-
+    std::cout << 1000 << std::endl;
     total_particles = readBinaryParticleArraysOneSort(f,&dbg_x,&dbg_y,&dbg_z,
    		                                             &dbg_px,&dbg_py,&dbg_pz,&q_m,&m,nt,sort);
     memory_monitor("checkControlPointParticlesOneSort2",nt);
+	std::cout << 1001 << std::endl;
 
     size = (*AllCells).size();
 
@@ -2138,6 +2179,7 @@ double checkControlPointParticles(int check_point_num,FILE *f,char *fname,int nt
 	printf("checkControlPointParticles0.9 %u \n",info.freeram/1024/1024);
 #endif
 #endif
+    std::cout << 100 << std::endl;
 
 	ti  = checkControlPointParticlesOneSort(check_point_num,f,cp,nt,ION);
 //	printf("IONS\n");
@@ -2147,6 +2189,7 @@ double checkControlPointParticles(int check_point_num,FILE *f,char *fname,int nt
 	printf("checkControlPointParticles1 %u \n",info.freeram/1024/1024);
 #endif
 #endif
+    std::cout << 101 << std::endl;
 
 	te  = checkControlPointParticlesOneSort(check_point_num,f,cp,nt,PLASMA_ELECTRON);
 //	printf("ELECTRONS\n");
@@ -2157,6 +2200,7 @@ double checkControlPointParticles(int check_point_num,FILE *f,char *fname,int nt
     printf("checkControlPointParticles1.5 %u \n",info.freeram/1024/1024);
 #endif
 #endif
+    std::cout << 102 << std::endl;
 
 	tb  = checkControlPointParticlesOneSort(check_point_num,f,cp,nt,BEAM_ELECTRON);
 //	printf("BEAM\n");

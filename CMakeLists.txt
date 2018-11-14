@@ -8,6 +8,13 @@ find_package(MPI REQUIRED)
 #set(LDFLAGS ${LDFLAGS}; -lm -L$(CUDALIB) -arch=sm_52)
 #set(OBJ  "main.o" "mpi_shortcut.o" "service_functions.o" "compare.o" "maxwell.o" "load_data.o" "archAPI.o")
 
+add_custom_target(plasma_netcdf.o ALL)
+add_custom_command(TARGET plasma_netcdf.o COMMAND g++ -I../netcdf-cxx4/cxx4 -c src/NetCdf/plasma_netcdf.cpp)
+
+add_custom_target(libplasmanetcdf.a ALL)
+add_custom_command(TARGET libplasmanetcdf.a COMMAND ar rcs libplasmanetcdf.a plasma_netcdf.o)
+add_dependencies(libplasmanetcdf.a plasma_netcdf.o)
+
 add_custom_target(main.o ALL)
 add_custom_command(TARGET main.o COMMAND nvcc -g -c src/main.cu -arch=sm_52 -lineinfo --maxrregcount=128 -g -I/usr/local/cuda/include/ -I../netcdf-cxx4/cxx4/)
 
@@ -24,17 +31,13 @@ add_custom_target(maxwell.o ALL)
 add_custom_command(TARGET maxwell.o COMMAND nvcc -g -c src/maxwell.cu -arch=sm_52 -lineinfo --maxrregcount=128 -g -I/usr/local/cuda/include/)
 
 add_custom_target(load_data.o ALL)
-add_custom_command(TARGET load_data.o COMMAND nvcc -g -c src/load_data.cu -arch=sm_52 -lineinfo --maxrregcount=128 -g -I/usr/local/cuda/include/)
+add_custom_command(TARGET load_data.o COMMAND nvcc -std=c++11 -g -c src/load_data.cu -arch=sm_52 -lineinfo --maxrregcount=128 -g -I/usr/local/cuda/include/ -I../netcdf-cxx4/cxx4 -L../netcdf-cxx4/build/cxx4/ libplasmanetcdf.a -lnetcdf-cxx4 -lnetcdf -lhdf5_serial_hl -lhdf5_serial -lz)
+
+add_dependencies(load_data.o libplasmanetcdf.a)
 
 add_custom_target(archAPI.o ALL)
 add_custom_command(TARGET archAPI.o COMMAND nvcc -g -c src/archAPI.cu -arch=sm_52 -lineinfo --maxrregcount=128 -g -I/usr/local/cuda/include/)
 
-add_custom_target(plasma_netcdf.o ALL)
-add_custom_command(TARGET plasma_netcdf.o COMMAND g++ -I../netcdf-cxx4/cxx4 -c src/NetCdf/plasma_netcdf.cpp)
-
-add_custom_target(libplasmanetcdf.a ALL)
-add_custom_command(TARGET libplasmanetcdf.a COMMAND ar rcs libplasmanetcdf.a plasma_netcdf.o)
-add_dependencies(libplasmanetcdf.a plasma_netcdf.o)
 
 add_custom_target(atom ALL)
 add_custom_command(TARGET atom

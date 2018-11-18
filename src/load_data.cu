@@ -174,7 +174,6 @@ int readBinaryParticleArraysOneSort(
 	     {
 	     	 return err ;
 	     }
-	std::cout << 10000 << std::endl;
 
 	     /*
      * name + sort
@@ -246,7 +245,6 @@ int readBinaryParticleArraysOneSort(
 //	    	 {
 //	    	 	 return err ;
 //	    	 }
-	std::cout << 10001 << std::endl;
 
 //       *dbg_x = (double *)malloc(sizeof(double)*total_particles);
 
@@ -274,36 +272,29 @@ int readBinaryParticleArraysOneSort(
 
 	double *dbg_pz1 = (double *)malloc(sizeof(double)*total_particles);
 
-	std::cout << 10002 << std::endl;
 
         //Reading X coordinates for particles of sort "sort"
 	readVar("mumu60000000005.nc", (std::string("Coordinates_x") +  std::to_string(sort)).c_str(), (void*)dbg_x1);
-	std::cout << 10003 << std::endl;
 
 //	readFortranBinaryArray(f,*dbg_x);
 	 	//Reading Y coordinates for particles of sort "sort"
 	readVar("mumu60000000005.nc", (std::string("Coordinates_y") +  std::to_string(sort)).c_str(), (void*)dbg_y1);
-	std::cout << 10004 << std::endl;
 
 //	readFortranBinaryArray(f,*dbg_y);
 	 	//Reading Z coordinates for particles of sort "sort"
-	readVar("mumu60000000005.nc", (std::string("Coordinates_z") +  std::to_string(sort)).c_str(), (void*)dbg_z1);
-	std::cout << 10005 << std::endl;
+	readVar("mumu60000000005.nc", (std::string("Coordinates_z") couco+  std::to_string(sort)).c_str(), (void*)dbg_z1);
 
 //	readFortranBinaryArray(f,*dbg_z);
 	 	//Reading X impulses for particles of sort "sort"
 	readVar("mumu60000000005.nc", (std::string("Impulses_x") +  std::to_string(sort)).c_str(), (void*)dbg_px1);
-	std::cout << 10006 << std::endl;
 
 //	readFortranBinaryArray(f,*dbg_px);
 	 	//Reading Y impulses for particles of sort "sort"
 	readVar("mumu60000000005.nc", (std::string("Impulses_y") +  std::to_string(sort)).c_str(), (void*)dbg_py1);
-	std::cout << 10007 << std::endl;
 
 //	readFortranBinaryArray(f,*dbg_py);
 	 	//Reading Z impulses for particles of sort "sort"
 	readVar("mumu60000000005.nc", (std::string("Impulses_z") +  std::to_string(sort)).c_str(), (void*)dbg_pz1);
-	std::cout << 10008 << std::endl;
 
 	*dbg_x = dbg_x1;
 	*dbg_y = dbg_y1;
@@ -322,7 +313,6 @@ int readBinaryParticleArraysOneSort(
         debugPrintParticleCharacteristicArray(*dbg_px,total_particles,nt,"px",sort);
         debugPrintParticleCharacteristicArray(*dbg_py,total_particles,nt,"py",sort);
         debugPrintParticleCharacteristicArray(*dbg_pz,total_particles,nt,"pz",sort);
-	std::cout << 10009 << std::endl;
 
 	 	//printf("particle 79943 %25.15e \n",(*dbg_x)[79943]);
 

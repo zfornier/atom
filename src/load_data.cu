@@ -259,7 +259,7 @@ int readBinaryParticleArraysOneSort(
 
 
 //       *dbg_pz = (double *)malloc(sizeof(double)*total_particles);
-	std::cout << total_particles << std::endl;
+
 	double *dbg_x1 = (double *)malloc(sizeof(double)*total_particles);
 
 	double *dbg_y1 = (double *)malloc(sizeof(double)*total_particles);
@@ -282,7 +282,7 @@ int readBinaryParticleArraysOneSort(
 
 //	readFortranBinaryArray(f,*dbg_y);
 	 	//Reading Z coordinates for particles of sort "sort"
-	readVar("mumu60000000005.nc", (std::string("Coordinates_z") couco+  std::to_string(sort)).c_str(), (void*)dbg_z1);
+	readVar("mumu60000000005.nc", (std::string("Coordinates_z") +  std::to_string(sort)).c_str(), (void*)dbg_z1);
 
 //	readFortranBinaryArray(f,*dbg_z);
 	 	//Reading X impulses for particles of sort "sort"

@@ -51,15 +51,10 @@ const char* NetCDFManipulator::plsm_get_description(const char* fileName, const 
 
 
 Error_t NetCDFManipulator::plsm_get_var(const char* fileName, const char * name, void* array) {
-    std::cout << "Open file" << std::endl;
     NcFile dataFile(fileName, NcFile::read);
-    std::cout << "Get var" << std::endl;
     NcVar var = dataFile.getVar(name);
-    std::cout << "write to array" << std::endl;
     var.getVar(array);
-    std::cout << "Close" << std::endl;
     dataFile.close();
-    std::cout << "Return" << std::endl;
     return 0;
 
 }

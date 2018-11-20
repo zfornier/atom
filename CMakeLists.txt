@@ -1,58 +1,24 @@
-cmake_minimum_required(VERSION 3.8)
-project(atom)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.8) 
+PROJECT(atom VERSION 0.1
+	DESCRIPTION "Plasma modeling code"
+	LANGUAGES CXX CUDA)
 
-find_package(CUDA REQUIRED)
-find_package(MPI REQUIRED)
+FIND_PACKAGE(CUDA REQUIRED)
+FIND_PACKAGE(MPI REQUIRED)
 
-set(CUDAFLAGS "${CUDAFLAGS};-arch=sm_52;-lineinfo;--maxrregcount=128;-g;-I${CUDA_TOOLKIT_ROOT_DIR}/include/")
-set(CUDA_LIB "${CUDA_LIB};${CUDA_TOOLKIT_ROOT_DIR}/lib64")
-set(CUDA_LIBS "${CUDA_LIBS};-g;-L${CUDA_LIB};-lcuda;-lcudart")
-set(OBJ  "main.o;mpi_shortcut.o;service_functions.o;compare.o;maxwell.o;load_data.o;archAPI.o")
-set(MPI_COMP "mpicxx")
-set(CUDA_COMP "nvcc")
-set(CPP "g++")
-set(NET_CDF_LIB "${NET_CDF_LIB};../netcdf-cxx4/cxx4")
-set(NET_CDF_BLD "${NET_CDF_BLD};../netcdf-cxx4/build/cxx4/")
-set(NET_CDF_FLAGS "${NET_CDF_FLAGS};-lnetcdf-cxx4;-lnetcdf;-lhdf5_serial_hl;-lhdf5_serial;-lz")
+find_path (NETCDF_CXX_INCLUDES_C netcdf PATHS "$ENV{NETCDF_CXX_DIR}")
+find_library (NETCDF_CXX_LIBRARIES_C  netcdf-cxx4 PATHS "$ENV{NETCDF_CXX_LIB_DIR}")
 
-add_custom_target(plasma_netcdf.o ALL)
-add_custom_command(TARGET plasma_netcdf.o COMMAND ${CPP} -c -I${NET_CDF_LIB} src/NetCdf/plasma_netcdf.cpp)
+INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS} ${MPI_INCLUDE_PATH} ${NETCDF_CXX_INCLUDES_C})
 
-add_custom_target(libplasmanetcdf.a ALL)
-add_custom_command(TARGET libplasmanetcdf.a COMMAND ar rcs libplasmanetcdf.a plasma_netcdf.o)
-add_dependencies(libplasmanetcdf.a plasma_netcdf.o)
+set(SOURCES src/main.cu src/mpi_shortcut.cxx src/service_functions.cu src/compare.cxx src/maxwell.cu src/load_data.cu src/archAPI.cu)
 
-add_custom_target(main.o ALL)
-add_custom_command(TARGET main.o COMMAND ${CUDA_COMP} -g -c src/main.cu ${CUDAFLAGS} -I${NET_CDF_LIB})
+LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11 -O3 -ffast-math -Wall")
 
-add_custom_target(mpi_shortcut.o ALL)
-add_custom_command(TARGET mpi_shortcut.o COMMAND ${MPI_COMP} -g -c src/mpi_shortcut.cxx)
+LIST(APPEND CUDA_NVCC_FLAGS "-lineinfo;-gencode;arch=compute_52,code=sm_52;--maxrregcount=128;-O3")
 
-add_custom_target(service_functions.o ALL)
-add_custom_command(TARGET service_functions.o COMMAND ${CUDA_COMP} -g -c src/service_functions.cu ${CUDAFLAGS})
+ADD_SUBDIRECTORY(src/NetCdf)
 
-add_custom_target(compare.o ALL)
-add_custom_command(TARGET compare.o COMMAND ${MPI_COMP} -g -c src/compare.cxx)
+ADD_EXECUTABLE(atom ${SOURCES})
+TARGET_LINK_LIBRARIES(atom ${CUDA_LIBRARIES} ${MPI_LIBRARIES} netcdf_lib ${NETCDF_CXX_LIBRARIES_C})
 
-add_custom_target(maxwell.o ALL)
-add_custom_command(TARGET maxwell.o COMMAND ${CUDA_COMP} -g -c src/maxwell.cu ${CUDAFLAGS})
-
-add_custom_target(load_data.o ALL)
-add_custom_command(TARGET load_data.o COMMAND ${CUDA_COMP} -std=c++11 -g -c src/load_data.cu ${CUDAFLAGS} -I${NET_CDF_LIB} -L${NET_CDF_BLD} libplasmanetcdf.a ${NET_CDF_FLAGS})
-
-add_dependencies(load_data.o libplasmanetcdf.a)
-
-add_custom_target(archAPI.o ALL)
-add_custom_command(TARGET archAPI.o COMMAND ${CUDA_COMP}  -g -c src/archAPI.cu ${CUDAFLAGS})
-
-add_custom_target(atom ALL)
-add_custom_command(TARGET atom COMMAND ${MPI_COMP} -g -o atom ${OBJ} -L${NET_CDF_BLD} libplasmanetcdf.a ${NET_CDF_FLAGS} ${CUDA_LIBS})
-
-add_dependencies(atom main.o)
-add_dependencies(atom mpi_shortcut.o)
-add_dependencies(atom service_functions.o)
-add_dependencies(atom compare.o)
-add_dependencies(atom maxwell.o)
-add_dependencies(atom load_data.o)
-add_dependencies(atom archAPI.o)
-add_dependencies(atom libplasmanetcdf.a)

@@ -10,6 +10,8 @@
 
 
 #include "particle.h"
+#include <string>
+#include <sstream>
 #include <vector>
 
 #include "maxwell.h"
@@ -66,5 +68,14 @@ int LoadParticleData(int nt,
 		               std::vector<Particle> & beam_vp, int nx,int ny,int nz);
 
 
+namespace patch
+{
+    template < typename T > std::string to_string( const T& n )
+    {
+        std::ostringstream stm ;
+        stm << n ;
+        return stm.str() ;
+    }
+}
 
 #endif /* LOAD_DATA_H_ */

@@ -201,7 +201,7 @@ int readBinaryParticleArraysOneSort(
 
 	     //Reading extra number placed by Fortran
 
-	readVar("mumu60000000005.nc", (std::string("Extra_number_") +  std::to_string(sort)).c_str(), &t);
+	readVar("mumu60000000005.nc", (std::string("Extra_number_") +  patch::to_string(sort)).c_str(), &t);
 
 //	     fread(&t,sizeof(int),1,f);
 //	     if((err = ferror(f)) != 0)
@@ -209,7 +209,7 @@ int readBinaryParticleArraysOneSort(
 //	    	 	 return err ;
 //	    	 }
 	     //Reading number of particles of sort "sort"
-	readVar("mumu60000000005.nc", (std::string("Nb_particles_") +  std::to_string(sort)).c_str(), &total_particles);
+	readVar("mumu60000000005.nc", (std::string("Nb_particles_") +  patch::to_string(sort)).c_str(), &total_particles);
 
 //	fread(&tp,sizeof(double),1,f);
 //	     if((err = ferror(f)) != 0)
@@ -220,7 +220,7 @@ int readBinaryParticleArraysOneSort(
 	     //Reading charge for sort "sort"
 //	     total_particles = (int)tp;
 
-	readVar("mumu60000000005.nc", (std::string("Charge_") +  std::to_string(sort)).c_str(), &q_m);
+	readVar("mumu60000000005.nc", (std::string("Charge_") +  patch::to_string(sort)).c_str(), &q_m);
 
 //	fread(&q_m,sizeof(double),1,f);
 //	     if((err = ferror(f)) != 0)
@@ -229,7 +229,7 @@ int readBinaryParticleArraysOneSort(
 //	    	 }
 
          //Reading mass for sort "sort"
-	readVar("mumu60000000005.nc", (std::string("Mass_") +  std::to_string(sort)).c_str(), &m);
+	readVar("mumu60000000005.nc", (std::string("Mass_") +  patch::to_string(sort)).c_str(), &m);
 
 //	fread(&m,sizeof(double),1,f);
 //	     if((err = ferror(f)) != 0)
@@ -238,7 +238,7 @@ int readBinaryParticleArraysOneSort(
 //	    	 }
 
 	     // Reading extra number placed by Fortran
-	readVar("mumu60000000005.nc", (std::string("Extra_number_") +  std::to_string(sort)).c_str(), &t);
+	readVar("mumu60000000005.nc", (std::string("Extra_number_") +  patch::to_string(sort)).c_str(), &t);
 
 //	fread(&t,sizeof(int),1,f);
 //	     if((err = ferror(f)) != 0)
@@ -274,27 +274,27 @@ int readBinaryParticleArraysOneSort(
 
 
         //Reading X coordinates for particles of sort "sort"
-	readVar("mumu60000000005.nc", (std::string("Coordinates_x") +  std::to_string(sort)).c_str(), (void*)dbg_x1);
+	readVar("mumu60000000005.nc", (std::string("Coordinates_x") +  patch::to_string(sort)).c_str(), (void*)dbg_x1);
 
 //	readFortranBinaryArray(f,*dbg_x);
 	 	//Reading Y coordinates for particles of sort "sort"
-	readVar("mumu60000000005.nc", (std::string("Coordinates_y") +  std::to_string(sort)).c_str(), (void*)dbg_y1);
+	readVar("mumu60000000005.nc", (std::string("Coordinates_y") +  patch::to_string(sort)).c_str(), (void*)dbg_y1);
 
 //	readFortranBinaryArray(f,*dbg_y);
 	 	//Reading Z coordinates for particles of sort "sort"
-	readVar("mumu60000000005.nc", (std::string("Coordinates_z") +  std::to_string(sort)).c_str(), (void*)dbg_z1);
+	readVar("mumu60000000005.nc", (std::string("Coordinates_z") +  patch::to_string(sort)).c_str(), (void*)dbg_z1);
 
 //	readFortranBinaryArray(f,*dbg_z);
 	 	//Reading X impulses for particles of sort "sort"
-	readVar("mumu60000000005.nc", (std::string("Impulses_x") +  std::to_string(sort)).c_str(), (void*)dbg_px1);
+	readVar("mumu60000000005.nc", (std::string("Impulses_x") +  patch::to_string(sort)).c_str(), (void*)dbg_px1);
 
 //	readFortranBinaryArray(f,*dbg_px);
 	 	//Reading Y impulses for particles of sort "sort"
-	readVar("mumu60000000005.nc", (std::string("Impulses_y") +  std::to_string(sort)).c_str(), (void*)dbg_py1);
+	readVar("mumu60000000005.nc", (std::string("Impulses_y") +  patch::to_string(sort)).c_str(), (void*)dbg_py1);
 
 //	readFortranBinaryArray(f,*dbg_py);
 	 	//Reading Z impulses for particles of sort "sort"
-	readVar("mumu60000000005.nc", (std::string("Impulses_z") +  std::to_string(sort)).c_str(), (void*)dbg_pz1);
+	readVar("mumu60000000005.nc", (std::string("Impulses_z") +  patch::to_string(sort)).c_str(), (void*)dbg_pz1);
 
 	*dbg_x = dbg_x1;
 	*dbg_y = dbg_y1;

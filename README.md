@@ -9,3 +9,7 @@ CMake:
     
 NetCFD:
 * Добавлены файлы в проект
+
+CMake:
+mkdir build;cd build
+NETCDF_CXX_DIR=../netcdf-cxx4/cxx4/ NETCDF_CXX_LIB_DIR=../netcdf-cxx4/build/cxx4/ cmake ../

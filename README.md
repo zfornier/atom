@@ -9,6 +9,7 @@ CMake:
   Переменные окружения:
   	* NETCDF\_CXX\_DIR: Путь до заголовочных файлов NetCdf-cxx4
 	* NETCDF\_CXX\_LIB\_DIR: Путь до библиотек NetCdf-cxx4
+  Если пути до файлов библиотеки NetCdf-cxx4 не найдены, то библиотека будет скачена и собрана автоматически.
 
   пример использования:
   	`NETCDF_CXX_DIR=~/tmp/netcdf-cxx4/cxx4/ NETCDF_CXX_LIB_DIR=~/tmp/netcdf-cxx4/build/cxx4/ cmake -DCUDA_ARCH=52 -DCMAKE_BUILD_TYPE=Profiling ../`

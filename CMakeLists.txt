@@ -6,14 +6,6 @@ PROJECT(atom VERSION 0.1
 FIND_PACKAGE(CUDA REQUIRED)
 FIND_PACKAGE(MPI REQUIRED)
 
-find_path (NETCDF_CXX_INCLUDES_C netcdf PATHS "$ENV{NETCDF_CXX_DIR}")
-find_library (NETCDF_CXX_LIBRARIES_C  netcdf-cxx4 PATHS "$ENV{NETCDF_CXX_LIB_DIR}")
-
-INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS} ${MPI_INCLUDE_PATH} ${NETCDF_CXX_INCLUDES_C})
-
-set(SOURCES src/main.cu src/mpi_shortcut.cxx src/service_functions.cu src/compare.cxx src/maxwell.cu src/load_data.cu src/archAPI.cu)
-
-
 if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
     string( TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER )
 
@@ -27,8 +19,7 @@ if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "")
     endif()
 
     message(STATUS "BUILD TYPE set to '${CMAKE_BUILD_TYPE}'")
-    SET(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "Choose the type of
-build, options are: 'None', 'Release', 'Debug', 'RelWithDebInfo', and 'Profiling'.")
+    SET(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "Choose the type of build, options are: 'None', 'Release', 'Debug', 'RelWithDebInfo', and 'Profiling'.")
 else()
     SET(CMAKE_BUILD_TYPE "Release")
     message(STATUS "BUILD TYPE set to the default type:  '${CMAKE_BUILD_TYPE}'")
@@ -72,9 +63,39 @@ LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11 ${CXX_OPTS} -Wall")
 
 LIST(APPEND CMAKE_CUDA_FLAGS "${NVCC_OPTS} ${CUDARCH} --maxrregcount=128 ")
 
+# find NetCdf-cxx4 lib
+find_path (NETCDF_CXX_INCLUDES_C netcdf PATHS "$ENV{NETCDF_CXX_DIR}" "${CMAKE_SOURCE_DIR}/external/NetCdf-cxx4/include")
+find_library (NETCDF_CXX_LIBRARIES_C  libnetcdf-cxx4.a PATHS "$ENV{NETCDF_CXX_LIB_DIR}" "${CMAKE_SOURCE_DIR}/external/NetCdf-cxx4/lib")
 
+message(${NETCDF_CXX_LIBRARIES_C})
+
+set(BUILD_NETCDF_CXX4 FALSE)
+if( NOT NETCDF_CXX_INCLUDES_C OR
+    NOT NETCDF_CXX_LIBRARIES_C)
+    message(STATUS "NetCDF-cxx4 components not found. The package will be downloaded and compiled.")
+    include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
+    set(NETCDF_EXTERNAL_PATH "${CMAKE_SOURCE_DIR}/external/NetCdf-cxx4")
+    set(NETCDF_CXX_INCLUDES_C "${NETCDF_EXTERNAL_PATH}/include")
+    set(NETCDF_CXX_LIBRARIES_C "${NETCDF_EXTERNAL_PATH}/lib/libnetcdf-cxx4.a")
+    externalproject_add(netcdf_cxx4
+       PREFIX ${NETCDF_EXTERNAL_PATH}
+       INSTALL_DIR ${NETCDF_EXTERNAL_PATH}
+       GIT_REPOSITORY "https://github.com/Unidata/netcdf-cxx4.git"
+        CMAKE_ARGS
+         -DCMAKE_BUILD_TYPE:STRING=Release
+         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+	 -DBUILD_SHARED_LIBS:STRING=OFF
+    )
+    set(BUILD_NETCDF_CXX4 TRUE)
+endif()
+
+INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS} ${MPI_INCLUDE_PATH} ${NETCDF_CXX_INCLUDES_C})
+set(SOURCES src/main.cu src/mpi_shortcut.cxx src/service_functions.cu src/compare.cxx src/maxwell.cu src/load_data.cu src/archAPI.cu)
 ADD_SUBDIRECTORY(src/NetCdf)
-
 ADD_EXECUTABLE(atom ${SOURCES})
-TARGET_LINK_LIBRARIES(atom ${CUDA_LIBRARIES} ${MPI_LIBRARIES} netcdf_lib ${NETCDF_CXX_LIBRARIES_C})
+if(BUILD_NETCDF_CXX4)
+       add_dependencies(netcdf_lib netcdf_cxx4)
+       add_dependencies(atom netcdf_cxx4)
+endif()
+TARGET_LINK_LIBRARIES(atom ${CUDA_LIBRARIES} ${MPI_LIBRARIES} netcdf_lib ${NETCDF_CXX_LIBRARIES_C} "-lnetcdf")
 

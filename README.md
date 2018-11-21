@@ -6,9 +6,11 @@ CMake:
   Опции:
   	* CMAKE\_BUILD\_TYPE: Release,Debug,Profiling,RelWithDebInfo,None
 	* CUDA\_ARCH - one can specify compute cappability (20, 30, 35, etc.)
+
   Переменные окружения:
   	* NETCDF\_CXX\_DIR: Путь до заголовочных файлов NetCdf-cxx4
 	* NETCDF\_CXX\_LIB\_DIR: Путь до библиотек NetCdf-cxx4
+  
   Если пути до файлов библиотеки NetCdf-cxx4 не найдены, то библиотека будет скачена и собрана автоматически.
 
   пример использования:

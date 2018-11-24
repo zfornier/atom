@@ -48,8 +48,8 @@ std::string Properties::toLowerCase(std::string data) {
 std::vector<std::string> Properties::split(std::string data, char delimiter) {
     std::stringstream ss(data);
     std::string token;
-
     std::vector<std::string> tokens;
+
     while(std::getline(ss, token, delimiter)) {
         tokens.push_back(token);
     }

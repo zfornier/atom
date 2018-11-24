@@ -1,7 +1,7 @@
 # atom
 Optimization of Gurthang code to get rid of atomic operations. Next step: get current sum out of AccumulateCurrentWithParticlesInCell into separate kernel and parallelize it.
 
-CMake:
+###CMake:
 * Добавлена возможность сборки через cmake.
   Опции:
   	* CMAKE\_BUILD\_TYPE: Release,Debug,Profiling,RelWithDebInfo,None
@@ -16,8 +16,12 @@ CMake:
   пример использования:
   	`NETCDF_CXX_DIR=~/tmp/netcdf-cxx4/cxx4/ NETCDF_CXX_LIB_DIR=~/tmp/netcdf-cxx4/build/cxx4/ cmake -DCUDA_ARCH=52 -DCMAKE_BUILD_TYPE=Profiling ../`
 
-NetCFD:
+###NetCFD:
 * Добавлены файлы в проект
+
+###Файл конфигурации:
+* ключ=значение (пока что и ключ и значение приводятся к нижнему регистру)
+* комментарий:  # это комментарий
 
 ### Задачи ###
 

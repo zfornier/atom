@@ -8,7 +8,7 @@
 typedef struct {
     double tempX;                // plasma electron temperature along X
     double tempY;                // plasma electron temperature along Y
-    double tempX;                // plasma electron temperature along Z
+    double tempZ;                // plasma electron temperature along Z
     double beamImp;              // beam impulse
     double beamVelDisp;          // beam velocity dispersion
     double beamPlasmaDensityRat; // beam and plasma density ratio
@@ -33,7 +33,7 @@ typedef struct {
     int ts;                      // total steps
     int ms;                      // number of steps between diagnostic files
     int nsteps;                  //
-    int save_step;               // save every saveStep step
+    int saveStep;                // save every saveStep step
     int startSave;               // start save from startSave step
     int checkOnStep;             // check on checkOnStep step
     char* checkFile;             // file to check with
@@ -41,9 +41,41 @@ typedef struct {
 } Config;
 
 Config readConfig(std::ifstream &is) {
-   Config conf;
+   Properties properties;
+   properties.load(myfile);
 
-   // read props
+   Config conf;
+   conf.tempX = properties.getProperty("tempX");
+   conf.tempY = properties.getProperty("tempY");
+   conf.tempZ = properties.getProperty("tempZ");
+   conf.beamImp = properties.getProperty("tempZ");
+   conf.beamVelDisp = properties.getProperty("tempZ");
+   conf.beamPlasmaDensityRat = properties.getProperty("");
+   conf.plsmDensity = properties.getProperty("");
+   conf.externalMagnFieldX = properties.getProperty("");
+   conf.lx = properties.getProperty("lx");
+   conf.ly = properties.getProperty("ly");
+   conf.lz = properties.getProperty("lz");
+   conf.px = properties.getProperty("px");
+   conf.py = properties.getProperty("py");
+   conf.bx = properties.getProperty("bx");
+   conf.by = properties.getProperty("by");
+   conf.bz = properties.getProperty("bz");
+   conf.lp = properties.getProperty("lp");
+   conf.nx = properties.getProperty("nx");
+   conf.ny = properties.getProperty("ny");
+   conf.nz = properties.getProperty("nz");
+   conf.tau = properties.getProperty("tau");
+   conf.beamPlasma = properties.getProperty("beamPlasma");
+   conf.startFromFile = properties.getProperty("startFromFile");
+   conf.phase = properties.getProperty("phase");
+   conf.ts = properties.getProperty("ts");
+   conf.ms = properties.getProperty("ms");
+   conf.nsteps = properties.getProperty("nsteps");
+   conf.saveStep = properties.getProperty("saveStep");
+   conf.startSave = properties.getProperty("startSave");
+   conf.checkOnStep = properties.getProperty("checkOnStep");
+   conf.checkFile = properties.getProperty("checkFile");
 
    return conf;
 }
@@ -65,6 +97,49 @@ int main(int argc,char*argv[]) {
    }
 
    if(config != NULL) {
+      string line;
+      ifstream myfile(config);
+      Config conf;
+
+      if (myfile.is_open()) {
+         conf = readConfig(myfile);
+//         std::cout << conf.tempX << std::endl;
+//         std::cout << conf.tempY << std::endl;
+//         std::cout << conf.tempZ << std::endl;
+//         std::cout << conf.beamImp << std::endl;
+//         std::cout << conf.beamVelDisp << std::endl;
+//         std::cout << conf.beamPlasmaDensityRat << std::endl;
+//         std::cout << conf.plsmDensity << std::endl;
+//         std::cout << conf.externalMagnFieldX << std::endl;
+//         std::cout << conf.lx << std::endl;
+//         std::cout << conf.ly << std::endl;
+//         std::cout << conf.lz << std::endl;
+//         std::cout << conf.px << std::endl;
+//         std::cout << conf.py << std::endl;
+//         std::cout << conf.bx << std::endl;
+//         std::cout << conf.by << std::endl;
+//         std::cout << conf.bz << std::endl;
+//         std::cout << conf.lp << std::endl;
+//         std::cout << conf.nx << std::endl;
+//         std::cout << conf.ny << std::endl;
+//         std::cout << conf.nz << std::endl;
+//         std::cout << conf.tau << std::endl;
+//         std::cout << conf.beamPlasma << std::endl;
+//         std::cout << conf.startFromFile << std::endl;
+//         std::cout << conf.phase << std::endl;
+//         std::cout << conf.ts << std::endl;
+//         std::cout << conf.ms << std::endl;
+//         std::cout << conf.nsteps << std::endl;
+//         std::cout << conf.saveStep << std::endl;
+//         std::cout << conf.startSave << std::endl;
+//         std::cout << conf.checkOnStep << std::endl;
+//         std::cout << conf.checkFile << std::endl;
+      }
+      else {
+         cout << "Unable to open file: " <<  << endl;
+         return 0;
+      }
+
       InitMPI(argc,argv);
 
       printf("begin Particle size %d\n", sizeof(Particle));

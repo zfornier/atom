@@ -1,58 +1,87 @@
 #include "../include/gpu_plasma.h"
 #include <stdlib.h>
 #include "../include/mpi_shortcut.h"
-//#include "NetCdf/read_file.cpp"
+#include "ConfigParser/Properties.h"
+
 //TODO: gpu cell in the global array at copy from there appears to be not initialized
 
-int main(int argc,char*argv[])
-{
+typedef struct {
+    double tempX;                // plasma electron temperature along X
+    double tempY;                // plasma electron temperature along Y
+    double tempX;                // plasma electron temperature along Z
+    double beamImp;              // beam impulse
+    double beamVelDisp;          // beam velocity dispersion
+    double beamPlasmaDensityRat; // beam and plasma density ratio
+    double plsmDensity;          // plasma density
+    double externalMagnFieldX;   // external magnetic field (along X)
+    double lx;                   // domain size X
+    double ly;                   // domain size Y
+    double lz;                   // domain size Z
+    double px;                   // plasma size X
+    double py;                   // plasma size Y
+    double bx;                   // beam size X
+    double by;                   // beam size Y
+    double bz;                   // beam size Z
+    int lp;                      // average number of particles in cell
+    int nx;                      // number of mesh nodes along X
+    int ny;                      // number of mesh nodes along Y
+    int nz;                      // number of mesh nodes along Z
+    double tau;                  // timestep
+    int beamPlasma;              // 1 if beam-plasma interaction, 0 if beam-beam
+    int startFromFile;           // moment to start from saved
+    int phase;                   // phase to start from save
+    int ts;                      // total steps
+    int ms;                      // number of steps between diagnostic files
+    int nsteps;                  //
+    int save_step;               // save every saveStep step
+    int startSave;               // start save from startSave step
+    int checkOnStep;             // check on checkOnStep step
+    char* checkFile;             // file to check with
+
+} Config;
+
+Config readConfig(std::ifstream &is) {
+   Config conf;
+
+   // read props
+
+   return conf;
+}
+
+int main(int argc,char*argv[]) {
    Plasma *plasma;
 
-   InitMPI(argc,argv);
+   char* config = NULL;
+   int c;
 
-   printf("begin Particle size %d \n", sizeof(Particle));
+   while ((c = getopt (argc, argv, "i:")) != -1){
+      switch(c) {
+         case 'i':
+            config = optarg;
+            break;
+         default:
+            break;
+      }
+   }
 
-   plasma = new Plasma(100,4,4,1.1424,0.05,0.05,1.0,2000,1.0,0.001);
+   if(config != NULL) {
+      InitMPI(argc,argv);
 
-   plasma->Initialize();
+      printf("begin Particle size %d\n", sizeof(Particle));
 
-   plasma->Compute();
+      plasma = new Plasma(100,4,4,1.1424,0.05,0.05,1.0,2000,1.0,0.001);
 
-   CloseMPI();
+      plasma->Initialize();
 
-   delete plasma;
-//
-//   int result;
-//
-//   char* name_file_in = NULL;
-//   char* name_file_out = NULL;
-//   int c;
-//
-//   while ((c = getopt (argc, argv, "i:o:")) != -1){
-//      switch(c)
-//      {
-//         case 'i':
-//            name_file_in = optarg;
-//            break;
-//         case 'o':
-//            name_file_out = optarg;
-//            break;
-//      }
-//   }
-//
-//   result = copyFile(name_file_in, name_file_out);
-//
-//   cout << "File exported in NetCDF format with success" << endl;
+      plasma->Compute();
 
-//   double* array = (double *)malloc(sizeof(double) * (NX + 2) * (NY + 2) * (NZ + 2));
-//
-//   readVar("mumu60000000005.nc", "Ex", (void*)array);
-//   for(int i = 0; i < 20; i++) {
-//      cout << array[i] << endl;
-//   }
-//   free(array);
-//
-//   cout << "Get variable Ex success" << endl;
+      CloseMPI();
+
+      delete plasma;
+   }
+   else {
+      printf("Config file is expected.\n");
+   }
 
    return 0;
 }

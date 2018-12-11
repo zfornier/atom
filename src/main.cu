@@ -112,37 +112,6 @@ int main(int argc,char*argv[]) {
 
       if (myfile.is_open()) {
          conf = readConfig(myfile);
-         std::cout << conf.tempX << std::endl;
-         std::cout << conf.tempY << std::endl;
-         std::cout << conf.tempZ << std::endl;
-         std::cout << conf.beamImp << std::endl;
-         std::cout << conf.beamVelDisp << std::endl;
-         std::cout << conf.beamPlasmaDensityRat << std::endl;
-         std::cout << conf.plsmDensity << std::endl;
-         std::cout << conf.externalMagnFieldX << std::endl;
-         std::cout << conf.lx << std::endl;
-         std::cout << conf.ly << std::endl;
-         std::cout << conf.lz << std::endl;
-         std::cout << conf.px << std::endl;
-         std::cout << conf.py << std::endl;
-         std::cout << conf.bx << std::endl;
-         std::cout << conf.by << std::endl;
-         std::cout << conf.bz << std::endl;
-         std::cout << conf.lp << std::endl;
-         std::cout << conf.nx << std::endl;
-         std::cout << conf.ny << std::endl;
-         std::cout << conf.nz << std::endl;
-         std::cout << conf.tau << std::endl;
-         std::cout << conf.beamPlasma << std::endl;
-         std::cout << conf.startFromFile << std::endl;
-         std::cout << conf.phase << std::endl;
-         std::cout << conf.ts << std::endl;
-         std::cout << conf.ms << std::endl;
-         std::cout << conf.nsteps << std::endl;
-         std::cout << conf.saveStep << std::endl;
-         std::cout << conf.startSave << std::endl;
-         std::cout << conf.checkOnStep << std::endl;
-         std::cout << conf.checkFile << std::endl;
       }
       else {
          cout << "Unable to open file: " <<  config << endl;

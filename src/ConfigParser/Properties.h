@@ -21,6 +21,10 @@ public:
     void load(std::ifstream &is);
     std::string getProperty(std::string key);
 
+    // Numbers utils
+    int stringToInt(std::string str);
+    double stringToDouble(std::string str);
+
 private:
     // String utils
     std::string trim(std::string data);

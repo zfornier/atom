@@ -61,3 +61,11 @@ std::string Properties::trim(std::string str) {
     str.erase(std::remove_if(str.begin(), str.end(), isspace), str.end());
     return str;
 }
+
+double Properties::stringToDouble(std::string str) {
+    return std::stod(str);
+}
+
+int Properties::stringToInt(std::string str) {
+    return std::stoi(str);
+}

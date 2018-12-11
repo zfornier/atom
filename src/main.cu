@@ -37,7 +37,7 @@ typedef struct {
     int saveStep;                // save every saveStep step
     int startSave;               // start save from startSave step
     int checkOnStep;             // check on checkOnStep step
-    std::string checkFile;             // file to check with
+    std::string checkFile;       // file to check with
 
 } Config;
 
@@ -79,11 +79,11 @@ Config readConfig(std::ifstream &is) {
       conf.checkOnStep = properties.stringToInt(properties.getProperty("checkOnStep"));
       conf.checkFile = properties.getProperty("checkFile");
    }
-   catch (const std::invalid_argument& e) {
-      throw std::exception("Error while getting properties: " + e.what());
+   catch (std::invalid_argument e) {
+      throw 1;  // todo: make normal exception
    }
-   catch (const std::out_of_range& e) {
-      throw std::exception("Error while getting properties: " + e.what());
+   catch (std::out_of_range e) {
+      throw 1;  // todo: make normal exception
    }
 
    return conf;
@@ -95,7 +95,7 @@ int main(int argc,char*argv[]) {
    char* config = NULL;
    int c;
 
-   while ((c = getopt (argc, argv, "i:")) != -1){
+   while ((c = getopt(argc, argv, "i:")) != -1){
       switch(c) {
          case 'i':
             config = optarg;
@@ -122,7 +122,7 @@ int main(int argc,char*argv[]) {
 
       printf("begin Particle size %zu\n", sizeof(Particle));
 
-      plasma = new Plasma(100,4,4,1.1424,0.05,0.05,1.0,2000,1.0,0.001);
+      plasma = new Plasma(conf.nx,conf.ny,conf.nz,conf.lx,conf.ly,conf.lz,1.0,2000,1.0,conf.tau);
 
       plasma->Initialize();
 

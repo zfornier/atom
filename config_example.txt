@@ -1,10 +1,10 @@
-tempX=1.0
-tempY=2.0
-tempZ=3.0
-beamImp=4.0
-beamVelDisp=5.0
-beamPlasmaDensityRat=6.0
-plsmDensity=7.0
+tempX=1e-3
+tempY=1e-3
+tempZ=1e-3
+beamImp=0.2
+beamVelDisp=0.14
+beamPlasmaDensityRat=2.0e-3
+plsmDensity=1.0
 externalMagnFieldX=8.0
 lx=1.1424
 ly=0.05

@@ -1,27 +1,34 @@
-//#include "load_data.h"
 
-
-int InitializeGPU()
-{
+int InitializeGPU() {
 	int err = getLastError();
-	 if(err != cudaSuccess) { printf("%s:%d - error %d %s\n",__FILE__,__LINE__,err,getErrorString(err)); }
-    InitGPUParticles();
+	if(err != cudaSuccess) {
+		printf("%s:%d - error %d %s\n",__FILE__,__LINE__,err,getErrorString(err));
+	}
+
+	InitGPUParticles();
+
+	err = getLastError();
+    if(err != cudaSuccess) {
+    	printf("%s:%d - error %d %s\n",__FILE__,__LINE__,err,getErrorString(err));
+    }
+
+    InitGPUFields(
+    		&d_Ex,&d_Ey,&d_Ez,
+    		&d_Hx,&d_Hy,&d_Hz,
+		    &d_Jx,&d_Jy,&d_Jz,
+		    &d_npJx,&d_npJy,&d_npJz,
+		    &d_Qx,&d_Qy,&d_Qz,
+		    Ex,Ey,Ez,
+		    Hx,Hy,Hz,
+		    Jx,Jy,Jz,
+		    npJx,npJy,npJz,
+		    Qx,Qy,Qz,
+			Nx,Ny,Nz);
+
     err = getLastError();
-    if(err != cudaSuccess) { printf("%s:%d - error %d %s\n",__FILE__,__LINE__,err,getErrorString(err)); }
-    InitGPUFields(&d_Ex,&d_Ey,&d_Ez,
-    	          &d_Hx,&d_Hy,&d_Hz,
-    		      &d_Jx,&d_Jy,&d_Jz,
-    		      &d_npJx,&d_npJy,&d_npJz,
-                  &d_Qx,&d_Qy,&d_Qz,
-                  Ex,Ey,Ez,
-				  Hx,Hy,Hz,
-				  Jx,Jy,Jz,
-				  npJx,npJy,npJz,
-				  Qx,Qy,Qz,
-				  Nx,Ny,Nz
-            );
-    err = getLastError();
-    if(err != cudaSuccess) { printf("%s:%d - error %d %s\n",__FILE__,__LINE__,err,getErrorString(err)); }
+    if(err != cudaSuccess) {
+    	printf("%s:%d - error %d %s\n",__FILE__,__LINE__,err,getErrorString(err));
+    }
 
     setPrintfLimit();
 
@@ -32,41 +39,32 @@ int InitializeGPU()
     return 0;
 }
 
-int initMeshArrays()
-{
-	   initControlPointFile();
+int initMeshArrays() {
+	initControlPointFile();
 
-	   Alloc();
+	Alloc();
 
-	   Cell c000;
+	Cell c000;
 
-	   InitCells();
-	   c000 = (*AllCells)[0];
+	InitCells();
+	c000 = (*AllCells)[0];
 
-	   InitFields();
-	   c000 = (*AllCells)[0];
-	   InitCurrents();
+	InitFields();
+	c000 = (*AllCells)[0];
+	InitCurrents();
 
-	   return 0;
+	return 0;
 }
 
 
-void LoadTestData(int nt,
-		            int part_nt,
-		            std::vector<Particle> & ion_vp,
-		            std::vector<Particle> & el_vp,
-		            std::vector<Particle> & beam_vp)
-{
+void LoadTestData(int nt, int part_nt, std::vector<Particle> & ion_vp, std::vector<Particle> & el_vp, std::vector<Particle> & beam_vp)  {
+	if(nt > 1) {
+		ClearAllParticles();
+	}
 
-   if(nt > 1)
-   	 {
-   		 ClearAllParticles();
-   	 }
+  	LoadParticleData(nt,ion_vp,el_vp,beam_vp,Nx,Ny,Nz);
 
-
-   LoadParticleData(nt,ion_vp,el_vp,beam_vp,Nx,Ny,Nz);
-
-   magf = 1;
+   	magf = 1;
 }
 
 void AssignArraysToCells()
@@ -110,8 +108,7 @@ double compareParticleList(std::vector<Particle> v,std::vector<Particle> v1)
 
 
 
-virtual void InitializeCPU()
-{
+virtual void InitializeCPU(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd) {
    std::vector<Particle> ion_vp,el_vp,beam_vp;
    std::vector<Particle> ion_vp1,el_vp1,beam_vp1;
 
@@ -126,8 +123,7 @@ virtual void InitializeCPU()
    }
    else
    {
-	   getUniformMaxwellianParticles(ion_vp1,el_vp1,beam_vp1);
-
+	   getUniformMaxwellianParticles(ion_vp1,el_vp1,beam_vp1, tex0, tey0, tez0, Tb, rimp, rbd, ni, Lx, Ly, Lz);
    }
 
 
@@ -138,10 +134,11 @@ virtual void InitializeCPU()
 
 }
 
-void Initialize()
-{
+void Initialize(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd) {
 	int err = getLastError();
-	InitializeCPU();
+
+	InitializeCPU(tex0, tey0, tez0, Tb, rimp, rbd);
+
 	copyCellsWithParticlesToGPU();
 	err = getLastError();
 	 if(err != cudaSuccess) { printf("%s:%d - error %d %s\n",__FILE__,__LINE__,err,getErrorString(err)); }

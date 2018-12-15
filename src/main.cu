@@ -10,10 +10,10 @@ typedef struct {
     double tempX;                // plasma electron temperature along X
     double tempY;                // plasma electron temperature along Y
     double tempZ;                // plasma electron temperature along Z
-    double beamImp;              // beam impulse
-    double beamVelDisp;          // beam velocity dispersion
-    double beamPlasmaDensityRat; // beam and plasma density ratio
-    double plsmDensity;          // plasma density
+    double beamImp;              // beam impulse - rimp
+    double beamVelDisp;          // beam velocity dispersion - Tb
+    double beamPlasmaDensityRat; // beam and plasma density ratio - rbd
+    double plsmDensity;          // plasma density - ni
     double externalMagnFieldX;   // external magnetic field (along X)
     double lx;                   // domain size X
     double ly;                   // domain size Y
@@ -122,9 +122,9 @@ int main(int argc,char*argv[]) {
 
       printf("begin Particle size %zu\n", sizeof(Particle));
 
-      plasma = new Plasma(conf.nx,conf.ny,conf.nz,conf.lx,conf.ly,conf.lz,1.0,2000,1.0,conf.tau);
+      plasma = new Plasma(conf.nx,conf.ny,conf.nz,conf.lx,conf.ly,conf.lz,conf.plsmDensity,2000,1.0,conf.tau);
 
-      plasma->Initialize();
+      plasma->Initialize(conf.tempX, conf.tempY, conf.tempZ, conf.beamVelDisp, conf.beamImp, conf.beamPlasmaDensityRat);
 
       plasma->Compute();
 

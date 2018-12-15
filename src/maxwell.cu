@@ -674,26 +674,30 @@ int convertParticleArraysToSTLvector(
 
 int getUniformMaxwellianParticles(std::vector<Particle>  & ion_vp,
 		                           std::vector<Particle>  & el_vp,
-		                           std::vector<Particle>  & beam_vp)
+		                           std::vector<Particle>  & beam_vp,
+		                           double tex0, double tey0, double tez0,
+		                           double Tb, double rimp, double rbd,
+								   double ni, double lx, double ly, double lz)
 {
 	ParticleArrays ions,electrons,beam;
 
     int total = 1600000,jmb;
+	int    meh  = 0;
+	int    lp   = 1000;
 
-    double tex0 = 1e-3;
-    double tey0 = 1e-3;
-    double tez0 = 1e-3;
+//    double tex0 = 1e-3;
+//    double tey0 = 1e-3;
+//    double tez0 = 1e-3;
 //    double tol  = 1e-15;
 
-    double Tb   = 0.14;
-    double rimp = 0.2;
-    double rbd  = 2.0e-3;
-    double ni   = 1.0;
-    int    meh  = 0;
-    int    lp   = 1000;
-    double lx   = 1.1424;
-    double ly   = 0.05;
-    double lz   = 0.05;
+//    double Tb   = 0.14;
+//    double rimp = 0.2;
+//    double rbd  = 2.0e-3;
+
+//	double ni   = 1.0;
+//    double lx   = 1.1424;
+//    double ly   = 0.05;
+//    double lz   = 0.05;
 
     AllocateMemoryForArrays(total,&ions,&electrons,&beam);
 
@@ -711,7 +715,7 @@ int getUniformMaxwellianParticles(std::vector<Particle>  & ion_vp,
 						  electrons.dbg_x,electrons.dbg_y,electrons.dbg_z,
 						  electrons.dbg_px,electrons.dbg_py,electrons.dbg_pz);
 
-	 convertParticleArraysToSTLvector(
+	convertParticleArraysToSTLvector(
 			 beam.dbg_x,
 			 beam.dbg_y,
 			 beam.dbg_z,

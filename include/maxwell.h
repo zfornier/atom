@@ -56,6 +56,7 @@ int getUniformMaxwellianParticles(std::vector<Particle>  & ion_vp,
 								  double Tb, double rimp, double rbd,
 								  double ni, double lx, double ly, double lz);
 
+// todo: список параметров заменить на ParticleArrays
 int convertParticleArraysToSTLvector(
     		  double *dbg_x,
     		  double *dbg_y,

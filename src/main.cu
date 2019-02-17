@@ -1,7 +1,7 @@
 #include "../include/gpu_plasma.h"
 #include <stdlib.h>
 #include "../include/mpi_shortcut.h"
-#include "ConfigParser/Properties.h"
+#include "../include/ConfigParser/Properties.h"
 
 //TODO: gpu cell in the global array at copy from there appears to be not initialized
 using namespace std;

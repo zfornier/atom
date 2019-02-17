@@ -16,6 +16,9 @@ Optimization of Gurthang code to get rid of atomic operations. Next step: get cu
   пример использования:
   	`NETCDF_CXX_DIR=~/tmp/netcdf-cxx4/cxx4/ NETCDF_CXX_LIB_DIR=~/tmp/netcdf-cxx4/build/cxx4/ cmake -DCUDA_ARCH=52 -DCMAKE_BUILD_TYPE=Profiling ../`
 
+  Запуск программы:
+    atom -i configfile file.nc
+
 ### NetCFD: ###
 * Добавлены файлы в проект
 

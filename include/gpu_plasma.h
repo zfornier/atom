@@ -74,7 +74,7 @@
 #include "../src/wrap_kernel.cu"
 //#include "run_control.h"
 #include "../src/kernels.cu"
-#include "../src/NetCdf/read_file.cpp"
+#include "../src/utils/NetCdf/read_file.cpp"
 //#include "NetCdf/read_file.h"
 
 #include <vector>

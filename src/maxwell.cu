@@ -618,9 +618,7 @@ int getMassCharge(ParticleArrays *ions,ParticleArrays *electrons,ParticleArrays 
 	return 0;
 }
 
-int AllocateMemoryForArrays(int N,ParticleArrays *ions,ParticleArrays *electrons,ParticleArrays *beam_electrons)
-{
-
+int AllocateMemoryForArrays(int N,ParticleArrays *ions,ParticleArrays *electrons,ParticleArrays *beam_electrons) {
 	ions->total           = N;
     electrons->total      = 2*N;
     beam_electrons->total = N;
@@ -682,22 +680,8 @@ int getUniformMaxwellianParticles(std::vector<Particle>  & ion_vp,
 	ParticleArrays ions,electrons,beam;
 
     int total = 1600000,jmb;
-	int    meh  = 0;
-	int    lp   = 1000;
-
-//    double tex0 = 1e-3;
-//    double tey0 = 1e-3;
-//    double tez0 = 1e-3;
-//    double tol  = 1e-15;
-
-//    double Tb   = 0.14;
-//    double rimp = 0.2;
-//    double rbd  = 2.0e-3;
-
-//	double ni   = 1.0;
-//    double lx   = 1.1424;
-//    double ly   = 0.05;
-//    double lz   = 0.05;
+	int meh  = 0;
+	int lp   = 1000;
 
     AllocateMemoryForArrays(total,&ions,&electrons,&beam);
 

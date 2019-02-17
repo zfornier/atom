@@ -2,7 +2,7 @@
 // Created by egorpyat on 24.11.18.
 //
 
-#include "Properties.h"
+#include "../../../include/ConfigParser/Properties.h"
 
 void Properties::load(std::ifstream &is) {
     std::string line;

@@ -1,4 +1,4 @@
-#include "../../include/NetCdf/plasma_netcdf.h"
+#include "../../../include/NetCdf/plasma_netcdf.h"
 
 namespace plasmanetcdf{
 

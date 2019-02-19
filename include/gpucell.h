@@ -122,12 +122,12 @@ GPUCell* copyCellToDevice()
 	h_src->busyParticleArray = Cell::busyParticleArray;
 
 	//cudaPrintfInit();
-	cudaMalloc(&(h_src->doubParticleArray),sizeof(Particle)*MAX_particles_per_cell);
+	cudaMalloc((void **)&(h_src->doubParticleArray),sizeof(Particle)*MAX_particles_per_cell);
 	err1 = getLastError();
 
 
 
-	cudaMemset(h_src->doubParticleArray,0,sizeof(Particle)*MAX_particles_per_cell);
+	cudaMemset((void **)h_src->doubParticleArray,0,sizeof(Particle)*MAX_particles_per_cell);
 	err2 = getLastError();
 
 	//testKernelBefore<<<1,1>>>(h_src->doubParticleArray,50,1);
@@ -202,7 +202,7 @@ GPUCell* copyCellToDevice()
 
 	//compareArrayHostToDevice((double *)Cell<Particle>::Hx,(double *)h_src->Hx,sizeof(CellDouble),"Hx");
 
-	cudaMalloc(&(h_src->Hy),sizeof(CellDouble));
+	cudaMalloc((void **)&(h_src->Hy),sizeof(CellDouble));
 	err18 = getLastError();
 
 	MemoryCopy(h_src->Hy,Cell::Hy,sizeof(CellDouble),HOST_TO_DEVICE);

@@ -3,6 +3,6 @@
 
 double rnd_uniform();
 
-double rnd_gaussian(double a,double b);
+double rnd_gaussian(double a, double b);
 
 #endif

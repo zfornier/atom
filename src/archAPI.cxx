@@ -8,13 +8,15 @@
 #include<string.h>
 
 #ifndef __CUDAC__
-void BlockThreadSynchronize(){}
+
+void BlockThreadSynchronize() {}
+
 #endif
 
 #ifndef __CUDAC__
-double MultiThreadAdd(double *address, double val)
-{
-    double assumed,old=*address;
+
+double MultiThreadAdd(double *address, double val) {
+    double assumed, old = *address;
 
 #ifdef OMP_THREADS
 #pragma omp critical
@@ -29,88 +31,90 @@ double MultiThreadAdd(double *address, double val)
 
     return old;
 }
+
 #endif
 
+const char *getErrorString(int err) {
 
-const char *getErrorString(int err)
-{
-
-	return "";
+    return "";
 }
 
-int SetDevice(int n){return 0;}
+int SetDevice(int n) { return 0; }
 
 #ifndef __CUDACC__
-void AsyncCopy(double *dst,double *src,int n,int size)
-{
-	int j;
 
-	for(j = 0;j < size;j++)
-	{
-	   dst[j] = src[j];
-	}
+void AsyncCopy(double *dst, double *src, int n, int size) {
+    int j;
+
+    for (j = 0; j < size; j++) {
+        dst[j] = src[j];
+    }
 
 }
 
 
-int MemoryCopy(void* dst,void *src,size_t size,int dir)
-{
-	memcpy(dst,src,size);
+int MemoryCopy(void *dst, void *src, size_t size, int dir) {
+    memcpy(dst, src, size);
 
-	return 0;
-}
-#endif
-
-#ifndef __CUDACC__
-int MemoryAllocate(void** dst,size_t size)
-{
-	*dst = malloc(size);
-    return 0;
-}
-#endif
-
-#ifndef __CUDACC__
-int GetDeviceMemory(size_t *m_free,size_t *m_total)
-{
-	*m_free = 0;
-	*m_total = 0;
-	return 0;
-}
-#endif
-
-#ifndef __CUDACC__
-int MemorySet(void *s, int c, size_t n)
-{
-	memset(s,c,n);
-    return 0;
-}
-#endif
-
-
-#ifndef __CUDACC__
-int DeviceSynchronize()
-{
     return 0;
 }
 
- int ThreadSynchronize()
-{
-	 return 0;
+#endif
+
+#ifndef __CUDACC__
+
+int MemoryAllocate(void **dst, size_t size) {
+    *dst = malloc(size);
+    return 0;
 }
 
- int getLastError()
-{
-	return 0;
+#endif
+
+#ifndef __CUDACC__
+
+int GetDeviceMemory(size_t *m_free, size_t *m_total) {
+    *m_free = 0;
+    *m_total = 0;
+    return 0;
 }
+
+#endif
+
+#ifndef __CUDACC__
+
+int MemorySet(void *s, int c, size_t n) {
+    memset(s, c, n);
+    return 0;
+}
+
+#endif
+
+
+#ifndef __CUDACC__
+
+int DeviceSynchronize() {
+    return 0;
+}
+
+int ThreadSynchronize() {
+    return 0;
+}
+
+int getLastError() {
+    return 0;
+}
+
 #endif
 
 #ifdef __CUDACC__
- __device__ void BlockThreadSynchronize()
- {
-     __syncthreads();
- }
+__device__ void BlockThreadSynchronize()
+{
+    __syncthreads();
+}
 #else
- void BlockThreadSynchronize(){}
+
+void BlockThreadSynchronize() {}
+
 #endif
 
 #ifdef __CUDACC__
@@ -131,17 +135,18 @@ __device__ double MultiThreadAdd(double *address, double val)
     return old;
 }
 #else
-double MultiThreadAdd(double *address, double val){*address += val;}
+
+double MultiThreadAdd(double *address, double val) { *address += val; }
+
 #endif
 
 #ifdef __CUDACC__
- const char *getErrorString(int err)
+const char *getErrorString(int err)
 {
-	return cudaGetErrorString((cudaError_t)err);
+   return cudaGetErrorString((cudaError_t)err);
 }
 #else
-const char *getErrorString(int err){return "";}
+
+const char *getErrorString(int err) { return ""; }
 
 #endif
-
-

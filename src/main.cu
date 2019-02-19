@@ -1,5 +1,5 @@
-#include "../include/gpu_plasma.h"
 #include <stdlib.h>
+#include "Plasma.cu" // todo: change to header file (find couse of multiply definition error with .h file)
 #include "../include/mpi_shortcut.h"
 #include "../include/ConfigParser/Properties.h"
 
@@ -42,99 +42,97 @@ typedef struct {
 } Config;
 
 Config readConfig(std::ifstream &is) {
-   Properties properties;
-   properties.load(is);
+    Properties properties;
+    properties.load(is);
 
-   Config conf = Config();
-   try {
-      conf.tempX = properties.stringToDouble(properties.getProperty("tempX"));
-      conf.tempY = properties.stringToDouble(properties.getProperty("tempY"));
-      conf.tempZ = properties.stringToDouble(properties.getProperty("tempZ"));
-      conf.beamImp = properties.stringToDouble( properties.getProperty("beamImp"));
-      conf.beamVelDisp = properties.stringToDouble(properties.getProperty("beamVelDisp"));
-      conf.beamPlasmaDensityRat = properties.stringToDouble(properties.getProperty("beamPlasmaDensityRat"));
-      conf.plsmDensity = properties.stringToDouble(properties.getProperty("plsmDensity"));
-      conf.externalMagnFieldX = properties.stringToDouble(properties.getProperty("externalMagnFieldX"));
-      conf.lx = properties.stringToDouble(properties.getProperty("lx"));
-      conf.ly = properties.stringToDouble(properties.getProperty("ly"));
-      conf.lz = properties.stringToDouble(properties.getProperty("lz"));
-      conf.px = properties.stringToDouble(properties.getProperty("px"));
-      conf.py = properties.stringToDouble(properties.getProperty("py"));
-      conf.bx = properties.stringToDouble(properties.getProperty("bx"));
-      conf.by = properties.stringToDouble(properties.getProperty("by"));
-      conf.bz = properties.stringToDouble(properties.getProperty("bz"));
-      conf.lp = properties.stringToInt(properties.getProperty("lp"));
-      conf.nx = properties.stringToInt(properties.getProperty("nx"));
-      conf.ny = properties.stringToInt(properties.getProperty("ny"));
-      conf.nz = properties.stringToInt(properties.getProperty("nz"));
-      conf.tau = properties.stringToDouble(properties.getProperty("tau"));
-      conf.beamPlasma = properties.stringToInt(properties.getProperty("beamPlasma"));
-      conf.startFromFile = properties.stringToInt(properties.getProperty("startFromFile"));
-      conf.phase = properties.stringToInt(properties.getProperty("phase"));
-      conf.ts = properties.stringToInt(properties.getProperty("ts"));
-      conf.ms = properties.stringToInt(properties.getProperty("ms"));
-      conf.nsteps = properties.stringToInt(properties.getProperty("nsteps"));
-      conf.saveStep = properties.stringToInt(properties.getProperty("saveStep"));
-      conf.startSave = properties.stringToInt(properties.getProperty("startSave"));
-      conf.checkOnStep = properties.stringToInt(properties.getProperty("checkOnStep"));
-      conf.checkFile = properties.getProperty("checkFile");
-   }
-   catch (std::invalid_argument e) {
-      throw 1;  // todo: make normal exception
-   }
-   catch (std::out_of_range e) {
-      throw 1;  // todo: make normal exception
-   }
+    Config conf = Config();
+    try {
+        conf.tempX = properties.stringToDouble(properties.getProperty("tempX"));
+        conf.tempY = properties.stringToDouble(properties.getProperty("tempY"));
+        conf.tempZ = properties.stringToDouble(properties.getProperty("tempZ"));
+        conf.beamImp = properties.stringToDouble(properties.getProperty("beamImp"));
+        conf.beamVelDisp = properties.stringToDouble(properties.getProperty("beamVelDisp"));
+        conf.beamPlasmaDensityRat = properties.stringToDouble(properties.getProperty("beamPlasmaDensityRat"));
+        conf.plsmDensity = properties.stringToDouble(properties.getProperty("plsmDensity"));
+        conf.externalMagnFieldX = properties.stringToDouble(properties.getProperty("externalMagnFieldX"));
+        conf.lx = properties.stringToDouble(properties.getProperty("lx"));
+        conf.ly = properties.stringToDouble(properties.getProperty("ly"));
+        conf.lz = properties.stringToDouble(properties.getProperty("lz"));
+        conf.px = properties.stringToDouble(properties.getProperty("px"));
+        conf.py = properties.stringToDouble(properties.getProperty("py"));
+        conf.bx = properties.stringToDouble(properties.getProperty("bx"));
+        conf.by = properties.stringToDouble(properties.getProperty("by"));
+        conf.bz = properties.stringToDouble(properties.getProperty("bz"));
+        conf.lp = properties.stringToInt(properties.getProperty("lp"));
+        conf.nx = properties.stringToInt(properties.getProperty("nx"));
+        conf.ny = properties.stringToInt(properties.getProperty("ny"));
+        conf.nz = properties.stringToInt(properties.getProperty("nz"));
+        conf.tau = properties.stringToDouble(properties.getProperty("tau"));
+        conf.beamPlasma = properties.stringToInt(properties.getProperty("beamPlasma"));
+        conf.startFromFile = properties.stringToInt(properties.getProperty("startFromFile"));
+        conf.phase = properties.stringToInt(properties.getProperty("phase"));
+        conf.ts = properties.stringToInt(properties.getProperty("ts"));
+        conf.ms = properties.stringToInt(properties.getProperty("ms"));
+        conf.nsteps = properties.stringToInt(properties.getProperty("nsteps"));
+        conf.saveStep = properties.stringToInt(properties.getProperty("saveStep"));
+        conf.startSave = properties.stringToInt(properties.getProperty("startSave"));
+        conf.checkOnStep = properties.stringToInt(properties.getProperty("checkOnStep"));
+        conf.checkFile = properties.getProperty("checkFile");
+    }
+    catch (std::invalid_argument e) {
+        throw 1;  // todo: make normal exception
+    }
+    catch (std::out_of_range e) {
+        throw 1;  // todo: make normal exception
+    }
 
-   return conf;
+    return conf;
 }
 
-int main(int argc,char*argv[]) {
-   Plasma *plasma;
+int main(int argc, char *argv[]) {
+    Plasma *plasma;
 
-   char* config = NULL;
-   int c;
+    char *config = NULL;
+    int c;
 
-   while ((c = getopt(argc, argv, "i:")) != -1){
-      switch(c) {
-         case 'i':
-            config = optarg;
-            break;
-         default:
-            break;
-      }
-   }
+    while ((c = getopt(argc, argv, "i:")) != -1) {
+        switch (c) {
+            case 'i':
+                config = optarg;
+                break;
+            default:
+                break;
+        }
+    }
 
-   if(config != NULL) {
-      string line;
-      ifstream myfile(config);
-      Config conf;
+    if (config != NULL) {
+        string line;
+        ifstream myfile(config);
+        Config conf;
 
-      if (myfile.is_open()) {
-         conf = readConfig(myfile);
-      }
-      else {
-         cout << "Unable to open file: " <<  config << endl;
-         return 0;
-      }
+        if (myfile.is_open()) {
+            conf = readConfig(myfile);
+        } else {
+            cout << "Unable to open file: " << config << endl;
+            return 0;
+        }
 
-      InitMPI(argc,argv);
+        InitMPI(argc, argv);
 
-      printf("begin Particle size %zu\n", sizeof(Particle));
+        printf("begin Particle size %zu\n", sizeof(Particle));
 
-      plasma = new Plasma(conf.nx,conf.ny,conf.nz,conf.lx,conf.ly,conf.lz,conf.plsmDensity,2000,1.0,conf.tau);
+        plasma = new Plasma(conf.nx, conf.ny, conf.nz, conf.lx, conf.ly, conf.lz, conf.plsmDensity, 2000, 1.0, conf.tau);
 
-      plasma->Initialize(conf.tempX, conf.tempY, conf.tempZ, conf.beamVelDisp, conf.beamImp, conf.beamPlasmaDensityRat);
+        plasma->Initialize(conf.tempX, conf.tempY, conf.tempZ, conf.beamVelDisp, conf.beamImp, conf.beamPlasmaDensityRat);
 
-      plasma->Compute();
+        plasma->Compute();
 
-      CloseMPI();
+        CloseMPI();
 
-      delete plasma;
-   }
-   else {
-      printf("Config file is expected.\n");
-   }
+        delete plasma;
+    } else {
+        printf("Config file is expected.\n");
+    }
 
-   return 0;
+    return 0;
 }

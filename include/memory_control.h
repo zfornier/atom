@@ -10,10 +10,8 @@
 
 #include <string>
 
-
 int get_mem_used_sizeMb();
 int get_mem_used_various(int nt,char *where);
 int memoryAllocationLog(size_t size,std::string fname,int line_number);
-
 
 #endif /* MEMORY_CONTROL_H_ */

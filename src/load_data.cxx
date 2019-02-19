@@ -11,15 +11,14 @@
 
 #include "../include/load_data.h"
 
-std::string getBinaryFileName(int nt)
-	  {
-		  char part_name[100];
-		  std::string s;
+std::string getBinaryFileName(int nt) {
+    char part_name[100];
+    std::string s;
 
-		  sprintf(part_name,"mumu000%08d.dat",nt);
+    sprintf(part_name, "mumu000%08d.dat", nt);
 
-		  s = part_name;
+    s = part_name;
 
-		  return s;
-	  }
+    return s;
+}
 

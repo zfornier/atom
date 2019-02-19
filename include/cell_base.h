@@ -4,14 +4,13 @@
 #include "particle.h"
 
 template<class Particle>
-class CellZBase
-{
+class CellZBase {
 public:
-  int     k;
-  double hz;
-  double z0;
-  double zm;
-  int Nz;
+    int k;
+    double hz;
+    double z0;
+    double zm;
+    int Nz;
 
 //#ifdef __CUDACC__
 //__host__ __device__

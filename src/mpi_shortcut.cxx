@@ -13,88 +13,76 @@
 #include <stdlib.h>
 #include "../include/archAPI.h"
 
-int InitMPI(int argc,char *argv[])
-{
-	MPI_Init(&argc,&argv);
+int InitMPI(int argc, char *argv[]) {
+    MPI_Init(&argc, &argv);
 }
 
-int sumMPI(int size,double *d_jx,double *d_jy,double *d_jz)
-{
-    double *snd,*rcv,*jx,*jy,*jz;
+int sumMPI(int size, double *d_jx, double *d_jy, double *d_jz) {
+    double *snd, *rcv, *jx, *jy, *jz;
     int i;
-    
-    jx = (double *)malloc(size*sizeof(double));
-    jy = (double *)malloc(size*sizeof(double));
-    jz = (double *)malloc(size*sizeof(double));
 
-    int err  = MemoryCopy(jx,d_jx,size*sizeof(double),DEVICE_TO_HOST);
-    int err1 = MemoryCopy(jy,d_jy,size*sizeof(double),DEVICE_TO_HOST);
-    int err2 = MemoryCopy(jz,d_jz,size*sizeof(double),DEVICE_TO_HOST);
-    printf("sumMPI: err %d err1 %d err2 %d \n",err,err1,err2);
+    jx = (double *) malloc(size * sizeof(double));
+    jy = (double *) malloc(size * sizeof(double));
+    jz = (double *) malloc(size * sizeof(double));
 
-    snd = (double *)malloc(3*size*sizeof(double));
-    rcv = (double *)malloc(3*size*sizeof(double));
-    
-    for(i = 0;i < size;i++)
-    {   
-        snd[i]          = jx[i];
-        snd[i +   size] = jy[i];
-        snd[i + 2*size] = jz[i];
+    int err = MemoryCopy(jx, d_jx, size * sizeof(double), DEVICE_TO_HOST);
+    int err1 = MemoryCopy(jy, d_jy, size * sizeof(double), DEVICE_TO_HOST);
+    int err2 = MemoryCopy(jz, d_jz, size * sizeof(double), DEVICE_TO_HOST);
+    printf("sumMPI: err %d err1 %d err2 %d \n", err, err1, err2);
+
+    snd = (double *) malloc(3 * size * sizeof(double));
+    rcv = (double *) malloc(3 * size * sizeof(double));
+
+    for (i = 0; i < size; i++) {
+        snd[i] = jx[i];
+        snd[i + size] = jy[i];
+        snd[i + 2 * size] = jz[i];
     }
 
-    MPI_Allreduce(snd,rcv,size,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD);
-    
-    for(i = 0;i < size;i++)
-    {   
+    MPI_Allreduce(snd, rcv, size, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD);
+
+    for (i = 0; i < size; i++) {
         jx[i] = rcv[i];
-        jy[i] = rcv[i +   size];
-        jz[i] = rcv[i + 2*size];
+        jy[i] = rcv[i + size];
+        jz[i] = rcv[i + 2 * size];
     }
 
-    err  = MemoryCopy(d_jx,jx,size*sizeof(double),HOST_TO_DEVICE);
-    err1 = MemoryCopy(d_jy,jy,size*sizeof(double),HOST_TO_DEVICE);
-    err2 = MemoryCopy(d_jz,jz,size*sizeof(double),HOST_TO_DEVICE);
-    printf("sumMPI-after: err %d err1 %d err2 %d \n",err,err1,err2);
-
+    err = MemoryCopy(d_jx, jx, size * sizeof(double), HOST_TO_DEVICE);
+    err1 = MemoryCopy(d_jy, jy, size * sizeof(double), HOST_TO_DEVICE);
+    err2 = MemoryCopy(d_jz, jz, size * sizeof(double), HOST_TO_DEVICE);
+    printf("sumMPI-after: err %d err1 %d err2 %d \n", err, err1, err2);
 
     return 0;
 }
 
-int sumMPIenergy(double *e)
-{
-    double snd,rcv;
-    
+int sumMPIenergy(double *e) {
+    double snd, rcv;
+
     snd = *e;
 
-    MPI_Allreduce(&snd,&rcv,1,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD);
-    
+    MPI_Allreduce(&snd, &rcv, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD);
+
     *e = rcv;
-    
+
     return 0;
 }
 
-
-int getRank()
-{
-    int rank;
-    
-    
-    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-    
-    return rank;
-}
-
-int getSize()
-{
+int getRank() {
     int rank;
 
-
-    MPI_Comm_size(MPI_COMM_WORLD,&rank);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     return rank;
 }
 
-int  CloseMPI()
-{
-	MPI_Finalize();
+int getSize() {
+    int rank;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &rank);
+
+    return rank;
+}
+
+int CloseMPI() {
+    MPI_Finalize();
 }

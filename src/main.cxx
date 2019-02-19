@@ -3,20 +3,19 @@
 #include "../include/mpi_shortcut.h"
 //TODO: gpu cell in the global array at copy from there appears to be not initialized
 
-int main(int argc,char*argv[])
-{
-   Plasma *plasma;
+int main(int argc, char *argv[]) {
+    Plasma *plasma;
 
-   printf("begin Particle size %d \n", sizeof(Particle));
+    printf("begin Particle size %d \n", sizeof(Particle));
 
-   plasma = new Plasma(100,4,4,1.1424,0.05,0.05,1.0,2000,1.0,0.001);
+    plasma = new Plasma(100, 4, 4, 1.1424, 0.05, 0.05, 1.0, 2000, 1.0, 0.001);
 
-   plasma->Initialize();
+    plasma->Initialize();
 
-   plasma->Compute();
+    plasma->Compute();
 
-   delete plasma;
-   
+    delete plasma;
 
-   return 0;
+
+    return 0;
 }

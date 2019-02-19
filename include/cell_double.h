@@ -12,28 +12,33 @@
 
 class CellDouble {
 
-
     double M[CellExtent][CellExtent][CellExtent];
 public:
 
 
 #ifdef __CUDACC__
-__host__ __device__
+    __host__ __device__
 #endif
-    double get(int i,int l,int k){return M[i][l][k];}
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-    void put(int i,int l,int k,double t){M[i][l][k] = t;}
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-    double *getp(int i,int l,int k){return &(M[i][l][k]);}
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-    double *getMp(){return ((double *)M);}
-};
 
+    double get(int i, int l, int k) { return M[i][l][k]; }
+
+#ifdef __CUDACC__
+    __host__ __device__
+#endif
+
+    void put(int i, int l, int k, double t) { M[i][l][k] = t; }
+
+#ifdef __CUDACC__
+    __host__ __device__
+#endif
+
+    double *getp(int i, int l, int k) { return &(M[i][l][k]); }
+
+#ifdef __CUDACC__
+    __host__ __device__
+#endif
+
+    double *getMp() { return ((double *) M); }
+};
 
 #endif /* CELL_DOUBLE_H_ */

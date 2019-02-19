@@ -14,7 +14,7 @@ int sumMPI(int size,double *jx,double *jy,double *jz);
 
 int sumMPIenergy(double *e);
 
-int  CloseMPI();
+int CloseMPI();
 
 int getRank();
 

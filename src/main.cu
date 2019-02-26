@@ -29,6 +29,7 @@ typedef struct {
     int nz;                      // number of mesh nodes along Z
     double tau;                  // timestep
     int beamPlasma;              // 1 if beam-plasma interaction, 0 if beam-beam
+    // Computation parameters
     int startFromFile;           // moment to start from saved
     int phase;                   // phase to start from save
     int ts;                      // total steps
@@ -37,6 +38,7 @@ typedef struct {
     int saveStep;                // save every saveStep step
     int startSave;               // start save from startSave step
     int checkOnStep;             // check on checkOnStep step
+    int st;                      // start step
     std::string checkFile;       // file to check with
 
 } Config;
@@ -76,6 +78,7 @@ Config readConfig(std::ifstream &is) {
         conf.nsteps = properties.stringToInt(properties.getProperty("nsteps"));
         conf.saveStep = properties.stringToInt(properties.getProperty("saveStep"));
         conf.startSave = properties.stringToInt(properties.getProperty("startSave"));
+        conf.st = properties.stringToInt(properties.getProperty("st"));
         conf.checkOnStep = properties.stringToInt(properties.getProperty("checkOnStep"));
         conf.checkFile = properties.getProperty("checkFile");
     }
@@ -125,7 +128,7 @@ int main(int argc, char *argv[]) {
 
         plasma->Initialize(conf.tempX, conf.tempY, conf.tempZ, conf.beamVelDisp, conf.beamImp, conf.beamPlasmaDensityRat);
 
-        plasma->Compute();
+        plasma->Compute(conf.st, conf.ts);
 
         CloseMPI();
 

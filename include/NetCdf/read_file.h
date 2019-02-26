@@ -1,7 +1,6 @@
 #ifndef __READ_FILE__
 #define __READ_FILE__
 
-
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
@@ -39,14 +38,13 @@ using namespace netCDF;
 using namespace plasmanetcdf;
 using namespace netCDF::exceptions;
 
-static const int NX=102;
+static const int NX = 102;
 static const int NY = 6;
 static const int NZ = 6;
 // Return this in event of a problem.
 static const int NC_ERR = 2;
 
 //Name of the units
-
 #define UNITS string("units")
 #define UNITS_ELECTRIC_FIELD string("N.C^-1")
 #define UNITS_MAGNETIC_FIELD string("T")
@@ -56,8 +54,6 @@ static const int NC_ERR = 2;
 #define UNITS_MASS_PARTICLES  string(" ")
 #define UNITS_NO string("no units ")
 #define UNITS_IMPULSES string("N.s")
-
-
 
 //Descriptions
 #define DESCRIPTION  string("description")
@@ -72,24 +68,29 @@ static const int NC_ERR = 2;
 #define DESC_COORDINATES  string(" coordinates for particles of sort ")
 #define DESC_IMPULSES  string(" impulses for particles of sort ")
 
-double * read3dArray(ifstream& ifs);
-int copyOne3DArray(ifstream& ifs, const char* netCdfFileName, string label,string unit,string desc);
+double *read3dArray(ifstream &ifs);
 
-int copyInt(ifstream& ifs, const char* netCdfFileName, string label,string unit,string desc);
-int* readInt(ifstream& ifs);
+int copyOne3DArray(ifstream &ifs, const char *netCdfFileName, string label, string unit, string desc);
 
-int copyDouble(ifstream& ifs, const char* netCdfFileName, string label,string unit,string desc);
-double* readDouble(ifstream& ifs);
+int copyInt(ifstream &ifs, const char *netCdfFileName, string label, string unit, string desc);
 
-int copy1dArray(ifstream& ifs, const char* netCdfFileName, string label, string dim_label,string unit,string desc);
-int* read1dArray(ifstream& ifs);
+int *readInt(ifstream &ifs);
 
+int copyDouble(ifstream &ifs, const char *netCdfFileName, string label, string unit, string desc);
 
-int copyOneSortParticle(ifstream& ifs, const char* netCdfFileName, string label);
+double *readDouble(ifstream &ifs);
 
-int copyFile(const char* binaryFileName, const char* netCdfFileName);
+int copy1dArray(ifstream &ifs, const char *netCdfFileName, string label, string dim_label, string unit, string desc);
 
-void readVar(const char* fileName, const char * name, void* array);
+int *read1dArray(ifstream &ifs);
+
+int copyOneSortParticle(ifstream &ifs, const char *netCdfFileName, string label);
+
+int copyFile(const char *binaryFileName, const char *netCdfFileName);
+
+void readVar(const char *fileName, const char *name, void *array);
+
+int writeOne3DArray(const char *filename, double *tdArray, string label, string unit, string desc);
 
 #endif
 

@@ -176,11 +176,10 @@ public:
         }
 
 #ifdef CHECK_ARRAY_DETAIL_PRINTS
-                                                                                                                                if((f = fopen(fname,"wt")) != NULL)
-	 {
+        if((f = fopen(fname,"wt")) != NULL) {
 		 res = CheckArray(a,t,f);
 		 fclose(f);
-	 }
+	     }
 #else
 //	 res = CheckArray(a,t,f);
         int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
@@ -566,7 +565,7 @@ public:
         double ee;
 
         if (first == 1) {
-            cudaMalloc((void **)&d_ee, sizeof(double));
+            cudaMalloc((void **) &d_ee, sizeof(double));
             first = 0;
         }
         cudaMemset(d_ee, 0, sizeof(double));
@@ -1740,9 +1739,9 @@ public:
                cudaGetErrorString(before_MakeDepartureLists), dimGrid.x, dimGrid.y, dimGrid.z);
 
 //    int stage[4000],stage1[4000];//,*d_stage,*d_stage1;
-        cudaMalloc((void **)d_stage, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+        cudaMalloc((void **) d_stage, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
 
-        cudaMalloc((void **)d_stage1, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+        cudaMalloc((void **) d_stage1, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
 
 //    GPU_MakeDepartureLists//<<<dimGrid, dimBlockOne>>>(d_CellArray,nt,*d_stage);
 

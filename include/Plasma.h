@@ -63,6 +63,7 @@
 //#include "run_control.h"
 #include "../src/kernels.cu"
 #include "../src/utils/NetCdf/read_file.cpp"
+#include "../src/utils/NetCdf/write_file.cpp"
 
 #include <vector>
 
@@ -104,6 +105,11 @@ public:
     double *npEx, *npEy, *npEz;
     std::vector <GPUCell> *AllCells;
 
+private:
+    string dataFileStartPattern;
+    string dataFileEndPattern;
+
+public:
     Plasma(int, int, int, double, double, double, double, int, double, double);
 
     virtual ~Plasma();
@@ -224,12 +230,6 @@ public:
 
     int copyCellsWithParticlesToGPU();
 
-    void Free();
-
-    virtual void SetInitialConditions();
-
-    virtual void ParticleSort();
-
     void ListAllParticles(int, std::string);
 
     double TryCheckCurrent(int, double *);
@@ -274,8 +274,11 @@ public:
 
     int memory_status_print(int);
 
-    int Compute();
+    void writeDataToFile(int);
 
+    int Compute(int, int, int, int);
+
+    int Compute(int, int);
 };
 
 #endif /* GPU_PLASMA_H_ */

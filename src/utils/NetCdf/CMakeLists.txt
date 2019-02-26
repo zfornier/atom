@@ -8,7 +8,7 @@ find_library (NETCDF_CXX_LIBRARIES_C  netcdf-cxx4 PATHS "$ENV{NETCDF_CXX_LIB_DIR
 
 INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
 
-set(SOURCES plasma_netcdf.cpp read_file.cpp)
+set(SOURCES plasma_netcdf.cpp read_file.cpp write_file.cpp)
 
 ADD_LIBRARY(netcdf_lib ${SOURCES})
 

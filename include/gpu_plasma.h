@@ -63,10 +63,6 @@
 #include<string>
 #include <iostream>
 
-#include "particle_target.h"
-
-#include "memory_control.h"
-
 #include "../src/add.cu"
 #include "../src/wrap_kernel.cu"
 //#include "run_control.h"

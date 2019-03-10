@@ -5,8 +5,6 @@
  *      Author: snytav
  */
 
-
-
 #ifndef SERVICE_FUNCTIONS_H_
 #define SERVICE_FUNCTIONS_H_
 

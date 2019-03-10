@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <math.h>
 //#include <vector>
-#include "types.h"
 #include "particle.h"
 
 #define CellExtent 5

@@ -71,6 +71,10 @@ using namespace std;
 
 #define FORTRAN_ORDER
 
+//struct PlasmaSnapshot {
+//    // Параметры нужные для записи
+//};
+
 class Plasma {
 public:
     GPUCell **h_CellArray, **d_CellArray;
@@ -113,6 +117,12 @@ public:
     Plasma(int, int, int, double, double, double, double, int, double, double);
 
     virtual ~Plasma();
+
+//    PlasmaSnapshot createSnapshot() {
+//        PlasmaSnapshot snapshot = new PlasmaSnapshot();
+//
+//        return snapshot;
+//    }
 
     void copyCells(std::string, int);
 

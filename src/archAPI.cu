@@ -4,13 +4,16 @@
  *  Created on: Apr 10, 2018
  *      Author: snytav
  */
+
 #include<stdlib.h>
 #include<string.h>
 
 #include "../include/archAPI.h"
 
 #ifdef __CUDACC__
-int SetDevice(int n){return cudaSetDevice(n);}
+int SetDevice(int n) {
+    return cudaSetDevice(n);
+}
 #else
 
 int SetDevice(int n) { return 0; }
@@ -19,36 +22,30 @@ int SetDevice(int n) { return 0; }
 
 #ifdef __CUDACC__
 __device__
-void AsyncCopy(double *dst,double *src,int n,int size)
-{
+void AsyncCopy(double *dst,double *src,int n,int size) {
     int j;
     j = n;
     if(j < size)
     {
        dst[j] = src[j];
     }
-
 }
 #else
 
-void AsyncCopy(double *dst, double *src, int n, int size) { memcpy(dst, src, n, size); }
+void AsyncCopy(double *dst, double *src, int n, int size) {
+    memcpy(dst, src, n, size);
+}
 
 #endif
 
 #ifdef __CUDACC__
-int MemoryCopy(void* dst,void *src,size_t size,int dir)
-{
-//	int err = 0;
-
-
+int MemoryCopy(void* dst,void *src,size_t size,int dir) {
    cudaMemcpyKind cuda_dir;
 
    if(dir == HOST_TO_DEVICE) cuda_dir = cudaMemcpyHostToDevice;
    if(dir == HOST_TO_HOST) cuda_dir = cudaMemcpyHostToHost;
    if(dir == DEVICE_TO_HOST) cuda_dir = cudaMemcpyDeviceToHost;
    if(dir == DEVICE_TO_DEVICE) cuda_dir = cudaMemcpyDeviceToDevice;
-
-
 
    return ((int)cudaMemcpy(dst,src,size,cuda_dir));
 }
@@ -59,8 +56,7 @@ int MemoryCopy(void *dst, void *src, size_t size, int dir);
 #endif
 
 #ifdef __CUDACC__
-int MemoryAllocate(void** dst,size_t size)
-{
+int MemoryAllocate(void** dst,size_t size) {
    cudaMalloc(dst,size);
    return 0;
 }
@@ -97,8 +93,7 @@ int DeviceSynchronize() {
 }
 
 #ifdef __CUDACC__
-int __host__ ThreadSynchronize()
-{
+int __host__ ThreadSynchronize() {
     return cudaThreadSynchronize();
 }
 #else
@@ -114,15 +109,13 @@ int getLastError() {
 }
 
 #else
-int getLastError()
-{
+int getLastError() {
     return (int)cudaGetLastError();
 }
 #endif
 
 #ifdef __CUDACC__
-__device__ void BlockThreadSynchronize()
-{
+__device__ void BlockThreadSynchronize() {
     __syncthreads();
 }
 #else
@@ -132,15 +125,14 @@ void BlockThreadSynchronize() {}
 #endif
 
 #ifdef __CUDACC__
-__device__ double MultiThreadAdd(double *address, double val)
-{
+__device__ double MultiThreadAdd(double *address, double val) {
     double assumed,old=*address;
     do {
         assumed=old;
         old= __longlong_as_double(atomicCAS((unsigned long long int*)address,
                     __double_as_longlong(assumed),
                     __double_as_longlong(val+assumed)));
-    }while (assumed!=old);
+    } while (assumed!=old);
 
     *address += val;
 
@@ -153,14 +145,12 @@ __device__ double MultiThreadAdd(double *address, double val)
 double MultiThreadAdd(double *address, double val) {
 #pragma omp critical
     *address += val;
-
 }
 
 #endif
 
 #ifdef __CUDACC__
-const char *getErrorString(int err)
-{
+const char *getErrorString(int err) {
    return cudaGetErrorString((cudaError_t)err);
 }
 #else
@@ -171,8 +161,7 @@ const char *getErrorString(int err) { return ""; }
 
 
 #ifdef __CUDACC__
-int GetDeviceMemory(size_t *m_free,size_t *m_total)
-{
+int GetDeviceMemory(size_t *m_free,size_t *m_total) {
    return cudaMemGetInfo(m_free,m_total);
 }
 #else
@@ -186,11 +175,8 @@ int GetDeviceMemory(size_t *m_free, size_t *m_total) {
 
 
 #ifdef __CUDACC__
-int MemorySet(void *s, int c, size_t n)
-{
+int MemorySet(void *s, int c, size_t n) {
     return (int)cudaMemset(s,c,n);
-
-//    return 0;
 }
 #else
 
@@ -270,13 +256,9 @@ void call_with_args(const void *func, void **args) {
         func_7 f7 = (func_7) func;
         f7(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
     }
-
-
 }
 
-int cudaLaunchKernel_onCPU(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem,
-                           cudaStream_t stream) {
-
+int cudaLaunchKernel_onCPU(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream) {
     for (int i = 0; i < gridDim.x; i++) {
         for (int l = 0; l < gridDim.y; l++) {
             for (int k = 0; k < gridDim.z; k++) {
@@ -285,7 +267,6 @@ int cudaLaunchKernel_onCPU(const void *func, dim3 gridDim, dim3 blockDim, void *
                 blockIdx.y = l;
                 blockIdx.z = k;
 #endif
-
                 for (int i1 = 0; i1 < blockDim.x; i1++) {
                     for (int l1 = 0; l1 < blockDim.y; l1++) {
                         for (int k1 = 0; k1 < blockDim.z; k1++) {
@@ -301,6 +282,5 @@ int cudaLaunchKernel_onCPU(const void *func, dim3 gridDim, dim3 blockDim, void *
             }
         }
     }
-
 }
 

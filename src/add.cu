@@ -10,7 +10,5 @@ __device__ double cuda_atomicAdd(double *address, double val) {
                                         __double_as_longlong(val + assumed)));
     } while (assumed != old);
 
-    //printf("NEW ATOMIC ADD\n");
-
     return old;
 }

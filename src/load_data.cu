@@ -15,7 +15,6 @@
 #include <string>
 
 #include "../include/load_data.h"
-//#include "./NetCdf/read_file.cpp"
 
 std::string getMumuFileName(int nt) {
     char part_name[100];
@@ -29,12 +28,7 @@ std::string getMumuFileName(int nt) {
 }
 
 int readFortranBinaryArray(FILE *f, double *d) {
-//	    char str[100];
-//	    Cell<Particle>  c = (*AllCells)[0];
     int t, err;//,n;
-//	    double t0;
-
-    //sprintf(fname,"%s_fiel3d.dat",name);
     fread(&t, sizeof(int), 1, f);
     if ((err = ferror(f)) != 0) {
         return err;
@@ -45,8 +39,6 @@ int readFortranBinaryArray(FILE *f, double *d) {
         return err;
     }
 
-//	    t0 = d[269];
-//	    t0 = d[270];
     fread(&t, sizeof(int), 1, f);
     if ((err = ferror(f)) != 0) {
         return err;
@@ -128,10 +120,10 @@ void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, char *n
 
     if((f = fopen(fname,"wt")) == NULL) return;
 
-    for (int i = 0;i < np;i++)
-    {
+    for (int i = 0;i < np;i++) {
         fprintf(f,"%10d %10d %25.16e \n",i,i+1,p_ch[i]);
     }
+
     fclose(f);
 #endif
 }
@@ -149,10 +141,8 @@ int readBinaryParticleArraysOneSort(
         int nt,
         int sort
 ) {
-    //     char str[1000];
-    double /*x,y,z,px,py,pz,*/q_m,/* *buf,*/tp, m;
+    double q_m, tp, m;
     int t;
-//		     Cell<Particle> c0 = (*AllCells)[0];
     int total_particles;
     int err;
 
@@ -311,33 +301,19 @@ int readBinaryParticleArraysOneSort(
     return total_particles;
 }
 
-int getParticlesOneSortFromFile(
-        FILE *f,
-        particle_sorts sort,
-        int nt,
-        std::vector <Particle> &vp,
-        double *q_m,
-        double *m
-) {
+int getParticlesOneSortFromFile(FILE *f, particle_sorts sort, int nt, std::vector <Particle> &vp, double *q_m, double *m) {
     double x, y, z, px, py, pz;
     double *dbg_x, *dbg_y, *dbg_z, *dbg_px, *dbg_py, *dbg_pz;
     int total_particles;
-
 
     int err;
 
     if ((err = ferror(f)) != 0) return 1;
 
-    total_particles = readBinaryParticleArraysOneSort(f, &dbg_x, &dbg_y, &dbg_z,
-                                                      &dbg_px, &dbg_py, &dbg_pz, q_m, m, nt,
-                                                      sort);
-
-    // real_number_of_particle[(int)sort] = total_particles;
+    total_particles = readBinaryParticleArraysOneSort(f, &dbg_x, &dbg_y, &dbg_z, &dbg_px, &dbg_py, &dbg_pz, q_m, m, nt, sort);
 
     if ((err = ferror(f)) != 0) return 1;
-    convertParticleArraysToSTLvector(dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz, *q_m, *m,
-                                     total_particles, sort, vp);
-
+    convertParticleArraysToSTLvector(dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz, *q_m, *m, total_particles, sort, vp);
 }
 
 std::vector <Particle> readBinaryParticlesOneSortSTL(FILE *f, particle_sorts sort, int nt) {
@@ -354,7 +330,6 @@ std::vector <Particle> readBinaryParticlesOneSortSTL(FILE *f, particle_sorts sor
     printf("before1  %d free %u \n", nt, info.freeram / 1024 / 1024);
     err = ferror(f);
     return vp;
-    //			printPICstatitstics(m,q_m,total_particles);
 }
 
 int readBinaryParticlesAllSorts(FILE *f, int nt,

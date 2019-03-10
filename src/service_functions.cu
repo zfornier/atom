@@ -15,8 +15,6 @@
 
 #include "../include/particle.h"
 
-//#include<cuda.h>
-
 //struct sysinfo {
 //       long uptime;             /* Seconds since boot */
 //       unsigned long loads[3];  /* 1, 5, and 15 minute load averages */
@@ -105,29 +103,15 @@ double get_meminfo1(void)
 }
 
 
-double CheckArraySilent	(double* a, double* dbg_a,int size)
-	{
-	   // Cell<Particle> c = (*AllCells)[0];
+double CheckArraySilent	(double* a, double* dbg_a,int size) {
 	    double diff = 0.0;
 
-	    for(int n = 0;n < size;n++)
-	    {
+	    for(int n = 0;n < size;n++) {
             diff += pow(a[n] - dbg_a[n],2.0);
-
-//	        if(fabs(a[n] - dbg_a[n]) > TOLERANCE)
-//		    {
-//
-//		       int3 i = c.getCellTripletNumber(n);
-//
-//     		}
 	    }
 
 	    return pow(diff/(size),0.5);
 	}
-
-
-
-
 
 void get_load_data_file_names(
 		string & t_jxfile,
@@ -144,7 +128,6 @@ void get_load_data_file_names(
 		string & t_qzfile,int nt)
 {
 
-
     char d_exfile[100],d_eyfile[100],d_ezfile[100],d_hxfile[100],d_hyfile[100],d_hzfile[100];
     char d_0exfile[100],d_0eyfile[100],d_0ezfile[100];
     char jxfile[100],jyfile[100],jzfile[100];
@@ -153,13 +136,10 @@ void get_load_data_file_names(
     char d_jxfile[100],d_jyfile[100],d_jzfile[100];
     char qxfile[100],qyfile[100],qzfile[100];
     char pfile[100],nextpfile[100];
-//    char part_name[100];
 
     sprintf(qxfile,"dnqx%06d.dat",nt);
     sprintf(qyfile,"dnqy%06d.dat",nt);
     sprintf(qzfile,"dnqz%06d.dat",nt);
-
-
 
     sprintf(d_exfile,"dnex%06d.dat",2*nt-1);
     sprintf(d_eyfile,"dney%06d.dat",2*nt-1);
@@ -193,7 +173,6 @@ void get_load_data_file_names(
     sprintf(pfile,    "part%06d000.dat",nt);
     sprintf(nextpfile,"part%06d000.dat",nt+2);
 
-
     t_jxfile =    jxfile;
     t_jyfile =    jyfile;
     t_jzfile =    jzfile;
@@ -208,15 +187,11 @@ void get_load_data_file_names(
     t_qzfile =    qzfile;
 }
 
-void cudaMalloc3D(double **X,double **Y,double**Z,int nx,int ny,int nz)
-{
+void cudaMalloc3D(double **X,double **Y,double**Z,int nx,int ny,int nz) {
 	cudaMalloc((void **)X,sizeof(double)*(nx+2)*(ny+2)*(nz+2));
 	cudaMalloc((void **)Y,sizeof(double)*(nx+2)*(ny+2)*(nz+2));
 	cudaMalloc((void **)Z,sizeof(double)*(nx+2)*(ny+2)*(nz+2));
-
 }
-
-
 
 void copyFieldsToGPU(
 						double *d_Ex,double *d_Ey,double *d_Ez,
@@ -235,105 +210,93 @@ void copyFieldsToGPU(
 	int err;
 
     err = MemoryCopy(d_Ex,Ex,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-    {
+    if(err != cudaSuccess) {
     	printf("1copyFieldsToGPU err %d %s \n",err,getErrorString(err));
     	exit(0);
     }
     err = MemoryCopy(d_Ey,Ey,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-    {
+    if(err != cudaSuccess) {
      	printf("2copyFieldsToGPU err %d %s \n",err,getErrorString(err));
     	exit(0);
     }
 
     err = MemoryCopy(d_Ez,Ez,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("3copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("3copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
 
     err = MemoryCopy(d_Hx,Hx,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("4copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("4copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
+
     err = MemoryCopy(d_Hy,Hy,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("5copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("5copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
+
     err = MemoryCopy(d_Hz,Hz,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("6copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("6copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
 
     err = MemoryCopy(d_Jx,Jx,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("7copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("7copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
+
     err = MemoryCopy(d_Jy,Jy,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("8copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("8copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
 
     err = MemoryCopy(d_Jz,Jz,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("9copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("9copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
 
     err = MemoryCopy(d_npJx,npJx,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("10copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("10copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
 
     err = MemoryCopy(d_npJy,npJy,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("11copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("11copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
 
     err = MemoryCopy(d_npJz,npJz,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("12copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("12copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
 
     err = MemoryCopy(d_Qx,Qx,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("13copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("13copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
 
     err = MemoryCopy(d_Qy,Qy,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("14copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("14copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
 
     err = MemoryCopy(d_Qz,Qz,sizeof(double)*(Nx+2)*(Ny+2)*(Nz+2),HOST_TO_DEVICE);
-    if(err != cudaSuccess)
-        {
-         	printf("15copyFieldsToGPU err %d %s \n",err,getErrorString(err));
-        	exit(0);
-        }
+    if(err != cudaSuccess) {
+		printf("15copyFieldsToGPU err %d %s \n",err,getErrorString(err));
+		exit(0);
+	}
 }
 
 void InitGPUFields(
@@ -355,8 +318,6 @@ void InitGPUFields(
 	cudaMalloc3D(d_Jx,d_Jy,d_Jz,Nx,Ny,Nz);
 	cudaMalloc3D(d_npJx,d_npJy,d_npJz,Nx,Ny,Nz);
 	cudaMalloc3D(d_Qx,d_Qy,d_Qz,Nx,Ny,Nz);
-
-
 
     copyFieldsToGPU(
     		                        *d_Ex,*d_Ey,*d_Ez,

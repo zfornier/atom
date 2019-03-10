@@ -35,8 +35,6 @@ public:
     double x, y, z, pu, pv, pw, m, q_m, x1, y1, z1;
     particle_sorts sort;
 
-//   CurrentTensor t1,t2;
-
 #ifdef DEBUG_PLASMA
     int fortran_number;
 
@@ -90,10 +88,7 @@ public:
     }
 
     __host__ __device__
-    void ElectricMoveStageTwo(double tau1, double tau, double3 E,
-//		 double pu,double pv,double pw,
-                              double pu1, double pv1, double pw1, double *u, double *v, double *w, double *x, double *y,
-                              double *z) {
+    void ElectricMoveStageTwo(double tau1, double tau, double3 E, double pu1, double pv1, double pw1, double *u, double *v, double *w, double *x, double *y, double *z) {
         double sx, sy, sz, pu, pv, pw, ps, x1, y1, z1;
 
         sx = tau1 * E.x;
@@ -116,8 +111,6 @@ public:
         *x = x1;
         *y = y1;
         *z = z1;
-
-
     }
 
     __host__ __device__ double3 mult(double t, double3 t3) {
@@ -146,45 +139,25 @@ public:
 
     __host__ __device__ __forceinline__
     void Move(Field fd, double tau) {
-//    double bx,by,bz;
-        double tau1, u, v, w, ps;//,su,sv,sw;//,s1,s2,s3,s4,s5,s6,s;
-//	double sx,sy,sz,
-//	double x1,y1,z1,
+        double tau1, u, v, w, ps;
         double pu1, pv1, pw1;
-        double3 sx3;//,u3;
-
+        double3 sx3;
 
         ElectricMove(fd.E, tau, q_m, &tau1, &pu, &pv, &pw, &ps);
 
         MagneticMove(fd.H, ps, &pu1, &pv1, &pw1);
 
-//	ElectricMoveStageTwo(tau1,tau,E,pu1,pv1,pw1,&u,&v,&w,&x,&y,&z);
-
         sx3 = mult(tau1, fd.E);
-//	sx = sx3.x;
-//	sy = sx3.y;
-//	sz = sx3.z;
 
         add(sx3, &pu, &pv, &pw, pu1, pv1, pw1);
-//	pu = pu1 + sx3.x;
-//	pv = pv1 + sx3.y;
-//	pw = pw1 + sx3.z;
-//	ps = pu * pu + pv * pv + pw * pw;
+
         ps = impulse(pu, pv, pw);
 
         mult(&u, &v, &w, ps, pu, pv, pw);
 
-//	u = ps * pu;
-//	v = ps * pv;
-//	w = ps * pw;
         x1 = x + tau * u;
         y1 = y + tau * v;
         z1 = z + tau * w;
-
-//	x = x1;
-//	y = y1;
-//	z = z1;
-
     }
 
     __host__ __device__
@@ -232,44 +205,10 @@ public:
 
 
 #ifdef DEBUG_PLASMA
-//next
-//!!!!!!!!!!!!!!!!!
-//__host__ __device__ __forceinline__
-//   double3 GetXnext(){return next_x;}
-//
-//__host__ __device__ __forceinline__
-//  void    SetXnext(double3 x1){next_x.x = x1.x;next_x.y = x1.y;next_x.z = x1.z;}
-
-//__host__ __device__ __forceinline__
-//   int checkParticle(){return (
-//                               (fabs(x -next_x.x) < TOLERANCE) &&
-//                               (fabs(y -next_x.y) < TOLERANCE) &&
-//                               (fabs(z -next_x.z) < TOLERANCE)
-//
-//			      );
-//
-//                      }
 
 #endif
 
-    void Print(FILE *f, int num) {
-//     char num_str[20];
-//     sprintf(num_str,"num %05d",num);
-//
-//     gpu_string print_str;
-//     strcpy(print_str,num_str);
-//
-//     strcat(print_str,strcat(" x ",FortranExpWrite(x)));
-//     strcat(print_str,strcat(" y ",FortranExpWrite(y)));
-//     strcat(print_str,strcat(" z ",FortranExpWrite(z)));
-//     strcat(print_str,strcat(" px ",FortranExpWrite(pu)));
-//     strcat(print_str,strcat(" py ",FortranExpWrite(pv)));
-//     strcat(print_str,strcat(" pz ",FortranExpWrite(pw)));
-//     strcat(print_str,strcat(" mass ",FortranExpWrite(m)));
-//     strcat(print_str,strcat(" q/m ",FortranExpWrite(q_m)));
-//
-//     fprintf(f,"%s\n",print_str);
-    }
+    void Print(FILE *f, int num) {}
 
     __host__ __device__
     Particle &operator=(Particle const &src) {
@@ -287,19 +226,10 @@ public:
         z1 = src.z1;
 
 #ifdef DEBUG_PLASMA
-//	next_x = src.next_x;
-//	ex     = src.ex;
-//	ey     = src.ey;
-//	ez     = src.ez;
-//
-//	hx     = src.hx;
-//	hy     = src.hy;
-//	hz     = src.hz;
         fortran_number = src.fortran_number;
 #endif
         return (*this);
     }
-
 };
 
 #endif

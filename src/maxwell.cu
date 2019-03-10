@@ -2,23 +2,16 @@
 #include<stdlib.h>
 #include<math.h>
 
-//#include "rnd.h"
-
 #include "../include/read_particles.h"
-
 #include "../include/run_control.h"
 
 #include <vector>
 
 #include "../include/particle.h"
-
 #include "../include/maxwell.h"
-
-
 #include "../include/f2c.h"
+
 #include <stdio.h>
-//#include "rnd.h"
-// #include "run_control.h"
 
 /* Common Block Declarations */
 

@@ -431,7 +431,6 @@ void InitCurrents(string fnjx, string fnjy, string fnjz,
     read3Darray(dbg_fnjx, dbgJx);
     read3Darray(dbg_fnjy, dbgJy);
     read3Darray(dbg_fnjz, dbgJz);
-
 #endif
 }
 
@@ -442,8 +441,6 @@ void InitFields(char *fnex, char *fney, char *fnez,
                 char *np_ex, char *np_ey, char *np_ez,
                 char *dbg_fnhx, char *dbg_fnhy, char *dbg_fnhz) {
     InitFields();
-
-    //double t271 = Hy[27];
 
     read3Darray(fnex, Ex);
     read3Darray(fney, Ey);
@@ -469,9 +466,6 @@ void InitFields(char *fnex, char *fney, char *fnez,
     read3DarrayLog(np_ey, npEy,50,8);
     read3DarrayLog(np_ez, npEz,50,8);
 #endif
-
-    //   double t27 = Hy[27];
-
 }
 
 
@@ -498,17 +492,10 @@ virtual void InitParticles(char *fname, thrust::host_vector <Particle> &vp) {
         q_m = atof(str + 175);
 #undef GPU_PARTICLE
         Particle *p = new Particle(x, y, z, px, py, pz, m, q_m);
-//		      if(n == 829)
-//		      {
-//		    	  int qq = 0;
-//		    	  qq = 1;
-//		      }
         p->fortran_number = ++n;
         vp.push_back(*p);
 #define GPU_PARTICLE
-
     }
-
 
     dbg_x = (double *) malloc(sizeof(double) * vp.size());
     dbg_y = (double *) malloc(sizeof(double) * vp.size());
@@ -524,11 +511,12 @@ virtual void InitParticles(char *fname, thrust::host_vector <Particle> &vp) {
 
 
 void printPICstatitstics(double m, double q_m, int total_particles) {
-    int pn_min, pn_ave, pn_max, pn_sum;//,err;
+    int pn_min, pn_ave, pn_max, pn_sum;
 
     pn_min = 1000000000;
     pn_max = 0;
     pn_ave = 0;
+
     for (int n = 0; n < (*AllCells).size(); n++) {
         Cell &c = (*AllCells)[n];
 
@@ -541,12 +529,7 @@ void printPICstatitstics(double m, double q_m, int total_particles) {
     pn_sum = pn_ave;
     pn_ave /= (*AllCells).size();
 
-    printf("SORT m %15.5e q_m %15.5e %10d (sum %10d) particles in %8d cells: MIN %10d MAX %10d average %10d \n",
-           m, q_m, total_particles, pn_sum,
-           (*AllCells).size(),
-           pn_min, pn_max, pn_ave);
-
-
+    printf("SORT m %15.5e q_m %15.5e %10d (sum %10d) particles in %8d cells: MIN %10d MAX %10d average %10d \n", m, q_m, total_particles, pn_sum, (*AllCells).size(), pn_min, pn_max, pn_ave);
 }
 
 
@@ -555,7 +538,7 @@ int addParticleListToCells(std::vector <Particle> &vp) {
     int n;
 
     for (int i = 0; i < vp.size(); i++) {
-        Particle p = vp[i]; // = new Particle(x,y,z,px,py,pz,m,q_m);
+        Particle p = vp[i];
 
         double3 d;
         d.x = p.x;
@@ -577,7 +560,7 @@ int addParticleListToCells(std::vector <Particle> &vp) {
             }
 #endif
         }
-    }// END total_particles LOOP
+    }   // END total_particles LOOP
 
     return 0;
 
@@ -671,8 +654,7 @@ void Distribute(thrust::host_vector <Particle> &vecp) {
 
         if (c.Insert(p) == true) {
 #ifdef PARTICLE_PRINTS1000
-            if((vec_size-vecp.size())%1000 == 0 )	printf("particle %d (%e,%e,%e) is number %d in cell (%d,%d,%d)\n",vec_size-vecp.size(),
-                       p.x,p.y,p.z,c.number_of_particles,c.i,c.l,c.k);
+            if((vec_size-vecp.size())%1000 == 0 )	printf("particle %d (%e,%e,%e) is number %d in cell (%d,%d,%d)\n",vec_size-vecp.size(), p.x,p.y,p.z,c.number_of_particles,c.i,c.l,c.k);
             if((vec_size-vecp.size()) == 10000) exit(0);
 #endif
             vecp.erase(vecp.begin() + j);
@@ -690,7 +672,6 @@ void Distribute(thrust::host_vector <Particle> &vecp) {
     }
     pn_ave /= (*AllCells).size();
 
-    printf("%10d particles in %8d cells: MIN %5d MAX %5d average %5d \n", vec_size, (*AllCells).size(),
-           pn_min, pn_max, pn_ave);
+    printf("%10d particles in %8d cells: MIN %5d MAX %5d average %5d \n", vec_size, (*AllCells).size(), pn_min, pn_max, pn_ave);
 }
 

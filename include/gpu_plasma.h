@@ -64,8 +64,6 @@
 #include <iostream>
 
 #include "../src/add.cu"
-#include "../src/wrap_kernel.cu"
-//#include "run_control.h"
 #include "../src/kernels.cu"
 #include "../src/utils/NetCdf/read_file.cpp"
 

@@ -8,8 +8,7 @@
 #ifndef INIT_H_
 #define INIT_H_
 
-int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons,
-                  double ni, double rbd, int lp);
+int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons, double ni, double rbd, int lp);
 
 int InitUniformMaxwellianParticles(int beamf, int jmb,
                                    double tex0, double tey0, double tez0,

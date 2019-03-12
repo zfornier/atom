@@ -131,9 +131,11 @@ public:
 
     int virtual ElectricFieldTrace(double *, double *, double *, double *, int, double, double, double);
 
-    int checkFields_beforeMagneticStageOne(double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, int);
+    int checkFields_beforeMagneticStageOne(int);
 
-    int checkFields_afterMagneticStageOne(double *, double *, double *, double *, double *, double *, double *, int);
+    int checkFields_afterMagneticStageOne(int);
+
+    void checkCudaError();
 
     void ComputeField_FirstHalfStep(int);
 
@@ -141,13 +143,11 @@ public:
 
     void ElectricFieldComponentEvaluateTrace(
             double *, double *, double *, double *,
-            int, double, double, double,
-            int, int, int, int, int, int,
-            int, int, int, int, int, int);
+            int, double, double, double);
 
     void ElectricFieldComponentEvaluatePeriodic(
-            double *, double *, double *, double *,
-            int, double, double, double,
+            double *,
+            int,
             int, int, int, int, int, int,
             int, int, int, int, int, int);
 
@@ -181,21 +181,11 @@ public:
 
     int PeriodicBoundaries(double *, int, int, int, int, int, int);
 
-    int SinglePeriodicBoundary(double *, int, int, int, int, int, int);
-
     int SetPeriodicCurrentComponent(GPUCell **, double *, int, int, int, int);
 
     void SetPeriodicCurrents(int);
 
-    void InitQdebug(std::string, std::string, std::string);
-
     void AssignCellsToArraysGPU();
-
-    void AssignCellsToArrays();
-
-    void write3Darray(char *, double *);
-
-    void write3D_GPUArray(char *, double *);
 
     void readControlPoint(FILE **, char *, int, int, int, int,
                           double *, double *, double *,
@@ -205,13 +195,7 @@ public:
                           double *, double *, double *,
                           double *, double *, double *);
 
-    double checkControlMatrix(char *, int, char *, double *);
-
-    void checkCurrentControlPoint(int, int);
-
     void checkControlPoint(int, int, int);
-
-    void copyCellCurrentsToDevice(CellDouble *, CellDouble *, CellDouble *, CellDouble *, CellDouble *, CellDouble *);
 
     double CheckArray(double *, double *, FILE *);
 
@@ -219,29 +203,17 @@ public:
 
     double CheckGPUArraySilent(double *, double *);
 
-    int CheckValue(double *, double *, int);
-
     void read3DarrayLog(char *, double *, int, int);
 
     void read3Darray(char *, double *);
 
     void read3Darray(string, double *);
 
-    int PeriodicCurrentBoundaries(double *, int, int, int, int, int, int);
-
     void ClearAllParticles();
 
     int initControlPointFile();
 
     int copyCellsWithParticlesToGPU();
-
-    void ListAllParticles(int, std::string);
-
-    double TryCheckCurrent(int, double *);
-
-    double checkNonPeriodicCurrents(int);
-
-    double checkPeriodicCurrents(int);
 
     int SetCurrentArraysToZero();
 
@@ -251,7 +223,7 @@ public:
 
     int StepAllCells(int, double, double);
 
-    int StepAllCells_post_diagnostic(int);
+    void StepAllCells_post_diagnostic(int);
 
     int WriteCurrentsFromCellsToArrays(int);
 
@@ -263,7 +235,7 @@ public:
 
     int reorder_particles(int);
 
-    int Push(int, double, double);
+    void Push(int, double, double);
 
     int SetCurrentsToZero(int);
 

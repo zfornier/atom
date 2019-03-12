@@ -7,7 +7,7 @@
 #include <iostream>
 #include <math.h>
 #include "run_control.h"
-#include "control.h"
+#include "particle_types.h"
 
 #define GPU_PARTICLE
 

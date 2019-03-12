@@ -15,6 +15,8 @@
 
 int InitMPI(int argc, char *argv[]) {
     MPI_Init(&argc, &argv);
+
+    return 0;
 }
 
 int sumMPI(int size, double *d_jx, double *d_jy, double *d_jz) {
@@ -85,4 +87,6 @@ int getSize() {
 
 int CloseMPI() {
     MPI_Finalize();
+
+    return 0;
 }

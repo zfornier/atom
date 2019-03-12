@@ -726,7 +726,7 @@ void Plasma::checkControlPoint(int num, int nt, int check_part) {
     printf("STEP: %d\n", nt);
     f_prec_report = fopen("control_points.dat", "at");
     fprintf(f_prec_report,
-            " nt %5d\n num %3d\n Ex %15.5e\n Ey %15.5e\n Ez %15.5e\n Hx %15.5e\n Hy %15.5e\n Hz %15.5e\n Jx %15.5e\n Jy %15.5e\n Jz %15.5e\n Qx %15.5e\n Qy %15.5e\n Qz %15.5e\n particles %15.5e\n",
+            " nt %5d\n num %6d\n Ex %15.5e\n Ey %15.5e\n Ez %15.5e\n Hx %15.5e\n Hy %15.5e\n Hz %15.5e\n Jx %15.5e\n Jy %15.5e\n Jz %15.5e\n Qx %15.5e\n Qy %15.5e\n Qz %15.5e\n particles %15.5e\n",
             nt, num,
             t_ex, t_ey, t_ez,
             t_hx, t_hy, t_hz,

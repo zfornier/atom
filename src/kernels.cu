@@ -1,6 +1,5 @@
 
-__global__
-void GPU_SetAllCurrentsToZero(GPUCell **cells) {
+__global__ void GPU_SetAllCurrentsToZero(GPUCell **cells) {
     unsigned int nx = blockIdx.x;
     unsigned int ny = blockIdx.y;
     unsigned int nz = blockIdx.z;
@@ -13,8 +12,7 @@ void GPU_SetAllCurrentsToZero(GPUCell **cells) {
     nc.SetAllCurrentsToZero(threadIdx);
 }
 
-__global__
-void GPU_SetFieldsToCells(GPUCell **cells, double *Ex, double *Ey, double *Ez, double *Hx, double *Hy, double *Hz) {
+__global__ void GPU_SetFieldsToCells(GPUCell **cells, double *Ex, double *Ey, double *Ez, double *Hx, double *Hy, double *Hz) {
     unsigned int nx = blockIdx.x;
     unsigned int ny = blockIdx.y;
     unsigned int nz = blockIdx.z;
@@ -26,30 +24,7 @@ void GPU_SetFieldsToCells(GPUCell **cells, double *Ex, double *Ey, double *Ez, d
     c->readFieldsFromArrays(Ex, Ey, Ez, Hx, Hy, Hz, threadIdx);
 }
 
-__host__ __device__
-
-double CheckArraySize(double *a, double *dbg_a, int size) {
-    int wrong = 0;
-#ifdef CHECK_ARRAY_SIZE_DEBUG_PRINTS
-    printf("begin array checking1=============================\n");
-#endif
-    for (int n = 0; n < size; n++) {
-        if (fabs(a[n] - dbg_a[n]) > SIZE_TOLERANCE) {
-
-#ifdef CHECK_ARRAY_SIZE_DEBUG_PRINTS
-            printf("n %5d %15.5e dbg %15.5e diff %15.5e wrong %10d \n", n,a[n],dbg_a[n],fabs(a[n] - dbg_a[n]),wrong++);
-#endif
-        }
-    }
-#ifdef CHECK_ARRAY_SIZE_DEBUG_PRINTS
-    printf("  end array checking=============================\n");
-#endif
-
-    return (1.0 - ((double) wrong / (size)));
-}
-
-__global__ void GPU_WriteAllCurrents(GPUCell **cells, int n0,
-                                     double *jx, double *jy, double *jz, double *rho) {
+__global__ void GPU_WriteAllCurrents(GPUCell **cells, int n0, double *jx, double *jy, double *jz, double *rho) {
     unsigned int nx = blockIdx.x;
     unsigned int ny = blockIdx.y;
     unsigned int nz = blockIdx.z;
@@ -95,8 +70,6 @@ __global__ void GPU_WriteControlSystem(Cell **cells) {
 //            C. 2nd kernel to write arrival 3x3x3 matrices
 ///           D. 3rd kernel to form arrival positions in the particle list
 //            E. 4th to write arriving particles
-
-
 
 
 __global__ void GPU_MakeDepartureLists(GPUCell **cells, int nt, int *d_stage) {
@@ -161,7 +134,6 @@ __global__ void GPU_MakeDepartureLists(GPUCell **cells, int nt, int *d_stage) {
     }
 }
 
-
 __global__ void GPU_ArrangeFlights(GPUCell **cells, int nt, int *d_stage) {
     unsigned int nx = blockIdx.x;
     unsigned int ny = blockIdx.y;
@@ -203,79 +175,6 @@ __global__ void GPU_ArrangeFlights(GPUCell **cells, int nt, int *d_stage) {
             }
 }
 
-
-__global__ void GPU_CollectStrayParticles(Cell **cells, int nt) {
-    unsigned int nx = blockIdx.x;
-    unsigned int ny = blockIdx.y;
-    unsigned int nz = blockIdx.z;
-
-    Particle p;
-    int n;
-    Cell *c, *c0 = cells[0], nc, *new_c;
-
-    c = cells[n = c0->getGlobalCellNumber(nx, ny, nz)];
-
-    for (int i = 0; i < c->number_of_particles; i++) {
-        p = c->readParticleFromSurfaceDevice(i);
-#ifdef STRAY_DEBUG_PRINTS
-            printf("STRAY-BASIC step %d cell %3d %d %d sort %d particle %d FORTRAN %5d X: %15.5e < %15.5e < %15.5e Y: %15.5e < %15.5e < %15.5e Z: %15.5e < %15.5e < %15.5e \n",
-                    nt,c->i,c->l,c->k,(int)p.sort,i,p.fortran_number,
-                    c->x0,p.x,c->x0+c->hx,
-                    c->y0,p.y,c->y0+c->hy,
-                    c->z0,p.z,c->z0+c->hz
-                    );
-        //}
-#endif
-        if (!c->isPointInCell(p.GetX())) {
-#ifdef STRAY_DEBUG_PRINTS
-            printf("STRAY-OUT step %3d cell %3d %d %d sort %d particle %d FORTRAN %5d X: %15.5e < %25.17e < %15.5e \n",nt,c->i,c->l,c->k,(int)p.sort,i,p.fortran_number,c->x0,p.x,c->x0+c->hx);
-#endif
-            int new_n = c->getPointCell(p.GetX());
-            new_c = cells[new_n];
-
-
-            if (c->i == 99 && c->l == 0 && c->k == 3) {
-#ifdef STRAY_DEBUG_PRINTS
-#endif
-            }
-
-            while (atomicCAS(&(c->busyParticleArray), 0, 1)) {}
-            c->removeParticleFromSurfaceDevice(i, &p, &(c->number_of_particles));
-            atomicExch(&(c->busyParticleArray), 0u);
-            i--;
-
-            while (atomicCAS(&(new_c->busyParticleArray), 0, 1)) {}
-
-            new_c->Insert(p);
-#ifdef STRAY_DEBUG_PRINTS
-
-            printf("STRAY-INSERT step %d %3d %d %d sort %d particle %d FORTRAN %5d X: %15.5e < %25.17e < %15.5e \n",nt,new_c->i,new_c->l,new_c->k,(int)p.sort,i,p.fortran_number,new_c->x0,p.x,new_c->x0+new_c->hx);
-#endif
-            atomicExch(&(new_c->busyParticleArray), 0u);
-            if ((p.fortran_number == 2498) && (p.sort == BEAM_ELECTRON)) {}
-            if (c->i == 99 && c->l == 0 && c->k == 3) {}
-        }
-    }
-}
-
-__device__ double checkCurrentComponentImpact(CurrentTensorComponent *t1, CurrentTensorComponent *t2, int i, int l, int k, int pqr2) {
-    double res = 0;
-    if ((t1->i11 == i && t1->i12 == l && t1->i13 == k && (fabs(t1->t[0]) > 1e-15))) res = t1->t[0];
-    if ((t1->i21 == i && t1->i22 == l && t1->i23 == k && (fabs(t1->t[1]) > 1e-15))) res = t1->t[1];
-    if ((t1->i31 == i && t1->i32 == l && t1->i33 == k && (fabs(t1->t[2]) > 1e-15))) res = t1->t[2];
-    if ((t1->i41 == i && t1->i42 == l && t1->i43 == k && (fabs(t1->t[3]) > 1e-15))) res = t1->t[3];
-
-
-    if (pqr2 == 2) {
-        if ((t2->i11 == i && t2->i12 == l && t2->i13 == k && (fabs(t2->t[0]) > 1e-15))) res = t2->t[0];
-        if ((t2->i21 == i && t2->i22 == l && t2->i23 == k && (fabs(t2->t[1]) > 1e-15))) res = t2->t[1];
-        if ((t2->i31 == i && t2->i32 == l && t2->i33 == k && (fabs(t2->t[2]) > 1e-15))) res = t2->t[2];
-        if ((t2->i41 == i && t2->i42 == l && t2->i43 == k && (fabs(t2->t[3]) > 1e-15))) res = t2->t[3];
-    }
-    return res;
-}
-
-
 __device__ void writeCurrentComponent(CellDouble *J, CurrentTensorComponent *t1, CurrentTensorComponent *t2, int pqr2) {
     cuda_atomicAdd(&(J->M[t1->i11][t1->i12][t1->i13]), t1->t[0]);
     cuda_atomicAdd(&(J->M[t1->i21][t1->i22][t1->i23]), t1->t[1]);
@@ -311,15 +210,6 @@ __device__ void setCellDoubleToZero(CellDouble *dst, unsigned int n) {
     }
 }
 
-
-__global__ void GPU_GetCellNumbers(Cell **cells,
-                                   int *numbers) {
-    Cell *c;
-    c = cells[blockIdx.x];
-
-    numbers[blockIdx.x] = (*c).number_of_particles;
-}
-
 __device__ void assignSharedWithLocal(
         CellDouble **c_jx,
         CellDouble **c_jy,
@@ -343,7 +233,6 @@ __device__ void assignSharedWithLocal(
     *c_jy = &(fd[7]);
     *c_jz = &(fd[8]);
 }
-
 __device__ void copyFieldsToSharedMemory(
         CellDouble *c_jx,
         CellDouble *c_jy,
@@ -403,12 +292,6 @@ __device__ void set_cell_double_arrays_to_zero(
 
 }
 
-__device__ void set_cell_double_array_to_zero(CurrentTensorComponent *ca, int length) {
-    for (int i = 0; i <= 100; i++) {
-        ca[i].t[0] = 0.0;
-    }
-}
-
 __device__ void MoveParticlesInCell(
         CellDouble *c_ex,
         CellDouble *c_ey,
@@ -440,46 +323,6 @@ __device__ void MoveParticlesInCell(
     __syncthreads();
 }
 
-__device__ void assign_cell_double(CellDouble *a, CellDouble *b) {
-    int i, l, k;
-
-    for (i = 0; i < CellExtent; i++) {
-        for (l = 0; l < CellExtent; l++) {
-            for (k = 0; k < CellExtent; k++) {
-                a->M[i][l][k] = b->M[i][l][k];
-            }
-        }
-    }
-}
-
-__device__ void add_cell_double(CellDouble *a, CellDouble *b) {
-    int i, l, k;
-
-    for (i = 0; i < CellExtent; i++) {
-        for (l = 0; l < CellExtent; l++) {
-            for (k = 0; k < CellExtent; k++) {
-                a->M[i][l][k] += b->M[i][l][k];
-            }
-        }
-    }
-}
-
-__device__ void set_cell_double_array_to_zero(CellDouble *arr, int size) {
-    int i, l, k;
-    CellDouble *a;
-
-    for (int num = 0; num < size; num++) {
-        a = &(arr[num]);
-        for (i = 0; i < CellExtent; i++) {
-            for (l = 0; l < CellExtent; l++) {
-                for (k = 0; k < CellExtent; k++) {
-                    a->M[i][l][k] = 0.0;
-                }
-            }
-        }
-    }
-}
-
 __device__ void AccumulateCurrentWithParticlesInCell(
         CellDouble *c_jx,
         CellDouble *c_jy,
@@ -506,7 +349,6 @@ __device__ void AccumulateCurrentWithParticlesInCell(
 
 }
 
-
 __device__ void copyFromSharedMemoryToCell(
         CellDouble *c_jx,
         CellDouble *c_jy,
@@ -527,8 +369,7 @@ __device__ void copyFromSharedMemoryToCell(
 }
 
 
-__global__ void GPU_StepAllCells(GPUCell **cells//,
-) {
+__global__ void GPU_StepAllCells(GPUCell **cells) {
     Cell *c, *c0 = cells[0];
     __shared__
     CellDouble fd[9];
@@ -577,20 +418,7 @@ __global__ void GPU_CurrentsAllCells(GPUCell **cells, int nt) {
 
 }
 
-__global__ void
-GPU_ControlAllCellsCurrents(Cell **cells, int n, int i, CellDouble *jx, CellDouble *jy, CellDouble *jz) {
-    Cell *c, *c0 = cells[0], nc;
-    c = cells[n];
-
-    nc = *c;
-
-#ifdef GPU_CONTROL_ALL_CELLS_CURRENTS_PRINT
-#endif
-
-}
-
 __host__ __device__
-
 void emh2_Element(Cell *c, int i, int l, int k, double *Q, double *H) {
     int n = c->getGlobalCellNumber(i, l, k);
 
@@ -699,11 +527,4 @@ __global__ void GPU_eme(GPUCell **cells, int3 s, double *E, double *H1, double *
     s.z += nz;
 
     emeElement(c0, s, E, H1, H2, J, c1, c2, tau, d1, d2);
-}
-
-
-__global__ void copy_pointers(Cell **cells, int *d_flags, double_pointer *d_pointers) {
-    Cell *c = cells[blockIdx.x];
-    c->flag_wrong_current_cell = d_flags[blockIdx.x];
-    c->d_wrong_current_particle_attributes = d_pointers[blockIdx.x];
 }

@@ -121,12 +121,12 @@ int readBinaryParticleArraysOneSort(
     *dbg_py = dbg_py1;
     *dbg_pz = dbg_pz1;
 
-    debugPrintParticleCharacteristicArray(*dbg_x, total_particles, nt, "x", sort);
-    debugPrintParticleCharacteristicArray(*dbg_y, total_particles, nt, "y", sort);
-    debugPrintParticleCharacteristicArray(*dbg_z, total_particles, nt, "z", sort);
-    debugPrintParticleCharacteristicArray(*dbg_px, total_particles, nt, "px", sort);
-    debugPrintParticleCharacteristicArray(*dbg_py, total_particles, nt, "py", sort);
-    debugPrintParticleCharacteristicArray(*dbg_pz, total_particles, nt, "pz", sort);
+    debugPrintParticleCharacteristicArray(*dbg_x, total_particles, nt, (char*)"x", sort);
+    debugPrintParticleCharacteristicArray(*dbg_y, total_particles, nt, (char*)"y", sort);
+    debugPrintParticleCharacteristicArray(*dbg_z, total_particles, nt, (char*)"z", sort);
+    debugPrintParticleCharacteristicArray(*dbg_px, total_particles, nt, (char*)"px", sort);
+    debugPrintParticleCharacteristicArray(*dbg_py, total_particles, nt, (char*)"py", sort);
+    debugPrintParticleCharacteristicArray(*dbg_pz, total_particles, nt, (char*)"pz", sort);
 
     *qq_m = q_m;
     *mm = m;

@@ -8,11 +8,9 @@
 #ifndef GPUCELL_H_
 #define GPUCELL_H_
 
-
 #include "cell.h"
 #include "archAPI.h"
 #include <stdlib.h>
-
 
 void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char *name) {
     double t;
@@ -34,21 +32,11 @@ void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char
     printf("%s %10.3e \n", name, t);
 }
 
-__global__ void testKernelBefore(double *vec, int n_particle, int attribute) {
-
-}
-
-__global__ void testKernel(double *vec) {
-
-}
-
+__global__ void testKernel(double *vec) {}
 
 class GPUCell : public Cell {
-
-
 public:
     double *d_wrong_current_particle_attributes, *h_wrong_current_particle_attributes;
-
 
 #ifdef __CUDACC__
     __host__ __device__
@@ -63,18 +51,7 @@ public:
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     GPUCell(int i1, int l1, int k1, double Lx, double Ly, double Lz, int Nx1, int Ny1, int Nz1, double tau1) : Cell(i1, l1, k1, Lx, Ly, Lz, Nx1, Ny1, Nz1, tau1) {}
-
-    double compareArrayHostToDevice(double *h, double *d, int size, char *legend) {
-        double h_d[8 * CellExtent * CellExtent * CellExtent], t;
-
-        MemoryCopy(h_d, d, size, DEVICE_TO_HOST);
-
-        t = compare(h, h_d, size / sizeof(double), legend, TOLERANCE);
-
-        return t;
-    }
 
     GPUCell *copyCellToDevice() {
         GPUCell *h_src, *d_dst;
@@ -214,11 +191,6 @@ public:
             printf("copyCellToDevice error d_dst %p\n", d_dst);
         }
 
-        if (d_dst == NULL) {
-            int qq = 0;
-        }
-
-
         return d_dst;
     }
 
@@ -321,6 +293,5 @@ public:
     }
 
 };
-
 
 #endif /* GPUCELL_H_ */

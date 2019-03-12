@@ -42,121 +42,12 @@ typedef long ftnlen;
 typedef long ftnint;
 #endif
 
-/*external read, write*/
-typedef struct {
-    flag cierr;
-    ftnint ciunit;
-    flag ciend;
-    char *cifmt;
-    ftnint cirec;
-} cilist;
-
-/*internal read, write*/
-typedef struct {
-    flag icierr;
-    char *iciunit;
-    flag iciend;
-    char *icifmt;
-    ftnint icirlen;
-    ftnint icirnum;
-} icilist;
-
-/*open*/
-typedef struct {
-    flag oerr;
-    ftnint ounit;
-    char *ofnm;
-    ftnlen ofnmlen;
-    char *osta;
-    char *oacc;
-    char *ofm;
-    ftnint orl;
-    char *oblnk;
-} olist;
-
-/*close*/
-typedef struct {
-    flag cerr;
-    ftnint cunit;
-    char *csta;
-} cllist;
-
-/*rewind, backspace, endfile*/
-typedef struct {
-    flag aerr;
-    ftnint aunit;
-} alist;
-
-/* inquire */
-typedef struct {
-    flag inerr;
-    ftnint inunit;
-    char *infile;
-    ftnlen infilen;
-    ftnint *inex;    /*parameters in standard's order*/
-    ftnint *inopen;
-    ftnint *innum;
-    ftnint *innamed;
-    char *inname;
-    ftnlen innamlen;
-    char *inacc;
-    ftnlen inacclen;
-    char *inseq;
-    ftnlen inseqlen;
-    char *indir;
-    ftnlen indirlen;
-    char *infmt;
-    ftnlen infmtlen;
-    char *inform;
-    ftnint informlen;
-    char *inunf;
-    ftnlen inunflen;
-    ftnint *inrecl;
-    ftnint *innrec;
-    char *inblank;
-    ftnlen inblanklen;
-} inlist;
-
 #define VOID void
-
-union Multitype {    /* for multiple entry points */
-    shortint h;
-    integer i;
-    real r;
-    doublereal d;
-    complex c;
-    doublecomplex z;
-};
-
-typedef union Multitype Multitype;
 
 typedef long Long;
 
-struct Vardesc {    /* for Namelist */
-    char *name;
-    char *addr;
-    Long *dims;
-    int type;
-};
-typedef struct Vardesc Vardesc;
-
-struct Namelist {
-    char *name;
-    Vardesc **vars;
-    int nvars;
-};
-typedef struct Namelist Namelist;
-
-#define abs(x) ((x) >= 0 ? (x) : -(x))
-#define dabs(x) (doublereal)abs(x)
-#define min(a, b) ((a) <= (b) ? (a) : (b))
-#define max(a, b) ((a) >= (b) ? (a) : (b))
-#define dmin(a, b) (doublereal)min(a,b)
-#define dmax(a, b) (doublereal)max(a,b)
-
 /* procedure parameter types for -A and -C++ */
 
-#define F2C_proc_par_types 1
 #ifdef __cplusplus
 typedef int /* Unknown procedure type */ (*U_fp)(...);
 typedef shortint (*J_fp)(...);

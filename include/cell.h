@@ -20,14 +20,6 @@
 #define PARTICLES_FLYING_ONE_DIRECTION 50
 #define TOO_MANY_PARTICLES -513131313
 
-#ifdef GPU_PARTICLE
-#ifdef __CUDACC__
-__global__
-#endif
-#endif
-
-typedef double *double_pointer;
-
 typedef struct CellDouble {
     double M[CellExtent][CellExtent][CellExtent];
 } CellDouble;
@@ -40,8 +32,6 @@ typedef struct CellTotalField {
 
 #define MAX_PPC   5000
 const int MAX_particles_per_cell = MAX_PPC;
-
-surface<void, 2> particle_surface;
 
 __host__ __device__ int isNan(double t) {
     if (t > 0) {}
@@ -795,7 +785,7 @@ public:
         double3 x = p->GetX();
         double3 x1 = p->GetX1();
         double mass = p->m;
-        double q_m = p->q_m;
+
         CurrentTensor t;
 
         CurrentTensor *t1 = &(dt->t1);

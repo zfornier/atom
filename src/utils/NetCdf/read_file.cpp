@@ -4,7 +4,6 @@ int copyFile(const char *binaryFileName, const char *netCdfFileName) {
     ifstream ifs(binaryFileName, ios::binary);
     NcFile dataFile(netCdfFileName, NcFile::replace);
     dataFile.close();
-    int res;
 
     // copy dimensions
     NetCDFManipulator::plsm_add_dimension(netCdfFileName, "x", NX);

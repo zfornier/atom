@@ -56,18 +56,6 @@ int initMeshArrays() {
     return 0;
 }
 
-
-void LoadTestData(int nt, int part_nt, std::vector <Particle> &ion_vp, std::vector <Particle> &el_vp,
-                  std::vector <Particle> &beam_vp) {
-    if (nt > 1) {
-        ClearAllParticles();
-    }
-
-    LoadParticleData(nt, ion_vp, el_vp, beam_vp, Nx, Ny, Nz);
-
-    magf = 1;
-}
-
 void AssignArraysToCells() {
     for (int n = 0; n < (*AllCells).size(); n++) {
 
@@ -77,53 +65,18 @@ void AssignArraysToCells() {
     }
 }
 
-int compare(Particle p, Particle p1) {
-    int tx = comd(p.x, p1.x);
-    int ty = comd(p.y, p1.y);
-    int tz = comd(p.z, p1.z);
-    int tpx = comd(p.pu, p1.pu);
-    double dpx = fabs(p.pu - p1.pu);
-    int tpy = comd(p.pv, p1.pv);
-    int tpz = comd(p.pw, p1.pw);
-
-    return (tx && ty && tz && tpx && tpy && tpz);
-}
-
-double compareParticleList(std::vector <Particle> v, std::vector <Particle> v1) {
-    double t = 0.0, s = v.size(), s1 = v1.size();
-
-    if (v.size() != v1.size()) return 0.0;
-
-    for (int i = 0; i < v.size(); i++) {
-
-        t += compare(v[i], v1[i]);
-    }
-
-    return (t / v.size());
-}
-
-
 virtual void InitializeCPU(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd) {
     std::vector <Particle> ion_vp, el_vp, beam_vp;
     std::vector <Particle> ion_vp1, el_vp1, beam_vp1;
 
     initMeshArrays();
 
-    int flag_from_file = 0;
-
-    if (flag_from_file == 1) {
-        LoadTestData(START_STEP_NUMBER, START_STEP_NUMBER, ion_vp, el_vp, beam_vp);
-
-    } else {
-        getUniformMaxwellianParticles(ion_vp1, el_vp1, beam_vp1, tex0, tey0, tez0, Tb, rimp, rbd, ni, Lx, Ly, Lz);
-    }
+    getUniformMaxwellianParticles(ion_vp1, el_vp1, beam_vp1, tex0, tey0, tez0, Tb, rimp, rbd, ni, Lx, Ly, Lz);
 
 
     addAllParticleListsToCells(ion_vp1, el_vp1, beam_vp1);
 
     AssignArraysToCells();
-
-
 }
 
 void Initialize(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd) {
@@ -141,18 +94,16 @@ void Initialize(double tex0, double tey0, double tez0, double Tb, double rimp, d
 }
 
 
-void InitGPUParticles()
-//   :InitParticles(fname,vp)
-{
+void InitGPUParticles() {
     int size;
     GPUCell *d_c, *h_ctrl;
     GPUCell *n;
-//	GPUCell<Particle> *h_c;//*h_copy,
-//	double t;
-    dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimBlockOne(1, 1, 1);
-    int err = getLastError();
 
+    dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimBlockOne(1, 1, 1);
+
+    int err = getLastError();
     if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
+
     err = getLastError();
     if (err != cudaSuccess) {
         printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
@@ -343,7 +294,6 @@ virtual void Alloc() {
     Qz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
 #ifdef DEBUG_PLASMA
-
     dbgEx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     dbgEy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     dbgEz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
@@ -468,71 +418,6 @@ void InitFields(char *fnex, char *fney, char *fnez,
 #endif
 }
 
-
-virtual void InitParticles(thrust::host_vector <Particle> &vp) {
-    InitIonParticles(n_per_cell, ion_q_m, vp);
-}
-
-virtual void InitParticles(char *fname, thrust::host_vector <Particle> &vp) {
-    FILE *f;
-    char str[1000];
-    double x, y, z, px, py, pz, q_m, m;
-    int n = 0;
-
-    if ((f = fopen(fname, "rt")) == NULL) return;
-
-    while (fgets(str, 1000, f) != NULL) {
-        x = atof(str);
-        y = atof(str + 25);
-        z = atof(str + 50);
-        px = atof(str + 75);
-        py = atof(str + 100);
-        pz = atof(str + 125);
-        m = fabs(atof(str + 150));
-        q_m = atof(str + 175);
-#undef GPU_PARTICLE
-        Particle *p = new Particle(x, y, z, px, py, pz, m, q_m);
-        p->fortran_number = ++n;
-        vp.push_back(*p);
-#define GPU_PARTICLE
-    }
-
-    dbg_x = (double *) malloc(sizeof(double) * vp.size());
-    dbg_y = (double *) malloc(sizeof(double) * vp.size());
-    dbg_z = (double *) malloc(sizeof(double) * vp.size());
-    dbg_px = (double *) malloc(sizeof(double) * vp.size());
-    dbg_py = (double *) malloc(sizeof(double) * vp.size());
-    dbg_pz = (double *) malloc(sizeof(double) * vp.size());
-
-    total_particles = vp.size();
-
-    magf = 1;
-}
-
-
-void printPICstatitstics(double m, double q_m, int total_particles) {
-    int pn_min, pn_ave, pn_max, pn_sum;
-
-    pn_min = 1000000000;
-    pn_max = 0;
-    pn_ave = 0;
-
-    for (int n = 0; n < (*AllCells).size(); n++) {
-        Cell &c = (*AllCells)[n];
-
-        pn_ave += c.number_of_particles;
-        if (pn_min > c.number_of_particles) pn_min = c.number_of_particles;
-        if (pn_max < c.number_of_particles) pn_max = c.number_of_particles;
-
-    }
-
-    pn_sum = pn_ave;
-    pn_ave /= (*AllCells).size();
-
-    printf("SORT m %15.5e q_m %15.5e %10d (sum %10d) particles in %8d cells: MIN %10d MAX %10d average %10d \n", m, q_m, total_particles, pn_sum, (*AllCells).size(), pn_min, pn_max, pn_ave);
-}
-
-
 int addParticleListToCells(std::vector <Particle> &vp) {
     Cell c0 = (*AllCells)[0];
     int n;
@@ -566,7 +451,6 @@ int addParticleListToCells(std::vector <Particle> &vp) {
 
 }
 
-
 int addAllParticleListsToCells(std::vector <Particle> &ion_vp,
                                std::vector <Particle> &el_vp,
                                std::vector <Particle> &beam_vp) {
@@ -578,100 +462,4 @@ int addAllParticleListsToCells(std::vector <Particle> &ion_vp,
 }
 
 
-//
-int readParticles(FILE *f, int nt) {
-    std::vector <Particle> ion_vp, el_vp, beam_vp;
-
-    readBinaryParticlesAllSorts(f, nt, ion_vp, el_vp, beam_vp);
-
-
-    addAllParticleListsToCells(ion_vp, el_vp, beam_vp);
-
-    return 0;
-}
-
-
-virtual void InitBinaryParticles(int nt) {
-    FILE *f;
-    std::string part_name = getMumuFileName(nt);
-
-    if ((f = readPreliminary3Darrays(part_name, nt, Nx, Ny, Nz)) == NULL) return;
-
-    std::vector <Particle> ion_vp, el_vp, beam_vp;
-
-    readBinaryParticlesAllSorts(f, nt, ion_vp, el_vp, beam_vp);
-
-
-    addAllParticleListsToCells(ion_vp, el_vp, beam_vp);
-
-    fclose(f);
-
-    magf = 1;
-}
-
-
-virtual void InitElectronParticles() {}
-
-virtual void InitIonParticles(int n_per_cell1, double q_m, thrust::host_vector <Particle> &vecp) {
-    int total_ions = Nx * Ny * Nz * n_per_cell;
-    Particle *p;
-    //double ami = ni /((double)n_per_cell);
-    double x, y, z;
-
-    for (int j = 0; j < total_ions; j++) {
-        z = 0.0;
-        y = 0.0;
-        x = 0.0;
-
-        p = new Particle(x, y, z, 0.0, 0.0, 0.0, ni, q_m);
-
-#ifdef DEBUG_PLASMA
-        //		printf("particle %d \n",j);
-#endif
-
-        vecp.push_back(*p);
-    }
-}
-
-virtual void InitBeamParticles(int n_per_cell1) {}
-
-void Distribute(thrust::host_vector <Particle> &vecp) {
-    Cell c0 = (*AllCells)[0], c111;
-    int n;//,i;
-    int vec_size = vecp.size();
-
-    for (int j = 0; j < vecp.size(); j++) {
-        Particle p = vecp[j];
-        double3 d;
-        d.x = p.x;
-        d.y = p.y;
-        d.z = p.z;
-
-        n = c0.getPointCell(d);
-
-        Cell &c = (*AllCells)[n];
-
-
-        if (c.Insert(p) == true) {
-#ifdef PARTICLE_PRINTS1000
-            if((vec_size-vecp.size())%1000 == 0 )	printf("particle %d (%e,%e,%e) is number %d in cell (%d,%d,%d)\n",vec_size-vecp.size(), p.x,p.y,p.z,c.number_of_particles,c.i,c.l,c.k);
-            if((vec_size-vecp.size()) == 10000) exit(0);
-#endif
-            vecp.erase(vecp.begin() + j);
-            j--;
-        }
-    }
-    int pn_min = 1000000, pn_max = 0, pn_ave = 0;
-    for (int n = 0; n < (*AllCells).size(); n++) {
-        Cell &c = (*AllCells)[n];
-
-        pn_ave += c.number_of_particles;
-        if (pn_min > c.number_of_particles) pn_min = c.number_of_particles;
-        if (pn_max < c.number_of_particles) pn_max = c.number_of_particles;
-
-    }
-    pn_ave /= (*AllCells).size();
-
-    printf("%10d particles in %8d cells: MIN %5d MAX %5d average %5d \n", vec_size, (*AllCells).size(), pn_min, pn_max, pn_ave);
-}
 

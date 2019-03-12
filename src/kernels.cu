@@ -109,16 +109,6 @@ __global__ void GPU_MakeDepartureLists(GPUCell **cells, int nt, int *d_stage) {
     Cell *c, *c0 = cells[0], nc;
     c = cells[c0->getGlobalCellNumber(nx, ny, nz)];
 
-#ifdef FLY_PRINTS
-
-#endif
-
-
-#ifdef FLY_PRINTS
-
-#endif
-
-
     c->departureListLength = 0;
     for (ix = 0; ix < 3; ix++) {
         for (iy = 0; iy < 3; iy++) {
@@ -130,14 +120,6 @@ __global__ void GPU_MakeDepartureLists(GPUCell **cells, int nt, int *d_stage) {
     c->departureListLength = 0;
     for (int num = 0; num < c->number_of_particles; num++) {
         p = c->readParticleFromSurfaceDevice(num);
-#ifdef FLY_PRINTS
-
-#endif
-
-#ifdef FLY_PRINTS
-
-
-#endif
 
         if (!c->isPointInCell(p.GetX())) { //check Paricle = operator !!!!!!!!!!!!!!!!!!!!!!!!!!!
             c->removeParticleFromSurfaceDevice(num, &p, &(c->number_of_particles));
@@ -147,20 +129,11 @@ __global__ void GPU_MakeDepartureLists(GPUCell **cells, int nt, int *d_stage) {
                 d_stage[1] = iy;
                 d_stage[2] = iz;
             }
-#ifdef FLY_PRINTS
 
-#endif
 //TODO: mke FINAL print at STRAY function.
 //					Make 3x3x3x20(50) particle fly array at each cell
 
             //departureList[departureListLength++] = p;
-
-
-#ifdef FLY_PRINTS
-#endif
-
-#ifdef FLY_PRINTS
-#endif
 
             if (c->departureListLength == PARTICLES_FLYING_ONE_DIRECTION) {
                 d_stage[0] = TOO_MANY_PARTICLES;
@@ -183,21 +156,9 @@ __global__ void GPU_MakeDepartureLists(GPUCell **cells, int nt, int *d_stage) {
             }
 
             c->departure[ix][iy][iz] += 1;
-#ifdef FLY_PRINTS
-#endif
             num--;
         }
-#ifdef FLY_PRINTS
-#endif
     }
-#ifdef FLY_PRINTS
-#endif
-    for (ix = 0; ix < 3; ix++)
-        for (iy = 0; iy < 3; iy++)
-            for (iz = 0; iz < 3; iz++) {
-#ifdef FLY_PRINTS
-#endif
-            }
 }
 
 

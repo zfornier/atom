@@ -1973,13 +1973,11 @@ public:
 #ifdef ATTRIBUTES_CHECK
         d_ctrlParticles = c;
 #endif
-
     }
 
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     void SetControlSystemToParticles() {
         Particle p;
         int i;

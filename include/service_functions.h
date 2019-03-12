@@ -16,24 +16,6 @@ void read3Darray(char *name, double *d);
 
 void read3Darray(std::string name, double *d);
 
-void get_load_data_file_names(
-        std::string &t_jxfile,
-        std::string &t_jyfile,
-        std::string &t_jzfile,
-        std::string &t_d_jxfile,
-        std::string &t_d_jyfile,
-        std::string &t_d_jzfile,
-        std::string &t_np_jxfile,
-        std::string &t_np_jyfile,
-        std::string &t_np_jzfile,
-        std::string &t_qxfile,
-        std::string &t_qyfile,
-        std::string &t_qzfile, int nt);
-
-double get_meminfo(void);
-
-double get_meminfo1(void);
-
 int setPrintfLimit();
 
 void cudaMalloc3D(double **X, double **Y, double **Z, int nx, int ny, int nz);

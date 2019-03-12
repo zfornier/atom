@@ -115,16 +115,6 @@ int getLastError() {
 #endif
 
 #ifdef __CUDACC__
-__device__ void BlockThreadSynchronize() {
-    __syncthreads();
-}
-#else
-
-void BlockThreadSynchronize() {}
-
-#endif
-
-#ifdef __CUDACC__
 __device__ double MultiThreadAdd(double *address, double val) {
     double assumed,old=*address;
     do {
@@ -255,32 +245,6 @@ void call_with_args(const void *func, void **args) {
     if (num == 7) {
         func_7 f7 = (func_7) func;
         f7(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-    }
-}
-
-int cudaLaunchKernel_onCPU(const void *func, dim3 gridDim, dim3 blockDim, void **args, size_t sharedMem, cudaStream_t stream) {
-    for (int i = 0; i < gridDim.x; i++) {
-        for (int l = 0; l < gridDim.y; l++) {
-            for (int k = 0; k < gridDim.z; k++) {
-#ifndef __CUDACC__
-                blockIdx.x = i;
-                blockIdx.y = l;
-                blockIdx.z = k;
-#endif
-                for (int i1 = 0; i1 < blockDim.x; i1++) {
-                    for (int l1 = 0; l1 < blockDim.y; l1++) {
-                        for (int k1 = 0; k1 < blockDim.z; k1++) {
-#ifndef __CUDACC__
-                            threadIdx.x = i1;
-                            threadIdx.x = l1;
-                            threadIdx.x = k1;
-#endif
-                            call_with_args(func, args);
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 

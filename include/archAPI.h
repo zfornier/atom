@@ -53,13 +53,7 @@ typedef struct dim3 dim3;
 
 #define OMP_NUM_THREADS 100
 
-extern uint3 threadIdx,blockIdx;
-#endif
-
-#ifdef __CUDACC__
-__device__ void BlockThreadSynchronize();
-#else
-void BlockThreadSynchronize();
+extern uint3 threadIdx, blockIdx;
 #endif
 
 #ifdef __CUDACC__

@@ -14,12 +14,9 @@
 
 #include <vector>
 
-double rnd_uniform();
+double rnd_gaussian(double, double, int);
 
-double rnd_gaussian(double a, double b);
-
-int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons,
-                  double ni, double rbd, int lp);
+int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons, double ni, double rbd, int lp);
 
 int InitUniformMaxwellianParticles(int beamf, int jmb,
                                    double tex0, double tey0, double tez0,
@@ -28,25 +25,6 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
                                    double *xi, double *yi, double *zi, double *ui, double *vi, double *wi,
                                    double *xb, double *yb, double *zb, double *ub, double *vb, double *wb,
                                    double *xf, double *yf, double *zf, double *uf, double *vf, double *wf
-);
-
-int AddBeamParticles(int jmb,
-                     double tex0, double tey0, double tez0,
-                     double beam_lx, double beam_ly, int *jmb_real,
-                     double lx, double ly, double lz, int meh, double Tb, double rimp, double rbd,
-                     double *xb, double *yb, double *zb, double *ub, double *vb, double *wb
-);
-
-int writeParamsFile(double tex0, double tey0, double tez0,
-                    double Tb, double rimp,
-                    double rbd, double ni,
-                    double lx, double ly, double lz,
-                    int lp, int nx, int ny, int nz,
-                    double tau, double B0,
-                    double bx, double by, double bz,
-                    double py, double pz,
-                    int beam_plasma, int start_from_file,
-                    int ts, int ms, int phase
 );
 
 int getUniformMaxwellianParticles(std::vector <Particle> &ion_vp,

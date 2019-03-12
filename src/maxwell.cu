@@ -1,17 +1,13 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
+#include <vector>
 
 #include "../include/read_particles.h"
 #include "../include/run_control.h"
-
-#include <vector>
-
 #include "../include/particle.h"
 #include "../include/maxwell.h"
 #include "../include/f2c.h"
-
-#include <stdio.h>
 
 /* Common Block Declarations */
 
@@ -212,62 +208,24 @@ int AllocateBinaryParticleArraysOneSort(
         int total_particles
 ) {
     *dbg_x = (double *) malloc(sizeof(double) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_x,total_particles,nt,"x",sort);
 
     *dbg_y = (double *) malloc(sizeof(double) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_y,total_particles,nt,"y",sort);
 
     *dbg_z = (double *) malloc(sizeof(double) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_z,total_particles,nt,"z",sort);
 
     *dbg_px = (double *) malloc(sizeof(double) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_px,total_particles,nt,"px",sort);
 
     *dbg_py = (double *) malloc(sizeof(double) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_py,total_particles,nt,"py",sort);
 
     *dbg_pz = (double *) malloc(sizeof(double) * total_particles);
 
     *m = (double *) malloc(sizeof(double) * total_particles);
 
-    //debugPrintParticleCharacteristicArray(*dbg_pz,total_particles,nt,"pz",sort);
-
-    return 0;
-}
-
-int AllocateBinaryParticleArraysOneSortFloat(
-        float **dbg_x,
-        float **dbg_y,
-        float **dbg_z,
-        float **dbg_px,
-        float **dbg_py,
-        float **dbg_pz,
-        int total_particles
-) {
-    *dbg_x = (float *) malloc(sizeof(float) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_x,total_particles,nt,"x",sort);
-
-    *dbg_y = (float *) malloc(sizeof(float) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_y,total_particles,nt,"y",sort);
-
-    *dbg_z = (float *) malloc(sizeof(float) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_z,total_particles,nt,"z",sort);
-
-    *dbg_px = (float *) malloc(sizeof(float) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_px,total_particles,nt,"px",sort);
-
-    *dbg_py = (float *) malloc(sizeof(float) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_py,total_particles,nt,"py",sort);
-
-    *dbg_pz = (float *) malloc(sizeof(double) * total_particles);
-    //debugPrintParticleCharacteristicArray(*dbg_pz,total_particles,nt,"pz",sort);
-
     return 0;
 }
 
 
-void AllocateBinaryParticlesArrays(
-        ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons) {
+void AllocateBinaryParticlesArrays(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons) {
     AllocateBinaryParticleArraysOneSort(&(ions->dbg_x), &(ions->dbg_y), &(ions->dbg_z),
                                         &(ions->dbg_px), &(ions->dbg_py),
                                         &(ions->dbg_pz),
@@ -283,77 +241,6 @@ void AllocateBinaryParticlesArrays(
                                         &(beam_electrons->dbg_px), &(beam_electrons->dbg_py), &(beam_electrons->dbg_pz),
                                         &(beam_electrons->m),
                                         beam_electrons->total);
-
-    //magf = 1;
-}
-
-void AllocateBinaryParticlesArraysFloat(
-        ParticleFloatArrays *ions, ParticleFloatArrays *electrons, ParticleFloatArrays *beam_electrons) {
-    AllocateBinaryParticleArraysOneSortFloat(&(ions->dbg_x), &(ions->dbg_y), &(ions->dbg_z),
-                                             &(ions->dbg_px), &(ions->dbg_py), &(ions->dbg_pz),
-                                             ions->total);
-
-
-    AllocateBinaryParticleArraysOneSortFloat(&(electrons->dbg_x), &(electrons->dbg_y), &(electrons->dbg_z),
-                                             &(electrons->dbg_px), &(electrons->dbg_py), &(electrons->dbg_pz),
-                                             electrons->total);
-
-    AllocateBinaryParticleArraysOneSortFloat(&(beam_electrons->dbg_x), &(beam_electrons->dbg_y),
-                                             &(beam_electrons->dbg_z),
-                                             &(beam_electrons->dbg_px), &(beam_electrons->dbg_py),
-                                             &(beam_electrons->dbg_pz),
-                                             beam_electrons->total);
-
-    //magf = 1;
-}
-
-
-int writeParamsFile(double tex0, double tey0, double tez0,
-                    double Tb, double rimp,
-                    double rbd, double ni,
-                    double lx, double ly, double lz,
-                    int lp, int nx, int ny, int nz,
-                    double tau, double B0,
-                    double bx, double by, double bz,
-                    double py, double pz,
-                    int beam_plasma, int start_from_file,
-                    int ts, int ms, int phase
-) {
-    FILE *f;
-
-    if ((f = fopen("000_params.dat", "wt")) == NULL) return 1;
-
-//		  fprintf(f,"\n");
-    fprintf(f, "%15.5e plasma electron temperature along X \n ", tex0);
-    fprintf(f, "%15.5e plasma electron temperature along Y \n ", tey0);
-    fprintf(f, "%15.5e plasma electron temperature along Z \n ", tez0);
-    fprintf(f, "%15.5e beam impulse\n ", rimp);
-    fprintf(f, "%15.5e beam velocity dispersion \n ", Tb);
-    fprintf(f, "%15.5e beam and plasma density ratio \n ", rbd);
-    fprintf(f, "%15.5e plasma density \n ", ni);
-    fprintf(f, "%15.5e external magnetic field (along X) \n ", B0);
-    fprintf(f, "%15.5e domain size X \n ", lx);
-    fprintf(f, "%15.5e domain size Y \n ", ly);
-    fprintf(f, "%15.5e domain size Z \n ", lz);
-    fprintf(f, "%15.5e plasma size Y \n ", py);
-    fprintf(f, "%15.5e plasma size Z \n ", pz);
-    fprintf(f, "%15.5e beam size X \n ", bx);
-    fprintf(f, "%15.5e beam size Y \n ", by);
-    fprintf(f, "%15.5e beam size Z \n ", bz);
-    fprintf(f, "%15d   average number of particles in cell \n ", lp);
-    fprintf(f, "%15d   number of mesh nodes along X \n ", nx);
-    fprintf(f, "%15d   number of mesh nodes along Y \n ", ny);
-    fprintf(f, "%15d   number of mesh nodes along Z \n ", nz);
-    fprintf(f, "%15.5e timestep \n ", tau);
-    fprintf(f, "%15d   1 if beam-plasma interaction, 0 if beam-beam \n", beam_plasma);
-    fprintf(f, "%15d   moment to start from saved\n ", start_from_file);
-    fprintf(f, "%15d   phase to start from save\n ", phase);
-    fprintf(f, "%15d   total steps \n ", ts);
-    fprintf(f, "%15d   number of steps between diagnostic files \n ", ms);
-
-
-    fclose(f);
-    return 0;
 }
 
 int InitUniformMaxwellianParticles(int beamf, int jmb,
@@ -366,7 +253,6 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
 ) {
     double x, y, z, vb0, d__1, d__2, d__3, vy, vz, termx, gb0;
     double vf01, vf02, pinv1, pinv2, mfrq = 0.0;
-//     double *ux,*uy,*uz;
     double *ux, *uy, *uz;
     double beam_y_max, beam_y_min, beam_sh;
     double beam_z_max, beam_z_min, beam_shz;
@@ -427,7 +313,6 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
 
     //1st beam particle impulse:    0.20296063288436139
     for (j = 1; j <= *jmb_real; j++) {
-//	    double uxt,ubt;
         d__1 = ux[j - 1];
         d__2 = uy[j - 1];
         d__3 = uz[j - 1];
@@ -441,8 +326,7 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
         vb[j - 1] = uy[j - 1] / vb0;
         wb[j - 1] = uz[j - 1] / vb0;
 #ifdef DEBUG_INITIAL_PARTICLE_PRINTS
-        printf("beam %10d %25.15e  %25.15e    %25.15e %25.15e %25.15e   %25.15e \n",
-                      j,  xb[j - 1],yb[j - 1],vb0,    ub[j-1],vb[j - 1],wb[j - 1]);
+        printf("beam %10d %25.15e  %25.15e    %25.15e %25.15e %25.15e   %25.15e \n", j,  xb[j - 1],yb[j - 1],vb0,    ub[j-1],vb[j - 1],wb[j - 1]);
 #endif
     }
 /*     MAKING THE RANDOM GENERATOR WORK THE SAME */
@@ -475,7 +359,6 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
 //          INVERSE CURRENT
 
         termx = rnd_gaussian(0.0, tex0, 0);
-// 	   printf("termx %15.5e vx %15.5e vy %15.5e \n",termx,vy,vz);
 
         gb0 = pow(1.0 + pow(ub[j - 1], 2) + pow(vb[j - 1], 2) + pow(wb[j - 1], 2), -0.5);
 
@@ -524,53 +407,6 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
     return 0;
 } /* start_ */
 
-int AddBeamParticles(int jmb,
-                     double tex0, double tey0, double tez0,
-                     double beam_lx, double beam_ly, int *jmb_real,
-                     double lx, double ly, double lz, int meh, double Tb, double rimp, double rbd,
-                     double *xb, double *yb, double *zb, double *ub, double *vb, double *wb
-) {
-    double x, y, z;//,vb0,d__1,d__2,d__3,vy,vz,termx,gb0;
-//    double vf01,vf02,pinv1,pinv2,mfrq;
-//     double *ux,*uy,*uz;
-//    double *ux,*uy,*uz;
-//    double beam_y_max;
-    double beam_y_min, beam_sh;
-
-    beam_sh = (ly - beam_ly) / 2;
-//    beam_y_max = ly - beam_sh;
-    beam_y_min = beam_sh;
-
-    for (int j = 1; j <= jmb; j++) {
-        z = beam_ly * rnd_uniform(0) + beam_y_min;
-        y = meh * ly + beam_ly * rnd_uniform(0) + beam_y_min;
-        x = beam_lx * rnd_uniform(0);
-
-        xb[j - 1] = x;
-        yb[j - 1] = y;
-        zb[j - 1] = z;
-
-        double vb0, ux, uy, uz;
-        vb0 = rnd_gaussian(0.0, Tb * rimp, 0);
-        ux = vb0 + rimp;
-        uy = rnd_gaussian(0.0, Tb * rimp, 0);
-        uz = rnd_gaussian(0.0, Tb * rimp, 0);
-
-        vb0 = sqrt(1.0 - ux * ux - uy * uy - uz * uz);
-
-        ub[j - 1] = ux / vb0;
-        vb[j - 1] = uy / vb0;
-        wb[j - 1] = uz / vb0;
-
-
-#ifdef ADD_BEAM_INITIAL_PARTICLE_PRINTS
-        printf("add beam %10d %25.15e  %25.15e    %25.15e %25.15e %25.15e   %25.15e \n",
-                      j,  xb[j - 1],yb[j - 1],vb0,    ub[j-1],vb[j - 1],wb[j - 1]);
-#endif
-    }
-    return 0;
-}
-
 int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons,
                   double ni, double rbd, int lp) {
     //int lp = ((double)N)/(Nx*Ny*Nz);
@@ -590,10 +426,8 @@ int AllocateMemoryForArrays(int N, ParticleArrays *ions, ParticleArrays *electro
     electrons->total = 2 * N;
     beam_electrons->total = N;
 
-//    sorts = 3;
-
     AllocateBinaryParticlesArrays(ions, electrons, beam_electrons);
-//    AllocateBinaryParticlesArraysFloat(&(diagnostics[0]),&(diagnostics[1]),&(diagnostics[2]));
+
     return 0;
 }
 
@@ -703,6 +537,4 @@ int getUniformMaxwellianParticles(std::vector <Particle> &ion_vp,
             el_vp);
 
     return 0;
-
-
 }

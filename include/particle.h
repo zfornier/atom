@@ -1,7 +1,6 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-
 #include <stdio.h>
 #include <string>
 #include <string.h>
@@ -23,15 +22,11 @@ typedef struct Field {
 } Field;
 
 #include "tensor.h"
-
-typedef char gpu_string[200];
-
 #include "compare.h"
 
 class Particle {
 
 public:
-
     double x, y, z, pu, pv, pw, m, q_m, x1, y1, z1;
     particle_sorts sort;
 
@@ -87,32 +82,6 @@ public:
         *pw1 = ((s6 + by) * su + (s5 - bx) * sv + (s3 + 1.) * sw) / s;
     }
 
-    __host__ __device__
-    void ElectricMoveStageTwo(double tau1, double tau, double3 E, double pu1, double pv1, double pw1, double *u, double *v, double *w, double *x, double *y, double *z) {
-        double sx, sy, sz, pu, pv, pw, ps, x1, y1, z1;
-
-        sx = tau1 * E.x;
-        sy = tau1 * E.y;
-        sz = tau1 * E.z;
-
-        pu = pu1 + sx;
-        pv = pv1 + sy;
-        pw = pw1 + sz;
-        ps = pu * pu + pv * pv + pw * pw;
-        ps = pow(((pu * pu + pv * pv + pw * pw) + 1.0), -0.5);
-
-        *u = ps * pu;
-        *v = ps * pv;
-        *w = ps * pw;
-        x1 = *x + tau * (*u);
-        y1 = *y + tau * (*v);
-        z1 = *z + tau * (*w);
-
-        *x = x1;
-        *y = y1;
-        *z = z1;
-    }
-
     __host__ __device__ double3 mult(double t, double3 t3) {
         t3.x *= t;
         t3.y *= t;
@@ -160,9 +129,6 @@ public:
         z1 = z + tau * w;
     }
 
-    __host__ __device__
-    void Collide(double sect) {}
-
     __host__ __device__ __forceinline__
     double3 GetX() {
         double3 d3x;
@@ -182,33 +148,11 @@ public:
     }
 
     __host__ __device__ __forceinline__
-    double3 GetV() {
-        double3 d3x;
-        d3x.x = x;
-        d3x.y = y;
-        d3x.z = z;
-        return d3x;
-    }
-
-    __host__ __device__ __forceinline__
     void SetX(double3 x1) {
         x = x1.x;
         y = x1.y;
         z = x1.z;
     }
-
-    __host__ __device__ __forceinline__
-    double GetMass() { return m; }
-
-    __host__ __device__ __forceinline__
-    double GetQ2M() { return q_m; }
-
-
-#ifdef DEBUG_PLASMA
-
-#endif
-
-    void Print(FILE *f, int num) {}
 
     __host__ __device__
     Particle &operator=(Particle const &src) {

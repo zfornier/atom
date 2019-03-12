@@ -49,7 +49,6 @@
 
 
 #include "init.h"
-#include "diagnose.h"
 
 #include <string>
 #include <iostream>

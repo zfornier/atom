@@ -19,11 +19,4 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
                                    double *xf, double *yf, double *zf, double *uf, double *vf, double *wf
 );
 
-int AddBeamParticles(int jmb,
-                     double tex0, double tey0, double tez0,
-                     double beam_lx, double beam_ly, int *jmb_real,
-                     double lx, double ly, double lz, int meh, double Tb, double rimp, double rbd,
-                     double *xb, double *yb, double *zb, double *ub, double *vb, double *wb
-);
-
 #endif /* INIT_H_ */

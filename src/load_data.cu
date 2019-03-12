@@ -16,105 +16,10 @@
 
 #include "../include/load_data.h"
 
-std::string getMumuFileName(int nt) {
-    char part_name[100];
-    std::string s;
-
-    sprintf(part_name, "mumu000%08d.dat", nt);
-
-    s = part_name;
-
-    return s;
-}
-
-int readFortranBinaryArray(FILE *f, double *d) {
-    int t, err;//,n;
-    fread(&t, sizeof(int), 1, f);
-    if ((err = ferror(f)) != 0) {
-        return err;
-    }
-
-    fread(d, 1, t, f);
-    if ((err = ferror(f)) != 0) {
-        return err;
-    }
-
-    fread(&t, sizeof(int), 1, f);
-    if ((err = ferror(f)) != 0) {
-        return err;
-    }
-    return t;
-}
-
-FILE *readPreliminary3Darrays(std::string fn, int nt, int nx, int ny, int nz) {
-    double *buf;
-    FILE *f;
-
-    buf = (double *) malloc(sizeof(double) * (nx + 2) * (ny + 2) * (nz + 2));
-
-    if ((f = fopen(fn.c_str(), "rb")) == NULL) return NULL;
-    struct sysinfo info;
-
-    sysinfo(&info);
-    printf("before1  %d free %u \n", nt, info.freeram / 1024 / 1024);
-
-    //reading electric field Ex
-    readFortranBinaryArray(f, buf);
-    sysinfo(&info);
-    printf("before1  %d free %u \n", nt, info.freeram / 1024 / 1024);
-
-    //reading electric field Ey
-    readFortranBinaryArray(f, buf);
-    sysinfo(&info);
-    printf("before1  %d free %u \n", nt, info.freeram / 1024 / 1024);
-
-    //reading electric field Ez
-    readFortranBinaryArray(f, buf);
-    sysinfo(&info);
-    printf("before1  %d free %u \n", nt, info.freeram / 1024 / 1024);
-
-    //reading magnetic field Hx
-    readFortranBinaryArray(f, buf);
-    sysinfo(&info);
-    printf("before1  %d free %u \n", nt, info.freeram / 1024 / 1024);
-
-    //reading magnetic field Hy
-    readFortranBinaryArray(f, buf);
-
-    //reading magnetic field Hz
-    readFortranBinaryArray(f, buf);
-
-    //reading array of current, Jx
-    readFortranBinaryArray(f, buf);
-    //reading array of current, Jy
-    readFortranBinaryArray(f, buf);
-    //reading array of current, Jz
-    readFortranBinaryArray(f, buf);
-
-    //reading magnetic field at halfstep, Qx
-    readFortranBinaryArray(f, buf);
-
-    //reading magnetic field at halfstep, Qy
-    readFortranBinaryArray(f, buf);
-
-    //reading magnetic field at halfstep, Qz
-    readFortranBinaryArray(f, buf);
-    int err;
-//--------------------------------------------
-    err = ferror(f);
-
-    if (err != 0) return NULL;
-
-    return f;
-}
-
 void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, char *name, int sort) {
-    char fname[200];
-    FILE *f;
 
 #ifndef PRINT_PARTICLE_INITIALS
     return;
-
 #else
     sprintf(fname,"particle_init_%s_%05d_sort%02d.dat",name,nt,sort);
 
@@ -141,7 +46,7 @@ int readBinaryParticleArraysOneSort(
         int nt,
         int sort
 ) {
-    double q_m, tp, m;
+    double q_m, m;
     int t;
     int total_particles;
     int err;
@@ -166,108 +71,45 @@ int readBinaryParticleArraysOneSort(
 * func: 	readVar("filename.nc", (std::to_string("Name") +  std::to_string(sort)).c_str(), &var);
 * filename: mumu60000000005.nc
 */
-
-//	int tp1;
-//	readVar("mumu60000000005.nc", (std::to_string("Extra_number_") +  std::to_string(sort)).c_str(), &tp1);
-//	std::cout << tp1 << std::endl;
-//
-//	readVar("mumu60000000005.nc", (std::to_string("Nb_particles_") +  std::to_string(sort)).c_str(), &tp1);
-//	std::cout << tp1 << std::endl;
-
     //Reading extra number placed by Fortran
 
     readVar("mumu60000000005.nc", (std::string("Extra_number_") + patch::to_string(sort)).c_str(), &t);
 
-//	     fread(&t,sizeof(int),1,f);
-//	     if((err = ferror(f)) != 0)
-//	    	 {
-//	    	 	 return err ;
-//	    	 }
     //Reading number of particles of sort "sort"
     readVar("mumu60000000005.nc", (std::string("Nb_particles_") + patch::to_string(sort)).c_str(), &total_particles);
 
-//	fread(&tp,sizeof(double),1,f);
-//	     if((err = ferror(f)) != 0)
-//	    	 {
-//	    	 	 return err ;
-//	    	 }
-
     //Reading charge for sort "sort"
-//	     total_particles = (int)tp;
 
     readVar("mumu60000000005.nc", (std::string("Charge_") + patch::to_string(sort)).c_str(), &q_m);
-
-//	fread(&q_m,sizeof(double),1,f);
-//	     if((err = ferror(f)) != 0)
-//	    	 {
-//	    	 	 return err ;
-//	    	 }
 
     //Reading mass for sort "sort"
     readVar("mumu60000000005.nc", (std::string("Mass_") + patch::to_string(sort)).c_str(), &m);
 
-//	fread(&m,sizeof(double),1,f);
-//	     if((err = ferror(f)) != 0)
-//	    	 {
-//	    	 	 return err ;
-//	    	 }
-
     // Reading extra number placed by Fortran
     readVar("mumu60000000005.nc", (std::string("Extra_number_") + patch::to_string(sort)).c_str(), &t);
 
-//	fread(&t,sizeof(int),1,f);
-//	     if((err = ferror(f)) != 0)
-//	    	 {
-//	    	 	 return err ;
-//	    	 }
-
-//       *dbg_x = (double *)malloc(sizeof(double)*total_particles);
-
-//       *dbg_y = (double *)malloc(sizeof(double)*total_particles);
-
-//       *dbg_z = (double *)malloc(sizeof(double)*total_particles);
-
-
-//       *dbg_px = (double *)malloc(sizeof(double)*total_particles);
-
-//       *dbg_py = (double *)malloc(sizeof(double)*total_particles);
-
-
-//       *dbg_pz = (double *)malloc(sizeof(double)*total_particles);
-
     double *dbg_x1 = (double *) malloc(sizeof(double) * total_particles);
-
     double *dbg_y1 = (double *) malloc(sizeof(double) * total_particles);
-
     double *dbg_z1 = (double *) malloc(sizeof(double) * total_particles);
-
     double *dbg_px1 = (double *) malloc(sizeof(double) * total_particles);
-
     double *dbg_py1 = (double *) malloc(sizeof(double) * total_particles);
-
     double *dbg_pz1 = (double *) malloc(sizeof(double) * total_particles);
-
 
     //Reading X coordinates for particles of sort "sort"
     readVar("mumu60000000005.nc", (std::string("Coordinates_x") + patch::to_string(sort)).c_str(), (void *) dbg_x1);
 
-//	readFortranBinaryArray(f,*dbg_x);
     //Reading Y coordinates for particles of sort "sort"
     readVar("mumu60000000005.nc", (std::string("Coordinates_y") + patch::to_string(sort)).c_str(), (void *) dbg_y1);
 
-//	readFortranBinaryArray(f,*dbg_y);
     //Reading Z coordinates for particles of sort "sort"
     readVar("mumu60000000005.nc", (std::string("Coordinates_z") + patch::to_string(sort)).c_str(), (void *) dbg_z1);
 
-//	readFortranBinaryArray(f,*dbg_z);
     //Reading X impulses for particles of sort "sort"
     readVar("mumu60000000005.nc", (std::string("Impulses_x") + patch::to_string(sort)).c_str(), (void *) dbg_px1);
 
-//	readFortranBinaryArray(f,*dbg_px);
     //Reading Y impulses for particles of sort "sort"
     readVar("mumu60000000005.nc", (std::string("Impulses_y") + patch::to_string(sort)).c_str(), (void *) dbg_py1);
 
-//	readFortranBinaryArray(f,*dbg_py);
     //Reading Z impulses for particles of sort "sort"
     readVar("mumu60000000005.nc", (std::string("Impulses_z") + patch::to_string(sort)).c_str(), (void *) dbg_pz1);
 
@@ -275,21 +117,16 @@ int readBinaryParticleArraysOneSort(
     *dbg_y = dbg_y1;
     *dbg_z = dbg_z1;
 
-
     *dbg_px = dbg_px1;
     *dbg_py = dbg_py1;
     *dbg_pz = dbg_pz1;
 
-
-//	readFortranBinaryArray(f,*dbg_pz);
     debugPrintParticleCharacteristicArray(*dbg_x, total_particles, nt, "x", sort);
     debugPrintParticleCharacteristicArray(*dbg_y, total_particles, nt, "y", sort);
     debugPrintParticleCharacteristicArray(*dbg_z, total_particles, nt, "z", sort);
     debugPrintParticleCharacteristicArray(*dbg_px, total_particles, nt, "px", sort);
     debugPrintParticleCharacteristicArray(*dbg_py, total_particles, nt, "py", sort);
     debugPrintParticleCharacteristicArray(*dbg_pz, total_particles, nt, "pz", sort);
-
-    //printf("particle 79943 %25.15e \n",(*dbg_x)[79943]);
 
     *qq_m = q_m;
     *mm = m;
@@ -301,70 +138,5 @@ int readBinaryParticleArraysOneSort(
     return total_particles;
 }
 
-int getParticlesOneSortFromFile(FILE *f, particle_sorts sort, int nt, std::vector <Particle> &vp, double *q_m, double *m) {
-    double x, y, z, px, py, pz;
-    double *dbg_x, *dbg_y, *dbg_z, *dbg_px, *dbg_py, *dbg_pz;
-    int total_particles;
-
-    int err;
-
-    if ((err = ferror(f)) != 0) return 1;
-
-    total_particles = readBinaryParticleArraysOneSort(f, &dbg_x, &dbg_y, &dbg_z, &dbg_px, &dbg_py, &dbg_pz, q_m, m, nt, sort);
-
-    if ((err = ferror(f)) != 0) return 1;
-    convertParticleArraysToSTLvector(dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz, *q_m, *m, total_particles, sort, vp);
-}
-
-std::vector <Particle> readBinaryParticlesOneSortSTL(FILE *f, particle_sorts sort, int nt) {
-    double q_m, m;
-    int err;
-    std::vector <Particle> vp;
-    getParticlesOneSortFromFile(f, sort, nt, vp, &q_m, &m);
-
-    err = ferror(f);
-
-
-    struct sysinfo info;
-    sysinfo(&info);
-    printf("before1  %d free %u \n", nt, info.freeram / 1024 / 1024);
-    err = ferror(f);
-    return vp;
-}
-
-int readBinaryParticlesAllSorts(FILE *f, int nt,
-                                std::vector <Particle> &ion_vp,
-                                std::vector <Particle> &el_vp,
-                                std::vector <Particle> &beam_vp) {
-    ion_vp = readBinaryParticlesOneSortSTL(f, ION, nt);
-    el_vp = readBinaryParticlesOneSortSTL(f, PLASMA_ELECTRON, nt);
-    beam_vp = readBinaryParticlesOneSortSTL(f, BEAM_ELECTRON, nt);
-
-    return 0;
-}
-
-//loading particle data and 12 mesh 3D arrays - everything
-int LoadParticleData(int nt,    // number of timestep
-                     std::vector <Particle> &ion_vp,     //ion particles
-                     std::vector <Particle> &el_vp,      //electron particles
-                     std::vector <Particle> &beam_vp,
-                     int nx, //mesh size X,Y,Z
-                     int ny,
-                     int nz) {
-
-    FILE *f;
-
-    std::string part_name = getMumuFileName(nt);
-
-    //reading 3D arrays: electric and magnetic fields and currents
-    if ((f = readPreliminary3Darrays(part_name, nt, nx, ny, nz)) == NULL) return 1;
-
-    //reading three sorts of particles
-    readBinaryParticlesAllSorts(f, nt, ion_vp, el_vp, beam_vp);
-
-    fclose(f);
-
-    return 0;
-}
 
 

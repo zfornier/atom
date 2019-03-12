@@ -629,20 +629,6 @@ void Plasma::readControlPoint(FILE **f1, char *fncpy, int num, int nt, int part_
     readVar(fn, "Qy", (void *) qy);
     readVar(fn, "Qz", (void *) qz);
 
-//	readFortranBinaryArray(f,ex);
-//	readFortranBinaryArray(f,ey);
-//	readFortranBinaryArray(f,ez);
-//	readFortranBinaryArray(f,hx);
-//	readFortranBinaryArray(f,hy);
-//	readFortranBinaryArray(f,hz);
-//	readFortranBinaryArray(f,jx);
-//	readFortranBinaryArray(f,jy);
-//	readFortranBinaryArray(f,jz);
-
-//	readFortranBinaryArray(f,qx);
-//	readFortranBinaryArray(f,qy);
-//	readFortranBinaryArray(f,qz);
-
     if (field_assign == 1) AssignArraysToCells();
 }
 
@@ -1208,8 +1194,7 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, FILE *f, G
 
     Cell c0 = (*AllCells)[0];
 
-    total_particles = readBinaryParticleArraysOneSort(f, &dbg_x, &dbg_y, &dbg_z,
-                                                      &dbg_px, &dbg_py, &dbg_pz, &q_m, &m, nt, sort);
+    total_particles = readBinaryParticleArraysOneSort(f, &dbg_x, &dbg_y, &dbg_z, &dbg_px, &dbg_py, &dbg_pz, &q_m, &m, nt, sort);
     memory_monitor("checkControlPointParticlesOneSort2", nt);
 
     size = (*AllCells).size();

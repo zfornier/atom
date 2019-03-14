@@ -77,14 +77,16 @@ if( NOT NETCDF_CXX_INCLUDES_C OR
     set(NETCDF_EXTERNAL_PATH "${CMAKE_SOURCE_DIR}/external/NetCdf-cxx4")
     set(NETCDF_CXX_INCLUDES_C "${NETCDF_EXTERNAL_PATH}/include")
     set(NETCDF_CXX_LIBRARIES_C "${NETCDF_EXTERNAL_PATH}/lib/libnetcdf-cxx4.a")
+    set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{LD_LIBRARY_PATH})
     externalproject_add(netcdf_cxx4
-       PREFIX ${NETCDF_EXTERNAL_PATH}
-       INSTALL_DIR ${NETCDF_EXTERNAL_PATH}
-       GIT_REPOSITORY "https://github.com/Unidata/netcdf-cxx4.git"
+        PREFIX ${NETCDF_EXTERNAL_PATH}
+        INSTALL_DIR ${NETCDF_EXTERNAL_PATH}
+        GIT_REPOSITORY "https://github.com/Unidata/netcdf-cxx4.git"
         CMAKE_ARGS
-         -DCMAKE_BUILD_TYPE:STRING=Release
-         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-	 -DBUILD_SHARED_LIBS:STRING=OFF
+            -DCMAKE_BUILD_TYPE:STRING=Release
+            -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+            -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
+	        -DBUILD_SHARED_LIBS:STRING=OFF
     )
     set(BUILD_NETCDF_CXX4 TRUE)
 endif()

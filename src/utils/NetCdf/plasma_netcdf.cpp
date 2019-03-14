@@ -3,7 +3,6 @@
 namespace plasmanetcdf {
 
     Error_t NetCDFManipulator::plsm_create(const char *fileName, const int mesh_size[3]) {
-
         NcFile dataFile(fileName, NcFile::replace);
         NcDim xDim = dataFile.addDim("x", mesh_size[0]);
         NcDim yDim = dataFile.addDim("y", mesh_size[1]);
@@ -13,8 +12,7 @@ namespace plasmanetcdf {
     }
 
 
-    Error_t NetCDFManipulator::plsm_save_info(const char *fileName, const char *dim_names[], const int dim_sizes[],
-                                              const int dim_nb) {
+    Error_t NetCDFManipulator::plsm_save_info(const char *fileName, const char *dim_names[], const int dim_sizes[], const int dim_nb) {
         NcFile dataFile(fileName, NcFile::write);
 
         // add dims to NetCDF file
@@ -26,7 +24,6 @@ namespace plasmanetcdf {
     }
 
     const char *NetCDFManipulator::plsm_get_description(const char *fileName, const char *variable) {
-
         NcFile dataFile(fileName, NcFile::read);
 
         NcVar var;
@@ -45,7 +42,6 @@ namespace plasmanetcdf {
         copy(str.begin(), str.end(), desc);
         desc[str.size()] = '\0';
 
-
         return desc;
     }
 
@@ -59,11 +55,9 @@ namespace plasmanetcdf {
         return 0;
     }
 
-    Error_t NetCDFManipulator::plsm_save_3D_double_array(const char *fileName, double *pTab, char *label, const char *unit,
-                                                 const char *desc) {
+    Error_t NetCDFManipulator::plsm_save_3D_double_array(const char *fileName, double *pTab, char *label, const char *unit, const char *desc) {
         NcFile dataFile(fileName, NcFile::write);
         try {
-
             NcDim xDim = dataFile.getDim("x");
             NcDim yDim = dataFile.getDim("y");
             NcDim zDim = dataFile.getDim("z");
@@ -84,15 +78,11 @@ namespace plasmanetcdf {
             cout << e.what();
             return PLSM_NC_ERROR;
         }
-
     }
 
-    Error_t NetCDFManipulator::plsm_save_1D_int_array(const char *fileName, int *pTab, char *label, char *dim_label,
-                                                      const char *unit, const char *desc) {
-//cout << "write test" ;
+    Error_t NetCDFManipulator::plsm_save_1D_int_array(const char *fileName, int *pTab, char *label, char *dim_label, const char *unit, const char *desc) {
         NcFile dataFile(fileName, NcFile::write);
         try {
-
             NcDim xDim = dataFile.getDim(dim_label);
 
             vector <NcDim> dims;
@@ -111,12 +101,9 @@ namespace plasmanetcdf {
         }
     }
 
-    Error_t NetCDFManipulator::plsm_save_double(const char *fileName, double *pTab, char *label, const char *unit,
-                                                const char *desc) {
-//cout << "write test" ;
+    Error_t NetCDFManipulator::plsm_save_double(const char *fileName, double *pTab, char *label, const char *unit, const char *desc) {
         NcFile dataFile(fileName, NcFile::write);
         try {
-
             NcVar data = dataFile.addVar(label, ncDouble);
 
             data.putVar(pTab);
@@ -133,7 +120,6 @@ namespace plasmanetcdf {
 
     Error_t
     NetCDFManipulator::plsm_save_int(const char *fileName, int *pTab, char *label, const char *unit, const char *desc) {
-        //cout << "write test" ;
         NcFile dataFile(fileName, NcFile::write);
         try {
 
@@ -160,9 +146,7 @@ namespace plasmanetcdf {
     }
 
 
-    Error_t NetCDFManipulator::plsm_save_attribute(const char *fileName, const char *variable, const char *name,
-                                                   const char *desc) {
-
+    Error_t NetCDFManipulator::plsm_save_attribute(const char *fileName, const char *variable, const char *name, const char *desc) {
         NcFile dataFile(fileName, NcFile::write);
 
         try {

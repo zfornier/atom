@@ -34,7 +34,7 @@ void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, char *n
 }
 
 int readBinaryParticleArraysOneSort(
-        FILE *f,
+        FILE *f, // What for?
         double **dbg_x,
         double **dbg_y,
         double **dbg_z,
@@ -43,7 +43,7 @@ int readBinaryParticleArraysOneSort(
         double **dbg_pz,
         double *qq_m,
         double *mm,
-        int nt,
+        int nt, // what for?
         int sort
 ) {
     double q_m, m;
@@ -73,6 +73,8 @@ int readBinaryParticleArraysOneSort(
 */
     //Reading extra number placed by Fortran
 
+//EXPLAIN: why do you use this magic name? move it to config file!
+//EXPLAIN: what is `FILE *f` for here?
     readVar("mumu60000000005.nc", (std::string("Extra_number_") + patch::to_string(sort)).c_str(), &t);
 
     //Reading number of particles of sort "sort"
@@ -88,6 +90,8 @@ int readBinaryParticleArraysOneSort(
     // Reading extra number placed by Fortran
     readVar("mumu60000000005.nc", (std::string("Extra_number_") + patch::to_string(sort)).c_str(), &t);
 
+//WARNING: check if memory was allocated
+//Why do you need temorary wars for memory allocation? why not to allocate mem and assigne the pointr to the var without `1`?
     double *dbg_x1 = (double *) malloc(sizeof(double) * total_particles);
     double *dbg_y1 = (double *) malloc(sizeof(double) * total_particles);
     double *dbg_z1 = (double *) malloc(sizeof(double) * total_particles);
@@ -131,6 +135,7 @@ int readBinaryParticleArraysOneSort(
     *qq_m = q_m;
     *mm = m;
 
+//EXPLAIN: how will you destinguish error and number of particles 
     if ((err = ferror(f)) != 0) {
         return err;
     }

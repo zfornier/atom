@@ -6,6 +6,7 @@
 //TODO: gpu cell in the global array at copy from there appears to be not initialized
 using namespace std;
 
+//TODO: move this to the Properties.h file
 typedef struct {
     double tempX;                // plasma electron temperature along X
     double tempY;                // plasma electron temperature along Y
@@ -43,6 +44,8 @@ typedef struct {
 
 } Config;
 
+// TODO: move this to Properties.h or an appropriate cpp file
+// It shouldn't be here
 Config readConfig(std::ifstream &is) {
     Properties properties;
     properties.load(is);
@@ -98,6 +101,7 @@ int main(int argc, char *argv[]) {
     char *config = NULL;
     int c;
 
+    // TODO: add '-h' option and print the list of valid options 
     while ((c = getopt(argc, argv, "i:")) != -1) {
         switch (c) {
             case 'i':
@@ -124,6 +128,7 @@ int main(int argc, char *argv[]) {
 
         printf("begin Particle size %zu\n", sizeof(Particle));
 
+        // TODO: why are those magic constants here? ----------------------------------------------\_______/---
         plasma = new Plasma(conf.nx, conf.ny, conf.nz, conf.lx, conf.ly, conf.lz, conf.plsmDensity, 2000, 1.0, conf.tau);
 
         plasma->Initialize(conf.tempX, conf.tempY, conf.tempZ, conf.beamVelDisp, conf.beamImp, conf.beamPlasmaDensityRat);
@@ -134,6 +139,7 @@ int main(int argc, char *argv[]) {
 
         delete plasma;
     } else {
+        // TODO: print Usage info here 
         printf("Config file is expected.\n");
     }
 

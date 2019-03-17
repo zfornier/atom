@@ -45,6 +45,7 @@ __host__ __device__ int isNan(double t) {
     return 0;
 }
 
+//QUESTION: what was the reason to have class implementation in .h file?
 
 class Cell {
 public:
@@ -73,6 +74,16 @@ public:
     thrust::host_vector<Particle> all_particles;
 #endif
 
+//TODO: it's not an elegant way. Use the following approach:
+/*
+#ifdef __CUDACC__
+    #define host_device __host__ __device__
+#lese
+    #define host_device 
+#endif
+    host_device int AllocParticles....
+    host_device double ParticleArrayRead ....
+*/
 #ifdef __CUDACC__
     __host__ __device__
 #endif
@@ -189,6 +200,7 @@ public:
         }
     }
 
+// TODO: __host__ __device__ twice? 
 #ifdef __CUDACC__
     __host__ __device__
 #endif

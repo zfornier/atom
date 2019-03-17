@@ -53,6 +53,7 @@
 #include <string>
 #include <iostream>
 
+//TODO: It's an ugly style to include cu files. Include cuh (header files) only 
 #include "../src/add.cu"
 #include "../src/wrap_kernel.cu"
 #include "../src/kernels.cu"
@@ -169,7 +170,9 @@ public:
     void Diagnose(int);
 
     int getBoundaryLimit(int);
-
+    
+//TODO: It's an ugly style to include cu files. Include cuh (header files) only
+//TODO: you need to include hardware specific files only if an appropriate compiler is used.
 #include "../src/init.cu"
 
     int getMagneticFieldTraceShifts(int, int3 &, int3 &);

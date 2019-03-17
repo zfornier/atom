@@ -84,6 +84,10 @@ void copyFieldsToGPU(
 ) {
     int err;
 
+// TODO: It's better to define a macros and wrap  all MemoryCopy-s with it
+// Moreover you dont need to write  numbers and any line... print __FILE__ and __LINE__ and optionaly
+// You will print error code if build_type is debug (and not here but in ArchAPI.cu)
+
     err = MemoryCopy(d_Ex, Ex, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
     if (err != cudaSuccess) {
         printf("1copyFieldsToGPU err %d %s \n", err, getErrorString(err));

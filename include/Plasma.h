@@ -16,7 +16,7 @@
 #include <nvToolsExtCudaRt.h>
 #endif
 
-#include <time.h>
+//#include <time.h>
 //#ifdef __OMP__
 #include <omp.h>
 //#endif

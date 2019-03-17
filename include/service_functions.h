@@ -9,19 +9,7 @@
 #define SERVICE_FUNCTIONS_H_
 
 #include <string>
-#include <math.h>
-#include <string>
 #include <stdio.h>
-
-#include <stdlib.h>
-
-#include <string.h>
-#include <sys/resource.h>
-
-#include <stdint.h>
-#include <sys/sysinfo.h>
-
-#include <sys/time.h>
 
 #include "archAPI.h"
 #include "particle.h"
@@ -63,6 +51,5 @@ void copyFieldsToGPU(
         double *Qx, double *Qy, double *Qz,
         int Nx, int Ny, int Nz
 );
-
 
 #endif /* SERVICE_FUNCTIONS_H_ */

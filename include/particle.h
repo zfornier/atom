@@ -1,11 +1,6 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-#include <stdio.h>
-#include <string>
-#include <string.h>
-#include <iostream>
-#include <math.h>
 #include "run_control.h"
 #include "particle_types.h"
 #include "tensor.h"

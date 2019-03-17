@@ -9,6 +9,7 @@
 #define KERNELS_H_
 
 #include "gpucell.h"
+//#include "cell.h"
 
 __device__ double cuda_atomicAdd(double *address, double val);
 

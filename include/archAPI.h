@@ -1,10 +1,6 @@
 #ifndef ARCHAPI_H_
 #define ARCHAPI_H_
 
-#include <string.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "read_particles.h"
 
 #define HOST_TO_DEVICE   -131313

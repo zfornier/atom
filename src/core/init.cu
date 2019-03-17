@@ -92,7 +92,6 @@ void Initialize(double tex0, double tey0, double tez0, double Tb, double rimp, d
     if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
 }
 
-
 void InitGPUParticles() {
     int size;
     GPUCell *d_c, *h_ctrl;
@@ -344,57 +343,6 @@ virtual void InitCurrents() {
         dbgJy[i] = 0.0;
         dbgJz[i] = 0.0;
     }
-}
-
-void InitCurrents(string fnjx, string fnjy, string fnjz, string dbg_fnjx, string dbg_fnjy, string dbg_fnjz, string np_fnjx, string np_fnjy, string np_fnjz, int dbg) {
-    read3Darray(np_fnjx, npJx);
-    read3Darray(np_fnjy, npJy);
-    read3Darray(np_fnjz, npJz);
-
-    if (dbg == 0) {
-        read3Darray(fnjx, Jx);
-        read3Darray(fnjy, Jy);
-        read3Darray(fnjz, Jz);
-    }
-#ifdef DEBUG_PLASMA
-    read3Darray(dbg_fnjx, dbgJx);
-    read3Darray(dbg_fnjy, dbgJy);
-    read3Darray(dbg_fnjz, dbgJz);
-#endif
-}
-
-void InitFields(char *fnex, char *fney, char *fnez,
-                char *fnhx, char *fnhy, char *fnhz,
-                char *dbg_fnex, char *dbg_fney, char *dbg_fnez,
-                char *dbg_0fnex, char *dbg_0fney, char *dbg_0fnez,
-                char *np_ex, char *np_ey, char *np_ez,
-                char *dbg_fnhx, char *dbg_fnhy, char *dbg_fnhz) {
-    InitFields();
-
-    read3Darray(fnex, Ex);
-    read3Darray(fney, Ey);
-    read3Darray(fnez, Ez);
-    read3Darray(fnhx, Hx);
-    read3Darray(fnhy, Hy);
-    read3Darray(fnhz, Hz);
-
-#ifdef DEBUG_PLASMA
-    read3Darray(dbg_fnex, dbgEx);
-    read3Darray(dbg_fney, dbgEy);
-    read3Darray(dbg_fnez, dbgEz);
-
-    read3Darray(dbg_0fnex, dbgEx0);
-    read3Darray(dbg_0fney, dbgEy0);
-    read3Darray(dbg_0fnez, dbgEz0);
-
-    read3Darray(dbg_fnhx, dbgHx);
-    read3Darray(dbg_fnhy, dbgHy);
-    read3Darray(dbg_fnhz, dbgHz);
-
-    read3DarrayLog(np_ex, npEx,50,8);
-    read3DarrayLog(np_ey, npEy,50,8);
-    read3DarrayLog(np_ez, npEz,50,8);
-#endif
 }
 
 int addParticleListToCells(std::vector <Particle> &vp) {

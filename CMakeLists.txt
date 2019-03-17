@@ -37,7 +37,7 @@ else(NOT DEFINED CUDA_ARCH)
 endif(NOT DEFINED CUDA_ARCH)
 
 
-SET(NVCC_OPTS "")
+SET(NVCC_OPTS "-rdc=true")
 set(CXX_OPTS "")
 if(${CMAKE_BUILD_TYPE_LOWER} STREQUAL "debug")
     set(NVCC_OPTS "-lineinfo -O0 ${NVCC_OPTS}")
@@ -92,7 +92,7 @@ if( NOT NETCDF_CXX_INCLUDES_C OR
 endif()
 
 INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS} ${MPI_INCLUDE_PATH} ${NETCDF_CXX_INCLUDES_C})
-set(SOURCES src/core/main.cu src/core/mpi_shortcut.cxx src/core/service_functions.cu src/core/compare.cxx src/core/maxwell.cu src/core/load_data.cu src/core/archAPI.cu src/core/kernels.cu src/core/Plasma.cu)
+set(SOURCES src/core/main.cu src/core/mpi_shortcut.cxx src/core/service_functions.cu src/core/compare.cxx src/core/maxwell.cu src/core/load_data.cu src/core/archAPI.cu src/core/cell.cu src/core/gpucell.cu src/core/kernels.cu src/core/Plasma.cu)
 ADD_SUBDIRECTORY(src/utils/NetCdf)
 ADD_SUBDIRECTORY(src/utils/ConfigParser)
 ADD_EXECUTABLE(atom ${SOURCES})

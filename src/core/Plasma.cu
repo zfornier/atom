@@ -2,7 +2,7 @@
 // Created by egor on 19.02.19.
 //
 
-#include "../include/Plasma.h"
+#include "../../include/Plasma.h"
 
 Plasma::Plasma(int nx, int ny, int nz, double lx, double ly, double lz, double ni1, int n_per_cell1, double q_m, double TAU) {
     Nx = nx;
@@ -18,6 +18,7 @@ Plasma::Plasma(int nx, int ny, int nz, double lx, double ly, double lz, double n
     n_per_cell = n_per_cell1;
     ion_q_m = q_m;
     tau = TAU;
+
     dataFileStartPattern = "data";
     dataFileEndPattern = ".nc";
 }
@@ -238,17 +239,13 @@ void Plasma::ElectricFieldEvaluate(double *locEx, double *locEy, double *locEz, 
     double3 c1 = getMagneticFieldTimeMeshFactors();
 
     ElectricFieldComponentEvaluateTrace(locEx, locHz, locHy, loc_npJx, 0, c1.y, c1.z, tau);
-
     ElectricFieldComponentEvaluateTrace(locEy, locHx, locHz, loc_npJy, 1, c1.z, c1.x, tau);
-
     ElectricFieldComponentEvaluateTrace(locEz, locHy, locHx, loc_npJz, 2, c1.x, c1.y, tau);
 
     checkControlPoint(550, nt, 0);
 
     ElectricFieldComponentEvaluatePeriodic(locEx, 0, 1, 0, Nx, 1, Nz, Ny, 2, 0, Nx, 0, Ny + 1, Nz);
-
     ElectricFieldComponentEvaluatePeriodic(locEy, 1, 0, 0, Ny, 1, Nz, Nx, 2, 0, Nx + 1, 0, Ny, Nz);
-
     ElectricFieldComponentEvaluatePeriodic(locEz, 2, 0, 1, Ny, 0, Nz, Nx, 1, 0, Nx + 1, 0, Nz, Ny);
 
     checkControlPoint(600, nt, 0);
@@ -306,9 +303,7 @@ int Plasma::readStartPoint(int nt) {
     char fn[100];
 
     if (nt == START_STEP_NUMBER) {
-        readControlPoint(NULL, fn, 0, nt, 0, 1, Ex, Ey, Ez, Hx, Hy, Hz, Jx, Jy, Jz, Qx, Qy, Qz,
-                         dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz
-        );
+        readControlPoint(NULL, fn, 0, nt, 0, 1, Ex, Ey, Ez, Hx, Hy, Hz, Jx, Jy, Jz, Qx, Qy, Qz, dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz);
 
         copyFieldsToGPU(
                 d_Ex, d_Ey, d_Ez,
@@ -341,6 +336,7 @@ double Plasma::getElectricEnergy() {
         cudaMalloc((void **) &d_ee, sizeof(double));
         first = 0;
     }
+
     cudaMemset(d_ee, 0, sizeof(double));
 
     void *args[] = {(void *) &d_CellArray,
@@ -349,6 +345,7 @@ double Plasma::getElectricEnergy() {
                     (void *) &d_Ey,
                     (void *) &d_Ez,
                     0};
+
     cudaError_t cudaStatus = cudaLaunchKernel(
             (const void *) GPU_getCellEnergy, // pointer to kernel func.
             dimGrid,                          // grid
@@ -357,7 +354,6 @@ double Plasma::getElectricEnergy() {
             0,
             0
     );
-
 
     MemoryCopy(&ee, d_ee, sizeof(double), DEVICE_TO_HOST);
 
@@ -416,6 +412,7 @@ int Plasma::MagneticFieldTrace(double *Q, double *H, double *E1, double *E2, int
                     (void *) &d1,
                     (void *) &d2,
                     0};
+
     cudaError_t cudaStatus = cudaLaunchKernel(
             (const void *) GPU_emh1, // pointer to kernel func.
             dimGrid,                 // grid
@@ -444,6 +441,7 @@ int Plasma::SimpleMagneticFieldTrace(Cell &c, double *Q, double *H, int i_end, i
                     (void *) &Q,
                     (void *) &H,
                     0};
+
     cudaError_t cudaStatus = cudaLaunchKernel(
             (const void *) GPU_emh2,       // pointer to kernel func.
             dimGrid,                       // grid
@@ -470,6 +468,7 @@ int Plasma::PeriodicBoundaries(double *E, int dir, int start1, int end1, int sta
                     (void *) &zero,
                     (void *) &N,
                     0};
+
     cudaError_t cudaStatus = cudaLaunchKernel(
             (const void *) GPU_periodic,   // pointer to kernel func.
             dimGrid,                       // grid
@@ -490,6 +489,7 @@ int Plasma::PeriodicBoundaries(double *E, int dir, int start1, int end1, int sta
                      (void *) &N1,
                      (void *) &one,
                      0};
+
     cudaStatus = cudaLaunchKernel(
             (const void *) GPU_periodic,   // pointer to kernel func.
             dimGrid,                       // grid
@@ -517,6 +517,7 @@ int Plasma::SetPeriodicCurrentComponent(GPUCell **cells, double *J, int dir, int
                     (void *) &k_s,
                     (void *) &N,
                     0};
+
     cudaError_t cudaStatus = cudaLaunchKernel(
             (const void *) GPU_CurrentPeriodic, // pointer to kernel func.
             dimGridX,                           // grid
@@ -634,7 +635,7 @@ void Plasma::readControlPoint(FILE **f1, char *fncpy, int num, int nt, int part_
 
 void Plasma::checkControlPoint(int num, int nt, int check_part) {
     double t_ex, t_ey, t_ez, t_hx, t_hy, t_hz, t_jx, t_jy, t_jz;
-    double t_qx, t_qy, t_qz;//,t_njx,t_njy,t_njz;
+    double t_qx, t_qy, t_qz;
 
     if ((nt != TOTAL_STEPS) || (num != 600)) {
 #ifndef CONTROL_POINT_CHECK
@@ -652,8 +653,7 @@ void Plasma::checkControlPoint(int num, int nt, int check_part) {
     memory_monitor("checkControlPoint2", nt);
 
     readControlPoint(&f, fn_copy, num, nt, 1, 0, dbgEx, dbgEy, dbgEz, dbgHx, dbgHy, dbgHz, dbgJx, dbgJy, dbgJz,
-                     dbg_Qx, dbg_Qy, dbg_Qz,
-                     dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz);
+                     dbg_Qx, dbg_Qy, dbg_Qz, dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz);
 
     memory_monitor("checkControlPoint3", nt);
 
@@ -746,7 +746,6 @@ double Plasma::CheckArray(double *a, double *dbg_a, FILE *f) {
     Cell c = (*AllCells)[0];
     double diff = 0.0;
 
-
 #ifdef CHECK_ARRAY_DETAIL_PRINTS
     fprintf(f,"begin array checking=============================\n");
 #endif
@@ -775,9 +774,11 @@ double Plasma::CheckArray(double *a, double *dbg_a) {
     Cell c = (*AllCells)[0];
     int wrong = 0;
     double diff = 0.0;
+
 #ifdef CHECK_ARRAY_DETAIL_PRINTS
     puts("begin array checking2=============================");
 #endif
+
     for (int n = 0; n < (Nx + 2) * (Ny + 2) * (Nz + 2); n++) {
         diff += pow(a[n] - dbg_a[n], 2.0);
 
@@ -806,6 +807,7 @@ double Plasma::CheckGPUArraySilent(double *a, double *d_a) {
         t = (double *) malloc(sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
         f = 0;
     }
+
     MemoryCopy(t, d_a, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     err = cudaGetLastError();
     if (err != cudaSuccess) {
@@ -824,7 +826,6 @@ void Plasma::read3DarrayLog(char *name, double *d, int offset, int col) {
     if ((f = fopen(name, "rt")) == NULL) return;
 
     while (fgets(str, 1000, f) != NULL) {
-
         int i = atoi(str + offset) - 1;
         int l = atoi(str + offset + 5) - 1;
         int k = atoi(str + offset + 10) - 1;
@@ -901,6 +902,7 @@ int Plasma::copyCellsWithParticlesToGPU() {
 
         cp[i] = d_c;
     }
+
     if ((err = cudaGetLastError()) != cudaSuccess) {
         printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err));
     }
@@ -969,7 +971,6 @@ int Plasma::StepAllCells(int nt, double mass, double q_mass) {
             0
     );
 
-
     std::cout << "GPU_StepAllCells returns " << cudaStatus << std::endl;
     dim3 dimBlock1(1, 1, 1);
     void *args1[] = {(void *) &d_CellArray, &nt, 0};
@@ -983,6 +984,7 @@ int Plasma::StepAllCells(int nt, double mass, double q_mass) {
             4000,
             0
     );
+
     std::cout << "GPU_CurrentsAllCells returns " << cudaStatus << " " << cudaGetErrorString(cudaStatus) << std::endl;
     puts("end step");
     cudaDeviceSynchronize();
@@ -1011,6 +1013,7 @@ int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
                     (void *) &d_Jz,
                     (void *) &d_Rho,
                     0};
+
     cudaError_t cudaStatus = cudaLaunchKernel(
             (const void *) GPU_WriteAllCurrents, // pointer to kernel func.
             dimGrid,                             // grid
@@ -1030,14 +1033,12 @@ int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
 }
 
 int Plasma::MakeParticleList(int nt, int *stage, int *stage1, int **d_stage, int **d_stage1) {
-    dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimGridOne(1, 1, 1), dimBlock(512, 1, 1),
-            dimBlockOne(1, 1, 1), dimBlockGrow(1, 1, 1), dimBlockExt(CellExtent, CellExtent, CellExtent);
+    dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimGridOne(1, 1, 1), dimBlock(512, 1, 1), dimBlockOne(1, 1, 1), dimBlockGrow(1, 1, 1), dimBlockExt(CellExtent, CellExtent, CellExtent);
     dim3 dimGridBulk(Nx, Ny, Nz);
     cudaError_t before_MakeDepartureLists, after_MakeDepartureLists;
 
     before_MakeDepartureLists = cudaGetLastError();
-    printf("before_MakeDepartureLists %d %s blockdim %d %d %d\n", before_MakeDepartureLists,
-           cudaGetErrorString(before_MakeDepartureLists), dimGrid.x, dimGrid.y, dimGrid.z);
+    printf("before_MakeDepartureLists %d %s blockdim %d %d %d\n", before_MakeDepartureLists, cudaGetErrorString(before_MakeDepartureLists), dimGrid.x, dimGrid.y, dimGrid.z);
 
     cudaMalloc((void **) d_stage, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
 
@@ -1048,6 +1049,7 @@ int Plasma::MakeParticleList(int nt, int *stage, int *stage1, int **d_stage, int
             (void *) &nt,
             (void *) d_stage,
             0};
+
     cudaError_t cudaStatus = cudaLaunchKernel(
             (const void *) GPU_MakeDepartureLists, // pointer to kernel func.
             dimGrid,                               // grid
@@ -1058,9 +1060,9 @@ int Plasma::MakeParticleList(int nt, int *stage, int *stage1, int **d_stage, int
     );
 
     after_MakeDepartureLists = cudaGetLastError();
+
     if (after_MakeDepartureLists != cudaSuccess) {
-        printf("after_MakeDepartureLists %d %s\n", after_MakeDepartureLists,
-               cudaGetErrorString(after_MakeDepartureLists));
+        printf("after_MakeDepartureLists %d %s\n", after_MakeDepartureLists, cudaGetErrorString(after_MakeDepartureLists));
     }
 
     cudaDeviceSynchronize();
@@ -1070,6 +1072,7 @@ int Plasma::MakeParticleList(int nt, int *stage, int *stage1, int **d_stage, int
     if (err != cudaSuccess) {
         printf("MakeParticleList sync error %d %s\n", err, getErrorString(err));
     }
+
     err = MemoryCopy(stage, *d_stage, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
 
     if (err != cudaSuccess) {
@@ -1082,8 +1085,7 @@ int Plasma::MakeParticleList(int nt, int *stage, int *stage1, int **d_stage, int
 
 int Plasma::inter_stage_diagnostic(int *stage, int nt) {
     if (stage[0] == TOO_MANY_PARTICLES) {
-        printf("too many particles flying to (%d,%d,%d) from (%d,%d,%d) \n", stage[1], stage[2], stage[3], stage[4],
-               stage[5], stage[6]);
+        printf("too many particles flying to (%d,%d,%d) from (%d,%d,%d) \n", stage[1], stage[2], stage[3], stage[4], stage[5], stage[6]);
         exit(0);
     }
 
@@ -1165,7 +1167,6 @@ int Plasma::SetCurrentsToZero(int nt) {
 }
 
 void Plasma::CellOrder_StepAllCells(int nt, double mass, double q_mass, int first) {
-
     checkCudaError();
 
     SetCurrentsToZero(nt);
@@ -1207,8 +1208,8 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, FILE *f, G
 #endif
 
         t += c.checkCellParticles(check_point_num, dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz, q_m, m);
-
     }
+
     memory_monitor("checkControlPointParticlesOneSort3", nt);
 
     free(dbg_x);
@@ -1345,7 +1346,6 @@ int Plasma::memory_monitor(std::string legend, int nt) {
     size_t m_free, m_total;
     struct sysinfo info;
 
-
     cudaError_t err = cudaMemGetInfo(&m_free, &m_total);
 
     sysinfo(&info);
@@ -1391,44 +1391,32 @@ void Plasma::writeDataToFile(int step) {
     int err;
 
     err = MemoryCopy(t, d_Ex, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + X_LABEL, UNITS_ELECTRIC_FIELD,
-                    DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + X_LABEL);
+    writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + X_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + X_LABEL);
     err = MemoryCopy(t, d_Ey, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + Y_LABEL, UNITS_ELECTRIC_FIELD,
-                    DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Y_LABEL);
+    writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + Y_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Y_LABEL);
     err = MemoryCopy(t, d_Ez, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + Z_LABEL, UNITS_ELECTRIC_FIELD,
-                    DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Z_LABEL);
+    writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + Z_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Z_LABEL);
 
     err = MemoryCopy(t, d_Hx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + X_LABEL, UNITS_MAGNETIC_FIELD,
-                    DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + X_LABEL);
+    writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + X_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + X_LABEL);
     err = MemoryCopy(t, d_Hy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + Y_LABEL, UNITS_MAGNETIC_FIELD,
-                    DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Y_LABEL);
+    writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + Y_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Y_LABEL);
     err = MemoryCopy(t, d_Hz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + Z_LABEL, UNITS_MAGNETIC_FIELD,
-                    DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Z_LABEL);
+    writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + Z_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Z_LABEL);
 
     err = MemoryCopy(t, d_Jx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + X_LABEL, UNITS_NO,
-                    CURRENT + CURRENT_FIELD_LABEL + X_LABEL);
+    writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + X_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + X_LABEL);
     err = MemoryCopy(t, d_Jy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + Y_LABEL, UNITS_NO,
-                    CURRENT + CURRENT_FIELD_LABEL + Y_LABEL);
+    writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + Y_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + Y_LABEL);
     err = MemoryCopy(t, d_Jz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + Z_LABEL, UNITS_NO,
-                    CURRENT + CURRENT_FIELD_LABEL + Z_LABEL);
+    writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + Z_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + Z_LABEL);
 
     err = MemoryCopy(t, d_Qx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL, UNITS_NO,
-                    DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL);
+    writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL);
     err = MemoryCopy(t, d_Qy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL, UNITS_NO,
-                    DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL);
+    writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL);
     err = MemoryCopy(t, d_Qz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL, UNITS_NO,
-                    DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL);
+    writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL);
 
     free(t);
 

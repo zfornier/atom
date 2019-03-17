@@ -8,11 +8,14 @@
 #ifndef MAXWELL_H_
 #define MAXWELL_H_
 
-#include "particle.h"
-
-#include "read_particles.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <vector>
+
+#include "particle.h"
+#include "read_particles.h"
+#include "run_control.h"
 
 double rnd_gaussian(double, double, int);
 

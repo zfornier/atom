@@ -5,16 +5,7 @@
  *      Author: snytav
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/resource.h>
-#include <stdint.h>
-#include <sys/sysinfo.h>
-#include <sys/time.h>
-#include <iostream>
-#include <string>
-
-#include "../include/load_data.h"
+#include "../../include/load_data.h"
 
 void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, char *name, int sort) {
 

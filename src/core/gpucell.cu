@@ -5,7 +5,7 @@
  *      Author: snytav
  */
 
-#include "../include/cell.h"
+#include "../../include/gpucell.h"
 
 void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char *name) {
     double t;
@@ -26,4 +26,7 @@ void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char
 
     printf("%s %10.3e \n", name, t);
 }
+
+__global__ void testKernel(double *vec) {}
+
 

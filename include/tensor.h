@@ -14,13 +14,9 @@
 #define __forceinline__
 #endif
 
-
 class CurrentTensorComponent {
 public:
-    char i11, i12, i13,
-            i21, i22, i23,
-            i31, i32, i33,
-            i41, i42, i43;
+    char i11, i12, i13, i21, i22, i23, i31, i32, i33, i41, i42, i43;
     double t[4];
 
     __host__ __device__ CurrentTensorComponent &operator=(CurrentTensorComponent b) {
@@ -73,6 +69,5 @@ public:
         return *this;
     }
 };
-
 
 #endif /* TENSOR_H_ */

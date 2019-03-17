@@ -4,63 +4,36 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
 #include <string>
-
-#include "load_data.h"
-
-//#include <unistd.h>
-//#include <stdio.h>
 #include <errno.h>
 
 #ifdef __CUDACC__
+#include <cuda.h>
 #include <nvToolsExtCuda.h>
 #include <nvToolsExtCudaRt.h>
 #endif
 
-#include "maxwell.h"
-
 #include <time.h>
-
 //#ifdef __OMP__
 #include <omp.h>
 //#endif
 
-#ifdef __CUDACC__
-#include <cuda.h>
-#endif
-
-#include "archAPI.h"
-#include "maxwell.h"
-#include "gpucell.h"
-#include "mpi_shortcut.h"
-
-#include "service_functions.h"
-
 #include <sys/resource.h>
 #include <stdint.h>
-
 #include <sys/sysinfo.h>
-#include <sys/time.h>
-
-
-#include "init.h"
-
-#include <string>
 #include <iostream>
-
-//TODO: It's an ugly style to include cu files. Include cuh (header files) only 
-#include "../src/add.cu"
-#include "../src/wrap_kernel.cu"
-#include "../src/kernels.cu"
-#include "../src/utils/NetCdf/read_file.cpp"
-#include "../src/utils/NetCdf/write_file.cpp"
-
 #include <vector>
+
+#include "mpi_shortcut.h"
+#include "service_functions.h"
+#include "load_data.h"
+#include "gpucell.h"
+
+//TODO: It's an ugly style to include cu files. Include cuh (header files) only
+#include "kernels.h"
 
 using namespace std;
 
@@ -173,7 +146,7 @@ public:
     
 //TODO: It's an ugly style to include cu files. Include cuh (header files) only
 //TODO: you need to include hardware specific files only if an appropriate compiler is used.
-#include "../src/init.cu"
+#include "../src/core/init.cu"
 
     int getMagneticFieldTraceShifts(int, int3 &, int3 &);
 

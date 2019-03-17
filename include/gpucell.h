@@ -10,33 +10,13 @@
 
 #include "cell.h"
 #include "archAPI.h"
-#include <stdlib.h>
 
-void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char *name) {
-    double t;
-    Cell *h_c;
-    int shift = (attribute + n_particle * sizeof(Particle) / sizeof(double));
-    int err;
+void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char *name);
 
-    h_c = new Cell;
-
-    err = (int) MemoryCopy(h_c, d_c, sizeof(Cell), DEVICE_TO_HOST);
-    if (err != cudaSuccess) {
-        printf("pyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
-    double *vec = h_c->doubParticleArray + shift;
-
-    MemoryCopy(&t, vec, sizeof(double), DEVICE_TO_HOST);
-
-    printf("%s %10.3e \n", name, t);
-}
-
-__global__ void testKernel(double *vec) {}
+__global__ void testKernel(double *vec);
 
 class GPUCell : public Cell {
 public:
-    double *d_wrong_current_particle_attributes, *h_wrong_current_particle_attributes;
 
 #ifdef __CUDACC__
     __host__ __device__
@@ -227,8 +207,7 @@ public:
 
         h_dst->number_of_particles = h_copy_of_d_src->number_of_particles;
 
-        code = MemoryCopy(h_dst->doubParticleArray, h_copy_of_d_src->doubParticleArray,
-                          sizeof(Particle) * MAX_particles_per_cell, DEVICE_TO_HOST);
+        code = MemoryCopy(h_dst->doubParticleArray, h_copy_of_d_src->doubParticleArray, sizeof(Particle) * MAX_particles_per_cell, DEVICE_TO_HOST);
         if (code != 0) {
             printf(" copyCellFromDevice3 %d %s \n ", code, getErrorString(code));
             exit(0);

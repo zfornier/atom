@@ -7,11 +7,8 @@
  * this software and related documentation outside the terms of the EULA
  * is strictly prohibited.
  */
-#include <mpi.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "../include/archAPI.h"
+#include "../../include/mpi_shortcut.h"
 
 int InitMPI(int argc, char *argv[]) {
     MPI_Init(&argc, &argv);

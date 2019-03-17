@@ -8,6 +8,7 @@
 #include <math.h>
 #include "run_control.h"
 #include "particle_types.h"
+#include "tensor.h"
 
 #define GPU_PARTICLE
 
@@ -21,9 +22,6 @@ typedef struct Field {
     double3 E, H;
 } Field;
 
-#include "tensor.h"
-#include "compare.h"
-
 class Particle {
 
 public:
@@ -32,17 +30,12 @@ public:
 
 #ifdef DEBUG_PLASMA
     int fortran_number;
-
 #endif
 
     __host__ __device__ Particle() {}
 
     __host__ __device__ __forceinline__
-    Particle(double x1, double y1, double z1, double u1, double v1, double w1, double m1, double q_m1) : x(x1), y(y1),
-                                                                                                         z(z1), pu(u1),
-                                                                                                         pv(v1), pw(w1),
-                                                                                                         m(m1),
-                                                                                                         q_m(q_m1) {}
+    Particle(double x1, double y1, double z1, double u1, double v1, double w1, double m1, double q_m1) : x(x1), y(y1), z(z1), pu(u1), pv(v1), pw(w1), m(m1), q_m(q_m1) {}
 
     __host__ __device__
     ~Particle() {}
@@ -56,7 +49,6 @@ public:
         *pv += *tau1 * E.y;
         *pw += *tau1 * E.z;
         *ps = (*tau1) * pow(((*pu) * (*pu) + (*pv) * (*pv) + (*pw) * (*pw)) * 1. + 1.0, -0.5);
-
     }
 
     __host__ __device__ void MagneticMove(double3 H, double ps, double *pu1, double *pv1, double *pw1) {

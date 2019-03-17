@@ -9,9 +9,6 @@
 #include <unistd.h>
 #include "plasma_netcdf.h"
 
-#define BINARY_FILE_NAME "mumu00000000001.dat"
-#define NETCDF_FILE_NAME "file_out.nc"
-
 #define ELECTRIC_FIELD_LABEL string("E")
 #define MAGNETIC_FIELD_LABEL string("M")
 #define CURRENT_FIELD_LABEL string("J")

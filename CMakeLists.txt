@@ -92,7 +92,7 @@ if( NOT NETCDF_CXX_INCLUDES_C OR
 endif()
 
 INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS} ${MPI_INCLUDE_PATH} ${NETCDF_CXX_INCLUDES_C})
-set(SOURCES src/main.cu src/mpi_shortcut.cxx src/service_functions.cu src/compare.cxx src/maxwell.cu src/load_data.cu src/archAPI.cu)
+set(SOURCES src/core/main.cu src/core/mpi_shortcut.cxx src/core/service_functions.cu src/core/compare.cxx src/core/maxwell.cu src/core/load_data.cu src/core/archAPI.cu src/core/kernels.cu src/core/Plasma.cu)
 ADD_SUBDIRECTORY(src/utils/NetCdf)
 ADD_SUBDIRECTORY(src/utils/ConfigParser)
 ADD_EXECUTABLE(atom ${SOURCES})

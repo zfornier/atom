@@ -8,6 +8,11 @@
 #ifndef MPI_SHORTCUT_H_
 #define MPI_SHORTCUT_H_
 
+#include <mpi.h>
+#include <stdio.h>
+#include "archAPI.h"
+
+
 int InitMPI(int argc,char *argv[]);
 
 int sumMPI(int size,double *jx,double *jy,double *jz);

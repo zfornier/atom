@@ -1,28 +1,15 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
-#include <vector>
-
-#include "../include/read_particles.h"
-#include "../include/run_control.h"
-#include "../include/particle.h"
-#include "../include/maxwell.h"
-#include "../include/f2c.h"
+#include "../../include/maxwell.h"
 
 /* Common Block Declarations */
 
-ParticleArraysGroup initial;
-ParticleFloatArraysGroup diagnostics;
+typedef long int integer;
+typedef double doublereal;
 
 struct cag05b_1_ {
     doublereal store1, store2;
 };
-struct cag05b_2_ {
-    doublereal normal, gamma;
-};
 
 #define cag05b_1 (*(struct cag05b_1_ *) &cag05b_)
-#define cag05b_2 (*(struct cag05b_2_ *) &cag05b_)
 
 struct cag05a_1_ {
     integer ix, iy, iz;

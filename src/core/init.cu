@@ -58,9 +58,7 @@ int initMeshArrays() {
 
 void AssignArraysToCells() {
     for (int n = 0; n < (*AllCells).size(); n++) {
-
         Cell c = (*AllCells)[n];
-
         c.readFieldsFromArrays(Ex, Ey, Ez, Hx, Hy, Hz);
     }
 }
@@ -73,7 +71,6 @@ virtual void InitializeCPU(double tex0, double tey0, double tez0, double Tb, dou
 
     getUniformMaxwellianParticles(ion_vp1, el_vp1, beam_vp1, tex0, tey0, tez0, Tb, rimp, rbd, ni, Lx, Ly, Lz);
 
-
     addAllParticleListsToCells(ion_vp1, el_vp1, beam_vp1);
 
     AssignArraysToCells();
@@ -85,8 +82,10 @@ void Initialize(double tex0, double tey0, double tez0, double Tb, double rimp, d
     InitializeCPU(tex0, tey0, tez0, Tb, rimp, rbd);
 
     copyCellsWithParticlesToGPU();
+
     err = getLastError();
     if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
+
     InitializeGPU();
 
     err = getLastError();
@@ -139,11 +138,10 @@ void InitGPUParticles() {
     }
 
     h_CellArray = (GPUCell **) malloc(size * sizeof(Cell * ));
-    err = cudaMalloc((void **)&d_CellArray, size * sizeof(Cell * ));
+    err = cudaMalloc((void **) &d_CellArray, size * sizeof(Cell * ));
 
     if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
 
-//    h_controlParticleNumberArray = (int*)malloc(size*sizeof(int));
     err = getLastError();
     if (err != cudaSuccess) {
         printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
@@ -151,7 +149,6 @@ void InitGPUParticles() {
     }
     printf("%s : size = %d\n", __FILE__, size);
     for (int i = 0; i < size; i++) {
-        //printf("GPU cell %d begins******************************************************\n",i);
         GPUCell c;
         c = (*AllCells)[i];
 
@@ -166,8 +163,6 @@ void InitGPUParticles() {
 #ifdef ATTRIBUTES_CHECK
         c.SetControlSystem(jmp,d_ctrlParticles);
 #endif
-
-
         d_c = c.copyCellToDevice();
         err = getLastError();
         if (err != cudaSuccess) {
@@ -178,8 +173,7 @@ void InitGPUParticles() {
         if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
 
         cudaMemGetInfo(&m_free, &m_total);
-//        double mtot;
-//        mfree = m_free;
+
         err = getLastError();
         if (err != cudaSuccess) {
             printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
@@ -197,15 +191,11 @@ void InitGPUParticles() {
       puts("COPY----------------------------------");
 #endif
 
-
 #ifdef PARTICLE_PRINTS
-
-        if(t < 1.0)
-        {
+        if(t < 1.0) {
             t = c.compareToCell(*h_copy);
         }
 #endif
-        ////////////////////////////////////////.
         err = getLastError();
         if (err != cudaSuccess) {
             printf("%s:%d - error %d %s cell %d \n", __FILE__, __LINE__, err, getErrorString(err), i);
@@ -223,16 +213,14 @@ void InitGPUParticles() {
 #ifdef InitGPUParticles_PRINTS
         dbgPrintGPUParticleAttribute(d_c,50,1," CPY " );
 
-       cudaPrintfInit();
+        cudaPrintfInit();
 
         testKernel<<<1,1>>>(h_ctrl->d_ctrlParticles,h_ctrl->jmp);
         cudaPrintfDisplay(stdout, true);
         cudaPrintfEnd();
 
-        printf("i %d l %d k n %d %d %e src %e num %d\n",h_ctrl->i,h_ctrl->l,h_ctrl->k,i,
-                c.ParticleArrayRead(0,7),c.number_of_particles
-                );
-    printf("GPU cell %d ended ******************************************************\n",i);
+        printf("i %d l %d k n %d %d %e src %e num %d\n",h_ctrl->i,h_ctrl->l,h_ctrl->k,i, c.ParticleArrayRead(0,7),c.number_of_particles);
+        printf("GPU cell %d ended ******************************************************\n",i);
 #endif
         err = getLastError();
         if (err != cudaSuccess) {
@@ -254,20 +242,18 @@ void InitGPUParticles() {
     err = getLastError();
     if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
 
-
 #ifdef ATTRIBUTES_CHECK
     GPU_WriteControlSystem<<<dimGrid, dimBlockOne,16000>>>(d_CellArray);
 #endif
     size = 0;
 
     err = getLastError();
-    if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
-
+    if (err != cudaSuccess) {
+        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
+    }
 }
 
-
 virtual void Alloc() {
-
     AllCells = new std::vector<GPUCell>;
 
     Ex = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
@@ -343,9 +329,7 @@ virtual void InitCells() {
                 printf("%5d %5d %5d size %d \n",i,l,k,(*AllCells).size());
 #endif
             }
-
         }
-
     }
 }
 
@@ -359,15 +343,10 @@ virtual void InitCurrents() {
         dbgJx[i] = 0.0;
         dbgJy[i] = 0.0;
         dbgJz[i] = 0.0;
-
     }
 }
 
-void InitCurrents(string fnjx, string fnjy, string fnjz,
-                  string dbg_fnjx, string dbg_fnjy, string dbg_fnjz,
-                  string np_fnjx, string np_fnjy, string np_fnjz,
-                  int dbg) {
-
+void InitCurrents(string fnjx, string fnjy, string fnjz, string dbg_fnjx, string dbg_fnjy, string dbg_fnjz, string np_fnjx, string np_fnjy, string np_fnjz, int dbg) {
     read3Darray(np_fnjx, npJx);
     read3Darray(np_fnjy, npJy);
     read3Darray(np_fnjz, npJz);
@@ -434,32 +413,22 @@ int addParticleListToCells(std::vector <Particle> &vp) {
 
         Cell &c = (*AllCells)[n];
 
-
         if (c.Insert(p) == true) {
 #ifdef PARTICLE_PRINTS1000
-            if((i+1)%1000 == 0 )
-            {
-                printf("particle %d (%e,%e,%e) is number %d in cell (%d,%d,%d)\n",
-                        i+1,
-                   x,y,z,c.number_of_particles,c.i,c.l,c.k);
+            if((i+1)%1000 == 0) {
+                printf("particle %d (%e,%e,%e) is number %d in cell (%d,%d,%d)\n", i+1, x,y,z,c.number_of_particles,c.i,c.l,c.k);
             }
 #endif
         }
     }   // END total_particles LOOP
 
     return 0;
-
 }
 
-int addAllParticleListsToCells(std::vector <Particle> &ion_vp,
-                               std::vector <Particle> &el_vp,
-                               std::vector <Particle> &beam_vp) {
+int addAllParticleListsToCells(std::vector <Particle> &ion_vp, std::vector <Particle> &el_vp, std::vector <Particle> &beam_vp) {
     addParticleListToCells(ion_vp);
     addParticleListToCells(el_vp);
     addParticleListToCells(beam_vp);
 
     return 0;
 }
-
-
-

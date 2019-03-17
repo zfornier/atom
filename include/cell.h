@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "particle.h"
+#include "compare.h"
 
 #define CellExtent 5
 #define PARTICLE_MASS_TOLERANCE 1e-15
@@ -25,25 +26,13 @@ typedef struct CellDouble {
 } CellDouble;
 
 typedef struct CellTotalField {
-
     CellDouble *Ex, *Ey, *Ez, *Hx, *Hy, *Hz;
-
 } CellTotalField;
 
 #define MAX_PPC   5000
 const int MAX_particles_per_cell = MAX_PPC;
 
-__host__ __device__ int isNan(double t) {
-    if (t > 0) {}
-    else {
-        if (t <= 0) {}
-        else {
-            return 1;
-        }
-    }
-
-    return 0;
-}
+__host__ __device__ int isNan(double t);
 
 //QUESTION: what was the reason to have class implementation in .h file?
 
@@ -56,9 +45,6 @@ public:
     int Nx, Ny, Nz;
     int jmp;
     double *d_ctrlParticles;
-
-    int flag_wrong_current_cell;
-    double *d_wrong_current_particle_attributes, *h_wrong_current_particle_attributes;
 
     CellDouble *Jx, *Ex, *Hx, *Jy, *Ey, *Hy, *Jz, *Ez, *Hz, *Rho;
 
@@ -123,11 +109,9 @@ public:
         ParticleArrayWrite(n, 5, p->pv);
         ParticleArrayWrite(n, 6, p->pw);
         ParticleArrayWrite(n, 7, p->q_m);
-
         ParticleArrayWrite(n, 8, p->x1);
         ParticleArrayWrite(n, 9, p->y1);
         ParticleArrayWrite(n, 10, p->z1);
-
         ParticleArrayWrite(n, 11, ((double) p->sort));
     }
 
@@ -162,7 +146,6 @@ public:
 
         return p;
     }
-
 
 public:
 
@@ -200,11 +183,9 @@ public:
         }
     }
 
-// TODO: __host__ __device__ twice? 
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    __host__ __device__
     double get_hx() { return hx; }
 
 #ifdef __CUDACC__
@@ -243,8 +224,7 @@ public:
     __host__ __device__
 #endif
     int getCellNumberCenter(double x, double x0, double hx) {
-        double t = ((getCellFraction(x, x0, hx) + 1.0) +
-                    1.5);         // Fortran-style numbering used for particle shift computation
+        double t = ((getCellFraction(x, x0, hx) + 1.0) + 1.5);         // Fortran-style numbering used for particle shift computation
         return (int) (t);
     }
 
@@ -252,8 +232,7 @@ public:
     __host__ __device__
 #endif
     int getCellNumberCenterCurrent(double x, double x0, double hx) {
-        double t = (getCellFraction(x, x0, hx) +
-                    1.5);         // Fortran-style numbering used for particle shift computation
+        double t = (getCellFraction(x, x0, hx) + 1.5);         // Fortran-style numbering used for particle shift computation
         return (int) (t + 1);
     }
 
@@ -275,7 +254,6 @@ public:
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     double getCellReminder(double x, double x0, double hx) {
         return (getCellNumber(x, x0, hx) - getCellFraction(x, x0, hx)) - 1.0;
     }
@@ -283,7 +261,6 @@ public:
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     double getCellCenterReminder(double x, double x0, double hx) {
         double t = getCellNumberCenter(x, x0, hx);
         double tf = getCellFraction(x, x0, hx);
@@ -295,7 +272,6 @@ public:
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     double getCellTransitAverage(double hz, int i1, int i2, double x0) {
         return (hz * (((double) i1 + (double) i2) * 0.5 - 2.0) + x0);
     }
@@ -304,28 +280,24 @@ public:
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     double getCellTransitRatio(double z1, double z, double z2) { return (z2 - z) / (z1 - z); }
 
 
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     double getCellTransitProduct(double z1, double z, double z2) { return (z2 - z) * (z1 - z); }
 
 
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     double getRatioBasedX(double x1, double x, double s) { return (x + (x1 - x) * s); }
 
 
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     double getCenterRelatedShift(double x, double x1, int i, double hx, double x0) { //double t = 0.50*(x+x1);
         //  double t1 = hx*((double)i-2.50);
         return (0.50 * (x + x1) - hx * ((double) i - 2.50) - x0);
@@ -334,7 +306,6 @@ public:
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     void flyDirection(Particle *p, int *dx, int *dy, int *dz) {
         *dx = (((p->x > x0 + hx) && (p->x < x0 + 2 * hx)) || ((p->x < hx) && (i == Nx - 1))) ? 2 : (((p->x < x0) ||
                                                                                                      ((p->x >
@@ -507,7 +478,6 @@ public:
     __host__ __device__
 #endif
     int getWrapCellNumber(int i, int l, int k) {
-
         getWrapCellNumberTriplet(&i, &l, &k);
 
         return (i * (Ny + 2) * (Nz + 2) + l * (Nz + 2) + k);
@@ -572,7 +542,6 @@ public:
 #ifdef VIRTUAL_FUNCTIONS
     virtual
 #endif
-
     void InverseKernel(double3 x, int3 &i, int3 &i1,
                        double &s1, double &s2, double &s3, double &s4, double &s5, double &s6,
                        double &s11, double &s21, double &s31, double &s41, double &s51, double &s61,
@@ -602,12 +571,10 @@ public:
         s61 = 1. - s6;
     }
 
-
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-    double Interpolate3D(CellDouble *E, int3 *cell, double sx, double sx1, double sy, double sy1, double sz, double sz1,
-                         Particle *p, int n) {
+    double Interpolate3D(CellDouble *E, int3 *cell, double sx, double sx1, double sy, double sy1, double sz, double sz1, Particle *p, int n) {
         double t, t1, t2;
         double t_ilk, t_ilk1, t_il1k, t_il1k1, t_i1lk, t_i1lk1, t_i1l1k, t_i1l1k1;
         int i, l, k;
@@ -655,17 +622,11 @@ public:
         t_i1l1k = E->M[i + 1][l + 1][k];
         t_i1l1k1 = E->M[i + 1][l + 1][k + 1];
 
-        t1 = sx * (sy * (sz * t_ilk
-                         + sz1 * t_ilk1)
-                   + sy1 * (sz * t_il1k
-                            + sz1 * t_il1k1));
+        t1 = sx * (sy * (sz * t_ilk + sz1 * t_ilk1) + sy1 * (sz * t_il1k + sz1 * t_il1k1));
 #ifdef ATTRIBUTES_CHECK
         d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,128+20*n)] = t1;
 #endif
-        t2 = sx1 * (sy * (sz * t_i1lk
-                          + sz1 * t_i1lk1)
-                    + sy1 * (sz * t_i1l1k
-                             + sz1 * t_i1l1k1));
+        t2 = sx1 * (sy * (sz * t_i1lk + sz1 * t_i1lk1) + sy1 * (sz * t_i1l1k + sz1 * t_i1l1k1));
 #ifdef ATTRIBUTES_CHECK
         d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,129+20*n)] = t2;
 #endif
@@ -770,19 +731,11 @@ public:
             return fd;
         }
 
-        InverseKernel(x,
-                      i, i1,
-                      s1, s2, s3, s4, s5, s6,
-                      s11, s21, s31, s41, s51, s61, p);
+        InverseKernel(x, i, i1, s1, s2, s3, s4, s5, s6, s11, s21, s31, s41, s51, s61, p);
 
+        fd.E = GetElectricField(i, i1, s1, s2, s3, s4, s5, s6, s11, s21, s31, s41, s51, s61, p, cf.Ex, cf.Ey, cf.Ez);
 
-        fd.E = GetElectricField(i, i1,
-                                s1, s2, s3, s4, s5, s6,
-                                s11, s21, s31, s41, s51, s61, p, cf.Ex, cf.Ey, cf.Ez);
-
-        fd.H = GetMagneticField(i, i1,
-                                s1, s2, s3, s4, s5, s6,
-                                s11, s21, s31, s41, s51, s61, p, cf.Hx, cf.Hy, cf.Hz);
+        fd.H = GetMagneticField(i, i1, s1, s2, s3, s4, s5, s6, s11, s21, s31, s41, s51, s61, p, cf.Hx, cf.Hy, cf.Hz);
         return fd;
     }
 
@@ -803,27 +756,20 @@ public:
         CurrentTensor *t1 = &(dt->t1);
         CurrentTensor *t2 = &(dt->t2);
 
-
         *cells = 1;
 
         i1.x = getCellNumberCenterCurrent(x.x, x0, hx);
         i1.y = getCellNumberCenterCurrent(x.y, y0, hy);
         i1.z = getCellNumberCenterCurrent(x.z, z0, hz);
 
-
         i2.x = getCellNumberCenterCurrent(x1.x, x0, hx);
-
-
         i2.y = getCellNumberCenterCurrent(x1.y, y0, hy);
-
-
         i2.z = getCellNumberCenterCurrent(x1.z, z0, hz);
 
         i = abs(i2.x - i1.x);
         l = abs(i2.y - i1.y);
         k = abs(i2.z - i1.z);
         m = 4 * i + 2 * l + k;
-
 
         switch (m) {
             case 1:
@@ -841,7 +787,6 @@ public:
             case 7:
                 goto L7;
         }
-
 
         pqr(i1, x, x1, mass, tau, t1, 0, p);
         goto L18;
@@ -916,7 +861,6 @@ public:
 #ifdef __CUDACC__
     __host__ __device__
 #endif
-
     void Reflect(Particle *p) {
         double3 x1 = p->GetX();
 
@@ -933,7 +877,6 @@ public:
 #ifdef VIRTUAL_FUNCTIONS
     virtual
 #endif
-
     void Kernel(CellDouble &Jx,
                 int i11, int i12, int i13,
                 int i21, int i22, int i23,
@@ -996,7 +939,6 @@ public:
             printf("pqr su 32587 x1 %25.15e %25.15e \n",x1.x,su);
         }
 #endif
-
         s1 = sv * sw / 12.0;
         s2 = su * sw / 12.0;
         s3 = su * sv / 12.0;
@@ -1005,6 +947,7 @@ public:
         d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,56+num)] = sv;
         d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,58+num)] = sw;
 #endif
+
 #ifdef ATTRIBUTES_CHECK
         d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,106)]     = su*a;
         d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,107)]     = tau*hy*hz;
@@ -1097,10 +1040,10 @@ public:
         t1->Jz.i43 = i.z;
         t1->Jz.t[3] = sw * (dx * dy + s3);
 #ifdef ATTRIBUTES_CHECK
-                                                                                                                                d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,82+num)] = sw*(dx1*dy1+s3);
-      d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,84+num)] = sw*(dx1*dy-s3);
-      d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,86+num)] = sw*(dx*dy1-s3);
-      d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,88+num)] = sw*(dx*dy+s3);
+        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,82+num)] = sw*(dx1*dy1+s3);
+        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,84+num)] = sw*(dx1*dy-s3);
+        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,86+num)] = sw*(dx*dy1-s3);
+        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,88+num)] = sw*(dx*dy+s3);
 #endif
     }
 
@@ -1236,8 +1179,6 @@ public:
         l1 = threadIdx.y;
         k1 = threadIdx.z;
         int n = getFortranCellNumber(i + i1 - 1, l + l1 - 1, k + k1 - 1);
-#ifdef DEBUG_PLASMA
-#endif
         getFortranCellTriplet(n, &i_f, &l_f, &k_f);
         double t = getFortranArrayValue(E, i + i1 - 1, l + l1 - 1, k + k1 - 1);
 
@@ -1355,8 +1296,7 @@ public:
         }
 #endif
 
-        res = compare(doubParticleArray, c->doubParticleArray,
-                      number_of_particles * sizeof(Particle) / sizeof(double), s, ABSOLUTE_TOLERANCE);
+        res = compare(doubParticleArray, c->doubParticleArray, number_of_particles * sizeof(Particle) / sizeof(double), s, ABSOLUTE_TOLERANCE);
 
         return res;
     }
@@ -1497,8 +1437,6 @@ public:
 
         for (i = 0; i < number_of_particles; i++) {
             p = readParticleFromSurfaceDevice(i);
-#ifdef ATTRIBUTES_CHECK
-#endif
         }
     }
 

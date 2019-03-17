@@ -8,16 +8,21 @@
 #ifndef LOAD_DATA_H_
 #define LOAD_DATA_H_
 
-
-#include "particle.h"
 #include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/resource.h>
+#include <stdint.h>
+#include <sys/sysinfo.h>
+#include <sys/time.h>
+#include <iostream>
+
+#include "particle.h"
 #include "maxwell.h"
-
-#include <string>
-
 #include "NetCdf/read_file.h"
 
 void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, std::string name, int sort);

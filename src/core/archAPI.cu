@@ -5,10 +5,7 @@
  *      Author: snytav
  */
 
-#include<stdlib.h>
-#include<string.h>
-
-#include "../include/archAPI.h"
+#include "../../include/archAPI.h"
 
 #ifdef __CUDACC__
 int MemoryCopy(void* dst,void *src,size_t size,int dir) {
@@ -63,14 +60,6 @@ const char *getErrorString(int err) { return ""; }
 
 #endif
 
-// QUESTION: do you really ned this function?
-int get_num_args(void **args) {
-    int i;
-    for (i = 0; args[i] != NULL; i++);
-
-    return i;
-}
-
 #ifndef __CUDACC__
-dim3 threadIdx, blockIdx;
+//dim3 threadIdx, blockIdx;
 #endif

@@ -1,7 +1,7 @@
 #include <stdlib.h>
-#include "Plasma.cu" // todo: change to header file (find couse of multiply definition error with .h file)
-#include "../include/mpi_shortcut.h"
-#include "../include/ConfigParser/Properties.h"
+#include "../../include/Plasma.h" // todo: change to header file (find couse of multiply definition error with .h file)
+#include "../../include/mpi_shortcut.h"
+#include "../../include/ConfigParser/Properties.h"
 
 //TODO: gpu cell in the global array at copy from there appears to be not initialized
 using namespace std;

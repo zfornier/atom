@@ -1,17 +1,10 @@
 #ifndef ARCHAPI_H_
 #define ARCHAPI_H_
 
-#include "read_particles.h"
-
 #define HOST_TO_DEVICE   -131313
 #define HOST_TO_HOST     -131314
 #define DEVICE_TO_HOST   -131315
 #define DEVICE_TO_DEVICE -131316
-
-#ifdef __CUDACC__
-#define hostdevice_for_CUDA __host__ __device__
-#define global_for_CUDA __global__
-#endif
 
 #ifndef __CUDACC__
 
@@ -34,7 +27,6 @@ typedef struct dim3 dim3;
 #define __global__
 #define __shared__
 
-//extern uint3 threadIdx, blockIdx;
 #endif
 
 const char *getErrorString(int err);
@@ -43,10 +35,6 @@ int MemoryCopy(void* dst,void *src,size_t size,int dir);
 
 int MemoryAllocate(void** dst,size_t size);
 
-#ifdef __CUDACC__
 int getLastError();
-#else
-int getLastError();
-#endif
 
 #endif /* ARCHAPI_H_ */

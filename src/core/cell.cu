@@ -16,20 +16,7 @@ __host__ __device__ int isNan(double t) {
     return 0;
 }
 
-//TODO: it's not an elegant way. Use the following approach:
-/*
-#ifdef __CUDACC__
-    #define host_device __host__ __device__
-#lese
-    #define host_device
-#endif
-    host_device int AllocParticles....
-    host_device double ParticleArrayRead ....
-*/
-
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 int Cell::AllocParticles() {
     int size = sizeof(Particle) / sizeof(double);
 
@@ -40,23 +27,17 @@ int Cell::AllocParticles() {
     return 0;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double Cell::ParticleArrayRead(int n_particle, int attribute) {
     return doubParticleArray[attribute + n_particle * sizeof(Particle) / sizeof(double)];
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::ParticleArrayWrite(int n_particle, int attribute, double t) {
     doubParticleArray[attribute + n_particle * sizeof(Particle) / sizeof(double)] = t;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::writeParticleToSurface(int n, Particle *p) {
     ParticleArrayWrite(n, 0, p->m);
     ParticleArrayWrite(n, 1, p->x);
@@ -72,18 +53,14 @@ void Cell::writeParticleToSurface(int n, Particle *p) {
     ParticleArrayWrite(n, 11, ((double) p->sort));
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::addParticleToSurface(Particle *p, int *number_of_particles) {
     writeParticleToSurface(*number_of_particles, p);
 
     (*number_of_particles)++;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 Particle Cell::readParticleFromSurfaceDevice(int n) {
     Particle p;
 
@@ -104,9 +81,7 @@ Particle Cell::readParticleFromSurfaceDevice(int n) {
     return p;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::removeParticleFromSurfaceDevice(int n, Particle *p, int *number_of_particles) {
     int i, k;
     double b;
@@ -138,179 +113,112 @@ void Cell::removeParticleFromSurfaceDevice(int n, Particle *p, int *number_of_pa
     }
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-double Cell::get_hx() { return hx; }
+host_device
+double Cell::get_hx() {
+    return hx;
+}
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-double Cell::get_hy() { return hy; }
+host_device
+double Cell::get_hy() {
+    return hy;
+}
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-double Cell::get_hz() { return hz; }
+host_device
+double Cell::get_hz() {
+    return hz;
+}
 
 #ifdef GPU_PARTICLE
-
 double *Cell::GetParticles() { return doubParticleArray; }
-
 #else
 thrust::host_vector<Particle>&  Cell::GetParticles(){return all_particles;}
 #endif
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double Cell::getCellFraction(double x, double x0, double hx) {
-    double t = (x - x0) / hx;
-    return t;
+    return (x - x0) / hx;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-int Cell::getCellNumber(double x, double x0, double hx) { return ((int) (getCellFraction(x, x0, hx) + 1.0) + 1); }
+host_device
+int Cell::getCellNumber(double x, double x0, double hx) {
+    return ((int) (getCellFraction(x, x0, hx) + 1.0) + 1);
+}
 
-__host__ __device__
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 int Cell::getCellNumberCenter(double x, double x0, double hx) {
-    double t = ((getCellFraction(x, x0, hx) + 1.0) + 1.5);         // Fortran-style numbering used for particle shift computation
-    return (int) (t);
+    return (int)((getCellFraction(x, x0, hx) + 1.0) + 1.5);         // Fortran-style numbering used for particle shift computation
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 int Cell::getCellNumberCenterCurrent(double x, double x0, double hx) {
     double t = (getCellFraction(x, x0, hx) + 1.5);         // Fortran-style numbering used for particle shift computation
     return (int) (t + 1);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-int Cell::getPointPosition(double x, double x0, double hx) { return (int) getCellFraction(x, x0, hx); }
+host_device
+int Cell::getPointPosition(double x, double x0, double hx) {
+    return (int) getCellFraction(x, x0, hx);
+}
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-int Cell::getPointCell(double3 x) {                                                                     // for Particle to Cell distribution:
+host_device
+int Cell::getPointCell(double3 x) { // for Particle to Cell distribution:
     int i = getPointPosition(x.x, 0.0, hx);
     int l = getPointPosition(x.y, 0.0, hy);
     int k = getPointPosition(x.z, 0.0, hz);
     return getGlobalCellNumber(i, l, k);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-double Cell::getCellReminder(double x, double x0, double hx) {
-    return (getCellNumber(x, x0, hx) - getCellFraction(x, x0, hx)) - 1.0;
-}
-
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-double Cell::getCellCenterReminder(double x, double x0, double hx) {
-    double t = getCellNumberCenter(x, x0, hx);
-    double tf = getCellFraction(x, x0, hx);
-    //double q  = t - tf - 1.0;
-    return (t - 0.5 - tf - 1.0);
-}
-
-
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double Cell::getCellTransitAverage(double hz, int i1, int i2, double x0) {
     return (hz * (((double) i1 + (double) i2) * 0.5 - 2.0) + x0);
 }
 
+host_device
+double Cell::getCellTransitRatio(double z1, double z, double z2) {
+    return (z2 - z) / (z1 - z);
+}
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-double Cell::getCellTransitRatio(double z1, double z, double z2) { return (z2 - z) / (z1 - z); }
+host_device
+double Cell::getCellTransitProduct(double z1, double z, double z2) {
+    return (z2 - z) * (z1 - z);
+}
 
+host_device
+double Cell::getRatioBasedX(double x1, double x, double s) {
+    return (x + (x1 - x) * s);
+}
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-double Cell::getCellTransitProduct(double z1, double z, double z2) { return (z2 - z) * (z1 - z); }
-
-
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-double Cell::getRatioBasedX(double x1, double x, double s) { return (x + (x1 - x) * s); }
-
-
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-double Cell::getCenterRelatedShift(double x, double x1, int i, double hx, double x0) { //double t = 0.50*(x+x1);
-    //  double t1 = hx*((double)i-2.50);
+host_device
+double Cell::getCenterRelatedShift(double x, double x1, int i, double hx, double x0) {
     return (0.50 * (x + x1) - hx * ((double) i - 2.50) - x0);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::flyDirection(Particle *p, int *dx, int *dy, int *dz) {
-    *dx = (((p->x > x0 + hx) && (p->x < x0 + 2 * hx)) || ((p->x < hx) && (i == Nx - 1))) ? 2 : (((p->x < x0) ||
-                                                                                                 ((p->x >
-                                                                                                   xm - hx) &&
-                                                                                                  (i == 0))) ? 0
-                                                                                                             : 1);
-    *dy = (((p->y > y0 + hy) && (p->y < y0 + 2 * hy)) || ((p->y < hy) && (l == Ny - 1))) ? 2 : (((p->y < y0) ||
-                                                                                                 ((p->y >
-                                                                                                   ym - hy) &&
-                                                                                                  (l == 0))) ? 0
-                                                                                                             : 1);
-    *dz = (((p->z > z0 + hz) && (p->z < z0 + 2 * hz)) || ((p->z < hz) && (k == Nz - 1))) ? 2 : (((p->z < z0) ||
-                                                                                                 ((p->z >
-                                                                                                   zm - hz) &&
-                                                                                                  (k == 0))) ? 0
-                                                                                                             : 1);
+    *dx = (((p->x > x0 + hx) && (p->x < x0 + 2 * hx)) || ((p->x < hx) && (i == Nx - 1))) ? 2 : (((p->x < x0) || ((p->x > xm - hx) && (i == 0))) ? 0 : 1);
+    *dy = (((p->y > y0 + hy) && (p->y < y0 + 2 * hy)) || ((p->y < hy) && (l == Ny - 1))) ? 2 : (((p->y < y0) || ((p->y > ym - hy) && (l == 0))) ? 0 : 1);
+    *dz = (((p->z > z0 + hz) && (p->z < z0 + 2 * hz)) || ((p->z < hz) && (k == Nz - 1))) ? 2 : (((p->z < z0) || ((p->z > zm - hz) && (k == 0))) ? 0 : 1);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-__host__ __device__ void Cell::inverseDirection(int *dx, int *dy, int *dz) {
+host_device
+void Cell::inverseDirection(int *dx, int *dy, int *dz) {
     *dx = (*dx == 2) ? 0 : (*dx == 0 ? 2 : 1);
     *dy = (*dy == 2) ? 0 : (*dy == 0 ? 2 : 1);
     *dz = (*dz == 2) ? 0 : (*dz == 0 ? 2 : 1);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 bool Cell::isPointInCell(double3 x) {
     return ((x0 <= x.x) && (x.x < x0 + hx) && (y0 <= x.y) && (x.y < y0 + hy) && (z0 <= x.z) && (x.z < z0 + hz));
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-
+host_device
 Cell::Cell() {}
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-
+host_device
 Cell::~Cell() {}
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-
+host_device
 Cell::Cell(int i1, int l1, int k1, double Lx, double Ly, double Lz, int Nx1, int Ny1, int Nz1, double tau1) {
     Cell();
     Nx = Nx1;
@@ -331,13 +239,10 @@ Cell::Cell(int i1, int l1, int k1, double Lx, double Ly, double Lz, int Nx1, int
     tau = tau1;
 }
 
-__host__ __device__
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double3 Cell::GetElectricField(
         int3 i, int3 i1,
         double &s1, double &s2, double &s3, double &s4, double &s5, double &s6,
@@ -365,9 +270,7 @@ double3 Cell::GetElectricField(
     return E;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 int3 Cell::getCellTripletNumber(int n) {
     int3 i;
     i.z = n % (Nz + 2);
@@ -376,9 +279,7 @@ int3 Cell::getCellTripletNumber(int n) {
     return i;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 int Cell::getGlobalCellNumberTriplet(int *i, int *l, int *k) {
     if (*i >= Nx + 2) *i -= Nx + 2;
     if (*l >= Ny + 2) *l -= Ny + 2;
@@ -387,9 +288,7 @@ int Cell::getGlobalCellNumberTriplet(int *i, int *l, int *k) {
     return 0;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 int Cell::getGlobalCellNumber(int i, int l, int k) {
 
     getGlobalCellNumberTriplet(&i, &l, &k);
@@ -397,9 +296,7 @@ int Cell::getGlobalCellNumber(int i, int l, int k) {
     return (i * (Ny + 2) * (Nz + 2) + l * (Nz + 2) + k);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 int Cell::getWrapCellNumberTriplet(int *i, int *l, int *k) {
     if (*i >= Nx) {
         *i -= Nx;
@@ -427,25 +324,19 @@ int Cell::getWrapCellNumberTriplet(int *i, int *l, int *k) {
     return 0;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 int Cell::getWrapCellNumber(int i, int l, int k) {
     getWrapCellNumberTriplet(&i, &l, &k);
 
     return (i * (Ny + 2) * (Nz + 2) + l * (Nz + 2) + k);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 int Cell::getFortranCellNumber(int i, int l, int k) {
     return getGlobalCellNumber(i - 1, l - 1, k - 1);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::getFortranCellTriplet(int n, int *i, int *l, int *k) {
     *i = n / ((Ny + 2) * (Nz + 2));
     *l = (n - (*i) * (Ny + 2) * (Nz + 2)) / Nz;
@@ -456,9 +347,7 @@ void Cell::getFortranCellTriplet(int n, int *i, int *l, int *k) {
     (*k) += 1;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 int Cell::getGlobalBoundaryCellNumber(int i, int k, int dir, int N) {
     int i1 = (dir == 0) * N + (dir == 1) * i + (dir == 2) * i;
     int l1 = (dir == 0) * i + (dir == 1) * N + (dir == 2) * k;
@@ -466,14 +355,12 @@ int Cell::getGlobalBoundaryCellNumber(int i, int k, int dir, int N) {
     return getGlobalCellNumber(i1, l1, k1);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-void Cell::ClearParticles() { number_of_particles = 0; }
+host_device
+void Cell::ClearParticles() {
+    number_of_particles = 0;
+}
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::Init() {
     Jx = new CellDouble;
     Jy = new CellDouble;
@@ -489,9 +376,7 @@ void Cell::Init() {
     AllocParticles();
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -500,21 +385,21 @@ void Cell::InverseKernel(double3 x, int3 &i, int3 &i1,
                    double &s11, double &s21, double &s31, double &s41, double &s51, double &s61,
                    Particle *p
 ) {
-    i.x = getCellNumber(x.x, x0, hx);            //(int) (s2 + 1.);  // FORTRAN-StYLE NUMBERING
-    i1.x = getCellNumberCenter(x.x, x0, hx);      //(int) (s2 + 1.5);
-    s1 = s1_interpolate(x.x);          //i - s2;
-    s2 = s2_interpolate(x.x); //getCellCenterReminder(x,0.0,hx);    //i1 - 0.5 - s2;
+    i.x = getCellNumber(x.x, x0, hx);
+    i1.x = getCellNumberCenter(x.x, x0, hx);
+    s1 = s1_interpolate(x.x);
+    s2 = s2_interpolate(x.x);
 
-    i.y = getCellNumber(x.y, y0, hy);            //(int) (s2 + 1.);
-    i1.y = getCellNumberCenter(x.y, y0, hy);      //(int) (s2 + 1.5);
+    i.y = getCellNumber(x.y, y0, hy);
+    i1.y = getCellNumberCenter(x.y, y0, hy);
 
-    s3 = s3_interpolate(x.y);//getCellReminder(y,y0,hy);          //i - s2;
-    s4 = s4_interpolate(x.y);//   getCellCenterReminder(y,y0,hy);    //i1 - 0.5 - s2;
+    s3 = s3_interpolate(x.y);
+    s4 = s4_interpolate(x.y);
 
-    i.z = getCellNumber(x.z, z0, hz);            //(int) (s2 + 1.);
-    i1.z = getCellNumberCenter(x.z, z0, hz);      //(int) (s2 + 1.5);
-    s5 = s5_interpolate(x.z); //getCellReminder(z,z0,hz);          //i - s2;
-    s6 = s6_interpolate(x.z); //getCellCenterReminder(z,z0,hz);    //i1 - 0.5 - s2;
+    i.z = getCellNumber(x.z, z0, hz);
+    i1.z = getCellNumberCenter(x.z, z0, hz);
+    s5 = s5_interpolate(x.z);
+    s6 = s6_interpolate(x.z);
 
     s11 = 1. - s1;
     s21 = 1. - s2;
@@ -524,9 +409,7 @@ void Cell::InverseKernel(double3 x, int3 &i, int3 &i1,
     s61 = 1. - s6;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double Cell::Interpolate3D(CellDouble *E, int3 *cell, double sx, double sx1, double sy, double sy1, double sz, double sz1, Particle *p, int n) {
     double t, t1, t2;
     double t_ilk, t_ilk1, t_il1k, t_il1k1, t_i1lk, t_i1lk1, t_i1l1k, t_i1l1k1;
@@ -588,9 +471,7 @@ double Cell::Interpolate3D(CellDouble *E, int3 *cell, double sx, double sx1, dou
     return t;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -618,56 +499,40 @@ double3 Cell::GetMagneticField(
     cn.z = i1.z;
     H.z = Interpolate3D(Hz1, &cn, s1, s11, s3, s31, s6, s61, p, 5);
 
-
     return H;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-
+host_device
 double Cell::s1_interpolate(double x) {
     return (int) (x / hx + 1.0) - x / hx;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double Cell::s2_interpolate(double x) {
     return (int) (x / hx + 1.5) - 0.5 - x / hx;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double Cell::s3_interpolate(double y) {
     return (int) (y / hy + 1.0) - y / hy;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double Cell::s5_interpolate(double z) {
     return (int) (z / hz + 1.0) - z / hz;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double Cell::s4_interpolate(double y) {
     return (int) (y / hy + 1.5) - 0.5 - y / hy;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double Cell::s6_interpolate(double z) {
     return (int) (z / hz + 1.5) - 0.5 - z / hz;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 Field Cell::GetField(Particle *p, CellTotalField cf) {
     int3 i, i1;
     double s1, s2, s3, s4, s5, s6, s11, s21, s31, s41, s51, s61;
@@ -692,9 +557,7 @@ Field Cell::GetField(Particle *p, CellTotalField cf) {
     return fd;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::CurrentToMesh(double tau, int *cells, DoubleCurrentTensor *dt, Particle *p) {
     double3 x2;
     double s;
@@ -811,9 +674,7 @@ void Cell::CurrentToMesh(double tau, int *cells, DoubleCurrentTensor *dt, Partic
     return;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::Reflect(Particle *p) {
     double3 x1 = p->GetX();
 
@@ -824,9 +685,7 @@ void Cell::Reflect(Particle *p) {
     p->SetX(x1);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -850,11 +709,10 @@ void Cell::Kernel(CellDouble &Jx,
     Jx.M[i41][i42][i43] += t4;//su*(dy*dz+s1);
 }
 
-__host__ __device__
+host_device
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
-
 void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau, CurrentTensor *t1, int num, Particle *p) {
     double dx, dy, dz, a, dx1, dy1, dz1, su, sv, sw, s1, s2, s3;
 
@@ -999,9 +857,7 @@ void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau, Current
 #endif
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -1036,10 +892,7 @@ void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau) {
     Kernel(*Jz, i.x, i.y, i.z, i.x, i.y + 1, i.z, i.x + 1, i.y, i.z, i.x + 1, i.y + 1, i.z, sw, dx, dy, dx1, dy1, s3);
 }
 
-
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 bool Cell::Insert(Particle &p) {
     if (isPointInCell(p.GetX())) {
         addParticleToSurface(&p, &number_of_particles);
@@ -1047,9 +900,7 @@ bool Cell::Insert(Particle &p) {
     } else return false;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -1065,9 +916,7 @@ void Cell::MoveSingleParticle(unsigned int i, CellTotalField cf) {
     writeParticleToSurface(i, &p);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 DoubleCurrentTensor Cell::AccumulateCurrentSingleParticle(unsigned int i, int *cells, DoubleCurrentTensor *dt) {
     Particle p;
     if (i >= number_of_particles) {
@@ -1091,10 +940,7 @@ DoubleCurrentTensor Cell::AccumulateCurrentSingleParticle(unsigned int i, int *c
     return (*dt);
 }
 
-
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::SetAllCurrentsToZero(uint3 threadIdx) {
     int i1, l1, k1;
 
@@ -1107,9 +953,7 @@ void Cell::SetAllCurrentsToZero(uint3 threadIdx) {
     Jz->M[i1][l1][k1] = 0;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 double Cell::getFortranArrayValue(double *E, int i, int l, int k) {
     int n = getFortranCellNumber(i, l, k);
 
@@ -1120,9 +964,7 @@ double Cell::getFortranArrayValue(double *E, int i, int l, int k) {
 
 // MAPPING: fORTRAN NODE i GOES TO 2nd NODE OF C++ CELL i-1
 // Simple : C++ (i+i1) ----->>>> F(i+i1-1)
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::readField(double *E, CellDouble &Ec, uint3 threadIdx) {
     int i_f, l_f, k_f;
     int i1, l1, k1;
@@ -1137,9 +979,7 @@ void Cell::readField(double *E, CellDouble &Ec, uint3 threadIdx) {
     Ec.M[i1][l1][k1] = t;
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::readField(double *E, CellDouble &Ec) {
     int i_f, l_f, k_f;
 
@@ -1155,11 +995,8 @@ void Cell::readField(double *E, CellDouble &Ec) {
     }
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
-void Cell::readFieldsFromArrays(double *glob_Ex, double *glob_Ey, double *glob_Ez, double *glob_Hx, double *glob_Hy,
-                          double *glob_Hz, uint3 threadIdx) {
+host_device
+void Cell::readFieldsFromArrays(double *glob_Ex, double *glob_Ey, double *glob_Ez, double *glob_Hx, double *glob_Hy, double *glob_Hz, uint3 threadIdx) {
     readField(glob_Ex, *Ex, threadIdx);
     readField(glob_Ey, *Ey, threadIdx);
     readField(glob_Ez, *Ez, threadIdx);
@@ -1168,9 +1005,7 @@ void Cell::readFieldsFromArrays(double *glob_Ex, double *glob_Ey, double *glob_E
     readField(glob_Hz, *Hz, threadIdx);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::readFieldsFromArrays(double *glob_Ex, double *glob_Ey, double *glob_Ez, double *glob_Hx, double *glob_Hy, double *glob_Hz) {
     readField(glob_Ex, *Ex);
     readField(glob_Ey, *Ey);
@@ -1180,9 +1015,7 @@ void Cell::readFieldsFromArrays(double *glob_Ex, double *glob_Ey, double *glob_E
     readField(glob_Hz, *Hz);
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 Cell &Cell::operator=(Cell const &src) {
     i = src.i;
     l = src.l;
@@ -1380,9 +1213,7 @@ void Cell::SetControlSystem(int j, double *c) {
 #endif
 }
 
-#ifdef __CUDACC__
-__host__ __device__
-#endif
+host_device
 void Cell::SetControlSystemToParticles() {
     Particle p;
     int i;

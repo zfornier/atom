@@ -14,8 +14,14 @@
 #include <vector>
 
 #include "particle.h"
-#include "read_particles.h"
 #include "run_control.h"
+
+typedef struct ParticleArrays {
+    double *dbg_x, *dbg_y, *dbg_z, *dbg_px, *dbg_py, *dbg_pz, q_m, *m;
+    int total;
+} ParticleArrays;
+
+void AllocateBinaryParticlesArrays(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons);
 
 double rnd_gaussian(double, double, int);
 
@@ -51,5 +57,7 @@ int convertParticleArraysToSTLvector(
         particle_sorts sort,
         std::vector <Particle> &vp
 );
+
+int AllocateBinaryParticleArraysOneSort(double **dbg_x, double **dbg_y, double **dbg_z, double **dbg_px, double **dbg_py, double **dbg_pz, double **m, int total_particles);
 
 #endif /* INIT_H_ */

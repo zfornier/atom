@@ -31,9 +31,8 @@
 #include "service_functions.h"
 #include "load_data.h"
 #include "gpucell.h"
-
-//TODO: It's an ugly style to include cu files. Include cuh (header files) only
 #include "kernels.h"
+#include "NetCdf/read_file.h"
 
 using namespace std;
 

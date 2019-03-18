@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "../../include/Plasma.h" // todo: change to header file (find couse of multiply definition error with .h file)
+#include "../../include/Plasma.h"
 #include "../../include/mpi_shortcut.h"
 #include "../../include/ConfigParser/Properties.h"
 
@@ -42,15 +42,15 @@ typedef struct {
     int st;                      // start step
     std::string checkFile;       // file to check with
 
-} Config;
+} PlasmaConfig;
 
 // TODO: move this to Properties.h or an appropriate cpp file
 // It shouldn't be here
-Config readConfig(std::ifstream &is) {
+PlasmaConfig readConfig(std::ifstream &is) {
     Properties properties;
     properties.load(is);
 
-    Config conf = Config();
+    PlasmaConfig conf = PlasmaConfig();
     try {
         conf.tempX = properties.stringToDouble(properties.getProperty("tempX"));
         conf.tempY = properties.stringToDouble(properties.getProperty("tempY"));
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     if (config != NULL) {
         string line;
         ifstream myfile(config);
-        Config conf;
+        PlasmaConfig conf;
 
         if (myfile.is_open()) {
             conf = readConfig(myfile);
@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
         delete plasma;
     } else {
         // TODO: print Usage info here 
-        printf("Config file is expected.\n");
+        printf("PlasmaConfig file is expected.\n");
     }
 
     return 0;

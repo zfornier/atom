@@ -32,21 +32,18 @@ int MemoryAllocate(void** dst,size_t size) {
    return 0;
 }
 #else
-
-int MemoryAllocate(void **dst, size_t size);
-
-#endif
-
-// ERROR: why it's ihndef here while you have ifdef otherwice?
-#ifndef __CUDACC__
-
-int getLastError() {
+int MemoryAllocate(void **dst, size_t size) {
     return 0;
 }
+#endif
 
-#else
+#ifdef __CUDACC__
 int getLastError() {
     return (int)cudaGetLastError();
+}
+#else
+int getLastError() {
+    return 0;
 }
 #endif
 
@@ -55,11 +52,11 @@ const char *getErrorString(int err) {
    return cudaGetErrorString((cudaError_t)err);
 }
 #else
-
-const char *getErrorString(int err) { return ""; }
-
+const char *getErrorString(int err) {
+    return "";
+}
 #endif
 
 #ifndef __CUDACC__
-//dim3 threadIdx, blockIdx;
+
 #endif

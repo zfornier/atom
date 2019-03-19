@@ -151,8 +151,6 @@ void InitGPUParticles() {
         GPUCell c;
         c = (*AllCells)[i];
 
-        h_controlParticleNumberArray[i] = c.number_of_particles;
-        /////////////////////////////////////////
         *n = c;
         err = getLastError();
         if (err != cudaSuccess) {

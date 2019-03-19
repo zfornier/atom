@@ -180,9 +180,6 @@ int Plasma::checkFields_beforeMagneticStageOne(int nt) {
 }
 
 int Plasma::checkFields_afterMagneticStageOne(int nt) {
-
-    CPU_field = 1;
-
     checkControlPoint(50, nt, 0);
     memory_monitor("afterComputeField_FirstHalfStep", nt);
 
@@ -235,7 +232,6 @@ void Plasma::ElectricFieldComponentEvaluatePeriodic(
 }
 
 void Plasma::ElectricFieldEvaluate(double *locEx, double *locEy, double *locEz, int nt, double *locHx, double *locHy, double *locHz, double *loc_npJx, double *loc_npJy, double *loc_npJz) {
-    CPU_field = 0;
     double3 c1 = getMagneticFieldTimeMeshFactors();
 
     ElectricFieldComponentEvaluateTrace(locEx, locHz, locHy, loc_npJx, 0, c1.y, c1.z, tau);
@@ -303,7 +299,7 @@ int Plasma::readStartPoint(int nt) {
     char fn[100];
 
     if (nt == START_STEP_NUMBER) {
-        readControlPoint(NULL, fn, 0, nt, 0, 1, Ex, Ey, Ez, Hx, Hy, Hz, Jx, Jy, Jz, Qx, Qy, Qz, dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz);
+        readControlPoint(NULL, fn, 0, nt, 0, 1, Ex, Ey, Ez, Hx, Hy, Hz, Jx, Jy, Jz, Qx, Qy, Qz);
 
         copyFieldsToGPU(
                 d_Ex, d_Ey, d_Ez,
@@ -326,8 +322,7 @@ int Plasma::readStartPoint(int nt) {
 }
 
 double Plasma::getElectricEnergy() {
-    dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimGridOne(1, 1, 1), dimBlock(MAX_particles_per_cell / 2, 1, 1),
-            dimBlockOne(1, 1, 1), dimBlockGrow(1, 1, 1), dimBlockExt(CellExtent, CellExtent, CellExtent);
+    dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimBlockOne(1, 1, 1);
     static int first = 1;
     static double *d_ee;
     double ee;
@@ -381,7 +376,9 @@ void Plasma::Diagnose(int nt) {
     fclose(f);
 }
 
-int Plasma::getBoundaryLimit(int dir) { return ((dir == 0) * Nx + (dir == 1) * Ny + (dir == 2) * Nz + 2); }
+int Plasma::getBoundaryLimit(int dir) {
+    return ((dir == 0) * Nx + (dir == 1) * Ny + (dir == 2) * Nz + 2);
+}
 
 int Plasma::getMagneticFieldTraceShifts(int dir, int3 &d1, int3 &d2) {
     d1.x = (dir == 0) * 0 + (dir == 1) * 1 + (dir == 2) * 0;
@@ -595,9 +592,7 @@ void Plasma::readControlPoint(FILE **f1, char *fncpy, int num, int nt, int part_
                               double *ex, double *ey, double *ez,
                               double *hx, double *hy, double *hz,
                               double *jx, double *jy, double *jz,
-                              double *qx, double *qy, double *qz,
-                              double *x, double *y, double *z,
-                              double *px, double *py, double *pz
+                              double *qx, double *qy, double *qz
 ) {
     char fn[100], fn_next[100];
     FILE *f;
@@ -653,7 +648,7 @@ void Plasma::checkControlPoint(int num, int nt, int check_part) {
     memory_monitor("checkControlPoint2", nt);
 
     readControlPoint(&f, fn_copy, num, nt, 1, 0, dbgEx, dbgEy, dbgEz, dbgHx, dbgHy, dbgHz, dbgJx, dbgJy, dbgJz,
-                     dbg_Qx, dbg_Qy, dbg_Qz, dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz);
+                     dbg_Qx, dbg_Qy, dbg_Qz);
 
     memory_monitor("checkControlPoint3", nt);
 
@@ -883,7 +878,6 @@ int Plasma::initControlPointFile() {
 
 int Plasma::copyCellsWithParticlesToGPU() {
     Cell c000 = (*AllCells)[0];
-    magf = 1;
     cudaError_t err;
 
     int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
@@ -1032,9 +1026,8 @@ int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
     return 0;
 }
 
-int Plasma::MakeParticleList(int nt, int *stage, int *stage1, int **d_stage, int **d_stage1) {
-    dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimGridOne(1, 1, 1), dimBlock(512, 1, 1), dimBlockOne(1, 1, 1), dimBlockGrow(1, 1, 1), dimBlockExt(CellExtent, CellExtent, CellExtent);
-    dim3 dimGridBulk(Nx, Ny, Nz);
+int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) {
+    dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimBlockOne(1, 1, 1);
     cudaError_t before_MakeDepartureLists, after_MakeDepartureLists;
 
     before_MakeDepartureLists = cudaGetLastError();
@@ -1080,7 +1073,7 @@ int Plasma::MakeParticleList(int nt, int *stage, int *stage1, int **d_stage, int
         exit(0);
     }
 
-    return (int) err;
+    return err;
 }
 
 int Plasma::inter_stage_diagnostic(int *stage, int nt) {
@@ -1123,7 +1116,6 @@ int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1
     printf("after_ArrangeFlights %d %s\n",after_ArrangeFlights,cudaGetErrorString(after_ArrangeFlights));
     cudaDeviceSynchronize();
 #endif
-
     err = MemoryCopy(stage1, d_stage1, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     if (err != cudaSuccess) {
         puts("copy error");
@@ -1137,7 +1129,7 @@ int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1
 int Plasma::reorder_particles(int nt) {
     int stage[4000], stage1[4000], *d_stage, *d_stage1, err;
 
-    MakeParticleList(nt, stage, stage1, &d_stage, &d_stage1);
+    MakeParticleList(nt, stage, &d_stage, &d_stage1);
 
     inter_stage_diagnostic(stage, nt);
 
@@ -1206,7 +1198,6 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, FILE *f, G
 #ifdef checkControlPointParticles_PRINT
         printf("cell %d particles %20d \n",i,c.number_of_particles);
 #endif
-
         t += c.checkCellParticles(check_point_num, dbg_x, dbg_y, dbg_z, dbg_px, dbg_py, dbg_pz, q_m, m);
     }
 

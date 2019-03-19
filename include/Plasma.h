@@ -16,7 +16,6 @@
 #include <nvToolsExtCudaRt.h>
 #endif
 
-//#include <time.h>
 //#ifdef __OMP__
 #include <omp.h>
 //#endif
@@ -34,41 +33,64 @@
 #include "kernels.h"
 #include "NetCdf/read_file.h"
 
-using namespace std;
-
 #define FORTRAN_ORDER
 
-//struct PlasmaSnapshot {
-//    // Параметры нужные для записи
-//};
+using namespace std;
+typedef struct {
+    double tempX;                // plasma electron temperature along X
+    double tempY;                // plasma electron temperature along Y
+    double tempZ;                // plasma electron temperature along Z
+    double beamImp;              // beam impulse - rimp
+    double beamVelDisp;          // beam velocity dispersion - Tb
+    double beamPlasmaDensityRat; // beam and plasma density ratio - rbd
+    double plsmDensity;          // plasma density - ni
+    double externalMagnFieldX;   // external magnetic field (along X)
+    double lx;                   // domain size X
+    double ly;                   // domain size Y
+    double lz;                   // domain size Z
+    double px;                   // plasma size X
+    double py;                   // plasma size Y
+    double bx;                   // beam size X
+    double by;                   // beam size Y
+    double bz;                   // beam size Z
+    int lp;                      // average number of particles in cell
+    int nx;                      // number of mesh nodes along X
+    int ny;                      // number of mesh nodes along Y
+    int nz;                      // number of mesh nodes along Z
+    double tau;                  // timestep
+    int beamPlasma;              // 1 if beam-plasma interaction, 0 if beam-beam
+    // Computation parameters
+    int startFromFile;           // moment to start from saved
+    int phase;                   // phase to start from save
+    int ts;                      // total steps
+    int ms;                      // number of steps between diagnostic files
+    int nsteps;                  //
+    int saveStep;                // save every saveStep step
+    int startSave;               // start save from startSave step
+    int checkOnStep;             // check on checkOnStep step
+    int st;                      // start step
+    std::string checkFile;       // file to check with
+
+} PlasmaConfig;
 
 class Plasma {
 public:
+    int Nx, Ny, Nz;
+    double Lx, Ly, Lz;
+    int n_per_cell;
+    double ni;
+    double ion_q_m, tau;
+
     GPUCell **h_CellArray, **d_CellArray;
     GPUCell **cp;
-    thrust::device_vector <GPUCell> *d_AllCells;
     double *d_Ex, *d_Ey, *d_Ez, *d_Hx, *d_Hy, *d_Hz, *d_Jx, *d_Jy, *d_Jz, *d_Rho, *d_npJx, *d_npJy, *d_npJz;
     double *d_Qx, *d_Qy, *d_Qz;
     double *dbg_x, *dbg_y, *dbg_z, *dbg_px, *dbg_py, *dbg_pz;
     int total_particles;
-    int h_controlParticleNumberArray[4000];
-    int jx_wrong_points_number;
-    int3 *jx_wrong_points, *d_jx_wrong_points;
-//#ifdef ATTRIBUTES_CHECK
-    double *ctrlParticles, *d_ctrlParticles, *check_ctrlParticles;
-//#endif
-    int jmp, size_ctrlParticles;
+    double *ctrlParticles, *d_ctrlParticles;
+    int size_ctrlParticles;
     double ami, amb, amf;
-    int real_number_of_particle[3];
     FILE *f_prec_report;
-    int CPU_field;
-    int Nx, Ny, Nz;
-    int n_per_cell;
-    int meh;
-    int magf;
-    double ion_q_m, tau;
-    double Lx, Ly, Lz;
-    double ni;
     double *Qx, *Qy, *Qz, *dbg_Qx, *dbg_Qy, *dbg_Qz;
     double *Ex, *Ey, *Ez, *Hx, *Hy, *Hz, *Jx, *Jy, *Jz, *Rho, *npJx, *npJy, *npJz;
     double *dbgEx, *dbgEy, *dbgEz, *dbgHx, *dbgHy, *dbgHz, *dbgJx, *dbgJy, *dbgJz;
@@ -84,12 +106,6 @@ public:
     Plasma(int, int, int, double, double, double, double, int, double, double);
 
     virtual ~Plasma();
-
-//    PlasmaSnapshot createSnapshot() {
-//        PlasmaSnapshot snapshot = new PlasmaSnapshot();
-//
-//        return snapshot;
-//    }
 
     void copyCells(std::string, int);
 
@@ -113,15 +129,9 @@ public:
 
     virtual void ComputeField_SecondHalfStep(int);
 
-    void ElectricFieldComponentEvaluateTrace(
-            double *, double *, double *, double *,
-            int, double, double, double);
+    void ElectricFieldComponentEvaluateTrace(double *, double *, double *, double *, int, double, double, double);
 
-    void ElectricFieldComponentEvaluatePeriodic(
-            double *,
-            int,
-            int, int, int, int, int, int,
-            int, int, int, int, int, int);
+    void ElectricFieldComponentEvaluatePeriodic(double *, int, int, int, int, int, int, int, int, int, int, int, int, int);
 
     void ElectricFieldEvaluate(double *, double *, double *, int, double *, double *, double *, double *, double *, double *);
 
@@ -161,13 +171,7 @@ public:
 
     void AssignCellsToArraysGPU();
 
-    void readControlPoint(FILE **, char *, int, int, int, int,
-                          double *, double *, double *,
-                          double *, double *, double *,
-                          double *, double *, double *,
-                          double *, double *, double *,
-                          double *, double *, double *,
-                          double *, double *, double *);
+    void readControlPoint(FILE **, char *, int, int, int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
 
     void checkControlPoint(int, int, int);
 
@@ -201,7 +205,7 @@ public:
 
     int WriteCurrentsFromCellsToArrays(int);
 
-    int MakeParticleList(int, int *, int *, int **, int **);
+    int MakeParticleList(int, int *, int **, int **);
 
     int inter_stage_diagnostic(int *, int);
 

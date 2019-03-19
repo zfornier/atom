@@ -4,8 +4,8 @@
 
 #include "../../include/PlasmaInitializer.h"
 
-PlasmaInitializer::PlasmaInitializer(Plasma * plasma) {
-    this->plasma = plasma;
+PlasmaInitializer::PlasmaInitializer(PlasmaConfig * p) {
+    this->p= p;
 }
 
 int PlasmaInitializer::InitializeGPU() {
@@ -160,7 +160,6 @@ void PlasmaInitializer::InitGPUParticles() {
         GPUCell c;
         c = (*AllCells)[i];
 
-        h_controlParticleNumberArray[i] = c.number_of_particles;
         /////////////////////////////////////////
         *n = c;
         err = getLastError();

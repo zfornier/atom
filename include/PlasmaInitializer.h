@@ -9,7 +9,7 @@
 
 class PlasmaInitializer {
 private:
-    Plasma * plasma;
+    PlasmaConfig * p;
 public:
     PlasmaInitializer(Plasma * plasma);
 

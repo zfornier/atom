@@ -394,8 +394,7 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
     return 0;
 } /* start_ */
 
-int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons,
-                  double ni, double rbd, int lp) {
+int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons, double ni, double rbd, int lp) {
     //int lp = ((double)N)/(Nx*Ny*Nz);
     electrons->m[0] = -ni / lp / 2.0;                 //!!!!!!
     ions->m[0] = (ni + rbd) / lp;
@@ -441,16 +440,13 @@ int convertParticleArraysToSTLvector(
         py = dbg_py[i];
         pz = dbg_pz[i];
 
-
         Particle p(x, y, z, px, py, pz, m, q_m);
 
         p.fortran_number = i + 1;
         p.sort = sort;
 
         vp.push_back(p);
-
     }
-    int size = vp.size();
 
     return 0;
 }

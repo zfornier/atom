@@ -26,14 +26,7 @@ void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, char *n
 
 int readBinaryParticleArraysOneSort(
         FILE *f, // What for?
-        double **dbg_x,
-        double **dbg_y,
-        double **dbg_z,
-        double **dbg_px,
-        double **dbg_py,
-        double **dbg_pz,
-        double *qq_m,
-        double *mm,
+        double **dbg_x, double **dbg_y, double **dbg_z, double **dbg_px, double **dbg_py, double **dbg_pz, double *qq_m, double *mm,
         int nt, // what for?
         int sort
 ) {

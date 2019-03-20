@@ -4,12 +4,14 @@
 
 #include "../../include/PlasmaInitializer.h"
 
-PlasmaInitializer::PlasmaInitializer(PlasmaConfig * p) {
-    this->p= p;
+PlasmaInitializer::PlasmaInitializer(PlasmaData * p) {
+    this->p = p;
 }
 
 int PlasmaInitializer::InitializeGPU() {
     int err = getLastError();
+    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
+
     if (err != cudaSuccess) {
         printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
     }
@@ -22,16 +24,16 @@ int PlasmaInitializer::InitializeGPU() {
     }
 
     InitGPUFields(
-            &d_Ex, &d_Ey, &d_Ez,
-            &d_Hx, &d_Hy, &d_Hz,
-            &d_Jx, &d_Jy, &d_Jz,
-            &d_npJx, &d_npJy, &d_npJz,
-            &d_Qx, &d_Qy, &d_Qz,
-            Ex, Ey, Ez,
-            Hx, Hy, Hz,
-            Jx, Jy, Jz,
-            npJx, npJy, npJz,
-            Qx, Qy, Qz,
+            &p->d_Ex, &p->d_Ey, &p->d_Ez,
+            &p->d_Hx, &p->d_Hy, &p->d_Hz,
+            &p->d_Jx, &p->d_Jy, &p->d_Jz,
+            &p->d_npJx, &p->d_npJy, &p->d_npJz,
+            &p->d_Qx, &p->d_Qy, &p->d_Qz,
+            p->Ex, p->Ey, p->Ez,
+            p->Hx, p->Hy, p->Hz,
+            p->Jx, p->Jy, p->Jz,
+            p->npJx, p->npJy, p->npJz,
+            p->Qx, p->Qy, p->Qz,
             Nx, Ny, Nz);
 
     err = getLastError();
@@ -56,29 +58,31 @@ int PlasmaInitializer::initMeshArrays() {
     Cell c000;
 
     InitCells();
-    c000 = (*AllCells)[0];
+    c000 = (*p->AllCells)[0];
 
     InitFields();
-    c000 = (*AllCells)[0];
+    c000 = (*p->AllCells)[0]; // TODO: why twice?
+
     InitCurrents();
 
     return 0;
 }
 
 void PlasmaInitializer::AssignArraysToCells() {
-    for (int n = 0; n < (*AllCells).size(); n++) {
-        Cell c = (*AllCells)[n];
-        c.readFieldsFromArrays(Ex, Ey, Ez, Hx, Hy, Hz);
+    for (int n = 0; n < (*p->AllCells).size(); n++) {
+        Cell c = (*p->AllCells)[n];
+        c.readFieldsFromArrays(p->Ex, p->Ey, p->Ez, p->Hx, p->Hy, p->Hz);
     }
 }
 
-virtual void PlasmaInitializer::InitializeCPU(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd) {
+void PlasmaInitializer::InitializeCPU(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd) {
     std::vector <Particle> ion_vp, el_vp, beam_vp;
     std::vector <Particle> ion_vp1, el_vp1, beam_vp1;
+    double Lx = p->lx, Ly = p->ly, Lz = p->lz;
 
     initMeshArrays();
 
-    getUniformMaxwellianParticles(ion_vp1, el_vp1, beam_vp1, tex0, tey0, tez0, Tb, rimp, rbd, ni, Lx, Ly, Lz);
+    getUniformMaxwellianParticles(ion_vp1, el_vp1, beam_vp1, tex0, tey0, tez0, Tb, rimp, rbd, p->plsmDensity, Lx, Ly, Lz);
 
     addAllParticleListsToCells(ion_vp1, el_vp1, beam_vp1);
 
@@ -105,6 +109,7 @@ void PlasmaInitializer::InitGPUParticles() {
     int size;
     GPUCell *d_c, *h_ctrl;
     GPUCell *n;
+    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
 
     dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimBlockOne(1, 1, 1);
 
@@ -126,7 +131,7 @@ void PlasmaInitializer::InitGPUParticles() {
     err = getLastError();
     if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
 
-    size = (*AllCells).size();
+    size = (int)(*p->AllCells).size();
     err = getLastError();
     if (err != cudaSuccess) {
         printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
@@ -145,8 +150,8 @@ void PlasmaInitializer::InitGPUParticles() {
         exit(0);
     }
 
-    h_CellArray = (GPUCell **) malloc(size * sizeof(Cell * ));
-    err = cudaMalloc((void **) &d_CellArray, size * sizeof(Cell * ));
+    p->h_CellArray = (GPUCell **) malloc(size * sizeof(Cell * ));
+    err = cudaMalloc((void **) &p->d_CellArray, size * sizeof(Cell * ));
 
     if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
 
@@ -158,7 +163,7 @@ void PlasmaInitializer::InitGPUParticles() {
     printf("%s : size = %d\n", __FILE__, size);
     for (int i = 0; i < size; i++) {
         GPUCell c;
-        c = (*AllCells)[i];
+        c = (*p->AllCells)[i];
 
         /////////////////////////////////////////
         *n = c;
@@ -168,7 +173,7 @@ void PlasmaInitializer::InitGPUParticles() {
             exit(0);
         }
 #ifdef ATTRIBUTES_CHECK
-        c.SetControlSystem(jmp,d_ctrlParticles);
+        c.SetControlSystem(p->jmp, p->d_ctrlParticles);
 #endif
         d_c = c.copyCellToDevice();
         err = getLastError();
@@ -187,15 +192,14 @@ void PlasmaInitializer::InitGPUParticles() {
             exit(0);
         }
 #ifdef COPY_CELL_PRINTS
-        double mfree,mtot;
+        double mfree, mtot;
         mtot  = m_total;
         mfree = m_free;
-        printf("cell %10d Device cell array allocated error %d %s memory: free %10.2f total %10.2f\n",i,err,getErrorString(err),
-                                                                mfree/1024/1024/1024,mtot/1024/1024/1024);
+        printf("cell %10d Device cell array allocated error %d %s memory: free %10.2f total %10.2f\n",i,err,getErrorString(err),mfree/1024/1024/1024,mtot/1024/1024/1024);
         puts("");
 
-      dbgPrintGPUParticleAttribute(d_c,50,1," CO2DEV " );
-      puts("COPY----------------------------------");
+        dbgPrintGPUParticleAttribute(d_c,50,1," CO2DEV " );
+        puts("COPY----------------------------------");
 #endif
 
 #ifdef PARTICLE_PRINTS
@@ -209,7 +213,7 @@ void PlasmaInitializer::InitGPUParticles() {
             exit(0);
         }
 
-        h_CellArray[i] = d_c;
+        p->h_CellArray[i] = d_c;
         err = MemoryCopy(h_ctrl, d_c, sizeof(Cell), DEVICE_TO_HOST);
 
         //  err = getLastError();
@@ -240,7 +244,7 @@ void PlasmaInitializer::InitGPUParticles() {
     if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
 
     //int err;
-    err = MemoryCopy(d_CellArray, h_CellArray, size * sizeof(Cell * ), HOST_TO_DEVICE);
+    err = MemoryCopy(p->d_CellArray, p->h_CellArray, size * sizeof(Cell * ), HOST_TO_DEVICE);
     if (err != cudaSuccess) {
         printf("bGPU_WriteControlSystem err %d %s \n", err, getErrorString(err));
         exit(0);
@@ -260,118 +264,119 @@ void PlasmaInitializer::InitGPUParticles() {
     }
 }
 
-virtual void PlasmaInitializer::Alloc() {
-    AllCells = new std::vector<GPUCell>;
+void PlasmaInitializer::Alloc() {
+    p->AllCells = new std::vector<GPUCell>;
+    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
 
-    Ex = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Ey = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Ez = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Hx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Hy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Hz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Jx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Jy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Jz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Rho = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Ex = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Ey = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Ez = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Hx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Hy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Hz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Jx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Jy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Jz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Rho = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-    npJx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    npJy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    npJz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->npJx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->npJy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->npJz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-    npEx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    npEy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    npEz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-
-    Qx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Qy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    Qz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Qx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Qy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    p->Qz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
 #ifdef DEBUG_PLASMA
-    dbgEx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgEy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgEz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgEx0  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgEy0  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgEz0  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbgEx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p-> dbgEy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbgEz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
 
-    dbgHx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgHy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgHz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgJx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgJy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgJz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbgHx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbgHy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbgHz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbgJx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbgJy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbgJz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
 
-    dbg_Qx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbg_Qy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbg_Qz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbg_Qx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbg_Qy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbg_Qz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
 #endif
 }
 
-virtual void PlasmaInitializer::InitFields() {
-    for (int i = 0; i < (Nx + 2) * (Ny + 2) * (Nz + 2); i++) {
-        Ex[i] = 0.0;
-        Ey[i] = 0.0;
-        Ez[i] = 0.0;
-        Hx[i] = 0.0;
-        Hy[i] = 0.0;
-        Hz[i] = 0.0;
+void PlasmaInitializer::InitFields() {
+    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
 
-        dbgEx[i] = 0.0;
-        dbgEy[i] = 0.0;
-        dbgEz[i] = 0.0;
-        dbgHx[i] = 0.0;
-        dbgHy[i] = 0.0;
-        dbgHz[i] = 0.0;
+    for (int i = 0; i < (Nx + 2) * (Ny + 2) * (Nz + 2); i++) {
+        p->Ex[i] = 0.0;
+        p->Ey[i] = 0.0;
+        p->Ez[i] = 0.0;
+        p->Hx[i] = 0.0;
+        p->Hy[i] = 0.0;
+        p->Hz[i] = 0.0;
+
+        p->dbgEx[i] = 0.0;
+        p->dbgEy[i] = 0.0;
+        p->dbgEz[i] = 0.0;
+        p->dbgHx[i] = 0.0;
+        p->dbgHy[i] = 0.0;
+        p->dbgHz[i] = 0.0;
     }
 }
 
-virtual void PlasmaInitializer::InitCells() {
+void PlasmaInitializer::InitCells() {
+    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
+    double Lx = p->lx, Ly = p->ly, Lz = p->lz;
+
     for (int i = 0; i < Nx + 2; i++) {
         for (int l = 0; l < Ny + 2; l++) {
             for (int k = 0; k < Nz + 2; k++) {
-                GPUCell *c = new GPUCell(i, l, k, Lx, Ly, Lz, Nx, Ny, Nz, tau);
+                GPUCell *c = new GPUCell(i, l, k, Lx, Ly, Lz, Nx, Ny, Nz, p->tau);
                 c->Init();
-                (*AllCells).push_back(*c);
+                (*p->AllCells).push_back(*c);
 #ifdef INIT_CELLS_DEBUG_PRINT
-                printf("%5d %5d %5d size %d \n",i,l,k,(*AllCells).size());
+                printf("%5d %5d %5d size %d \n",i,l,k,(*p->AllCells).size());
 #endif
             }
         }
     }
 }
 
-virtual void PlasmaInitializer::InitCurrents() {
-    for (int i = 0; i < (Nx + 2) * (Ny + 2) * (Nz + 2); i++) {
-        Jx[i] = 0.0;
-        Jy[i] = 0.0;
-        Jz[i] = 0.0;
-        Rho[i] = 0.0;
+void PlasmaInitializer::InitCurrents() {
+    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
 
-        dbgJx[i] = 0.0;
-        dbgJy[i] = 0.0;
-        dbgJz[i] = 0.0;
+    for (int i = 0; i < (Nx + 2) * (Ny + 2) * (Nz + 2); i++) {
+        p->Jx[i] = 0.0;
+        p->Jy[i] = 0.0;
+        p->Jz[i] = 0.0;
+        p->Rho[i] = 0.0;
+
+        p->dbgJx[i] = 0.0;
+        p->dbgJy[i] = 0.0;
+        p->dbgJz[i] = 0.0;
     }
 }
 
 int PlasmaInitializer::addParticleListToCells(std::vector <Particle> &vp) {
-    Cell c0 = (*AllCells)[0];
+    Cell c0 = (*p->AllCells)[0];
     int n;
 
     for (int i = 0; i < vp.size(); i++) {
-        Particle p = vp[i];
+        Particle particle = vp[i];
 
         double3 d;
-        d.x = p.x;
-        d.y = p.y;
-        d.z = p.z;
+        d.x = particle.x;
+        d.y = particle.y;
+        d.z = particle.z;
 
         n = c0.getPointCell(d);
 
-        Cell &c = (*AllCells)[n];
+        Cell & c = (*p->AllCells)[n];
 
-        if (c.Insert(p) == true) {
+        if (c.Insert(particle)) {
 #ifdef PARTICLE_PRINTS1000
-            if((i+1)%1000 == 0) {
+            if((i + 1) % 1000 == 0) {
                 printf("particle %d (%e,%e,%e) is number %d in cell (%d,%d,%d)\n", i+1, x,y,z,c.number_of_particles,c.i,c.l,c.k);
             }
 #endif
@@ -387,4 +392,86 @@ int PlasmaInitializer::addAllParticleListsToCells(std::vector <Particle> &ion_vp
     addParticleListToCells(beam_vp);
 
     return 0;
+}
+
+int PlasmaInitializer::initControlPointFile() {
+    p->f_prec_report = fopen("control_points.dat", "wt");
+    fclose(p->f_prec_report);
+
+    return 0;
+}
+
+int PlasmaInitializer::copyCellsWithParticlesToGPU() {
+    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
+
+    Cell c000 = (*p->AllCells)[0];
+    cudaError_t err;
+
+    int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
+
+    p->cp = (GPUCell **) malloc(size * sizeof(GPUCell *));
+
+    if ((err = cudaGetLastError()) != cudaSuccess) {
+        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err));
+    }
+
+    for (int i = 0; i < size; i++) {
+        GPUCell c, *d_c;
+        d_c = c.allocateCopyCellFromDevice();
+        if ((err = cudaGetLastError()) != cudaSuccess) {
+            printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err));
+        }
+
+        p->cp[i] = d_c;
+    }
+
+    if ((err = cudaGetLastError()) != cudaSuccess) {
+        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err));
+    }
+
+    return 0;
+}
+
+int PlasmaInitializer::readControlFile(int nt) {
+
+#ifndef ATTRIBUTES_CHECK
+    return 0;
+#else
+    FILE *f;
+    char fname[100];
+    static int first = 1;
+    int size;
+
+    sprintf(fname,"ctrl%05d",nt);
+
+    if((f = fopen(fname,"rb")) == NULL) {
+        puts("no ini-file");
+        exit(0);
+    }
+
+    fread(&size,sizeof(int),1,f);
+    fread(&p->ami,sizeof(double),1,f);
+    fread(&p->amf,sizeof(double),1,f);
+    fread(&p->amb,sizeof(double),1,f);
+    fread(&size,sizeof(int),1,f);
+
+    fread(&size,sizeof(int),1,f);
+
+    if(first == 1) {
+        first = 0;
+        p->ctrlParticles = (double *)malloc(size);
+#ifdef ATTRIBUTES_CHECK
+        memset(p->ctrlParticles,0,size);
+        cudaMalloc((void **)&p->d_ctrlParticles,size);
+        cudaMemset(p->d_ctrlParticles,0,size);
+        p->size_ctrlParticles = size;
+#endif
+    }
+    fread(p->ctrlParticles,1,size,f);
+
+
+    p->jmp = size / sizeof(double) / PARTICLE_ATTRIBUTES / 3;
+
+    return 0;
+#endif
 }

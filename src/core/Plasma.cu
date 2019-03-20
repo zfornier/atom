@@ -28,7 +28,7 @@ Plasma::~Plasma() {}
 void Plasma::copyCells(std::string where, int nt) {
     static int first = 1;
     size_t m_free, m_total;
-    int size = (*AllCells).size();
+    int size = (int)(*AllCells).size();
     struct sysinfo info;
 
     if (first == 1) {
@@ -55,7 +55,6 @@ void Plasma::copyCells(std::string where, int nt) {
 
         delta = m1 - m2;
         accum += delta;
-
     }
 
     if (first == 1) {
@@ -1477,4 +1476,8 @@ int Plasma::Compute(int startStep, int totalSteps, int startSaveStep, int saveSt
  */
 int Plasma::Compute(int startStep, int totalSteps) {
     return Compute(startStep, totalSteps, 0, 0);
+}
+
+void Plasma::Initialize() {
+    PlasmaInitializer * plasmaInitializer = new PlasmaInitializer(pd);
 }

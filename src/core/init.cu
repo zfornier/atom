@@ -268,10 +268,6 @@ virtual void Alloc() {
     npJy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     npJz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-    npEx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    npEy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    npEz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-
     Qx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     Qy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     Qz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
@@ -280,9 +276,6 @@ virtual void Alloc() {
     dbgEx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     dbgEy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     dbgEz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgEx0  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgEy0  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    dbgEz0  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
 
     dbgHx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     dbgHy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];

@@ -1,4 +1,3 @@
-
 #include "../../include/service_functions.h"
 
 using namespace std;
@@ -6,7 +5,7 @@ using namespace std;
 int setPrintfLimit() {
     size_t sizeP;
 
-    printf("Particle size %lu %lu CurrentTensor %d short %d\n", sizeof(Particle), sizeof(Particle) / sizeof(double), sizeof(CurrentTensor), sizeof(char));
+    printf("Particle size %lu %lu CurrentTensor %d short %d\n", sizeof(Particle), sizeof(Particle) / sizeof(double), (int)sizeof(CurrentTensor), (int)sizeof(char));
 
     cudaDeviceGetLimit(&sizeP, cudaLimitPrintfFifoSize);
 

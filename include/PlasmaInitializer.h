@@ -5,14 +5,19 @@
 #ifndef ATOM_PLASMAINITIALIZATOR_H
 #define ATOM_PLASMAINITIALIZATOR_H
 
-#include "Plasma.h"
+#include "PlasmaTypes.h"
+#include "maxwell.h"
+#include "service_functions.h"
 
 class PlasmaInitializer {
 private:
-    PlasmaConfig * p;
+    PlasmaData * p;
 public:
-    PlasmaInitializer(Plasma * plasma);
+    PlasmaInitializer(PlasmaData * plasma);
 
+    void Initialize(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd);
+
+private:
     int InitializeGPU();
 
     int initMeshArrays();
@@ -20,8 +25,6 @@ public:
     void AssignArraysToCells();
 
     virtual void InitializeCPU(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd);
-
-    void Initialize(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd);
 
     void InitGPUParticles();
 
@@ -36,6 +39,12 @@ public:
     int addParticleListToCells(std::vector <Particle> &vp);
 
     int addAllParticleListsToCells(std::vector <Particle> &ion_vp, std::vector <Particle> &el_vp, std::vector <Particle> &beam_vp);
+
+    int initControlPointFile();
+
+    int copyCellsWithParticlesToGPU();
+
+    int readControlFile(int);
 };
 
 #endif //ATOM_PLASMAINITIALIZATOR_H

@@ -271,7 +271,6 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
         wi[j - 1] = 0.0;
     }
 
-
 //    parasetrandombeam_();
 /*     END RANDOM GENERATOR */
 /* ****************** BEAM **************************************** */
@@ -295,7 +294,6 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
 #endif
             (*jmb_real)++;
         }
-
     }
 
     //1st beam particle impulse:    0.20296063288436139
@@ -450,7 +448,6 @@ int convertParticleArraysToSTLvector(
 
     return 0;
 }
-
 
 int getUniformMaxwellianParticles(std::vector <Particle> &ion_vp,
                                   std::vector <Particle> &el_vp,

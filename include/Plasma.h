@@ -16,10 +16,6 @@
 #include <nvToolsExtCudaRt.h>
 #endif
 
-//#ifdef __OMP__
-#include <omp.h>
-//#endif
-
 #include <sys/resource.h>
 #include <stdint.h>
 #include <sys/sysinfo.h>
@@ -65,8 +61,7 @@ public:
     FILE *f_prec_report;
 
 private:
-    PlasmaData * pd;
-    PlasmaComputationConfig * pcc;
+    PlasmaConfig * pd;
 
     string dataFileStartPattern;
     string dataFileEndPattern;

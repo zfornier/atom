@@ -43,32 +43,6 @@ typedef struct {
     int st;                      // start step
     std::string checkFile;       // file to check with
 
-} PlasmaConfig;
-
-typedef struct {
-    double tempX;                // plasma electron temperature along X
-    double tempY;                // plasma electron temperature along Y
-    double tempZ;                // plasma electron temperature along Z
-    double beamImp;              // beam impulse - rimp
-    double beamVelDisp;          // beam velocity dispersion - Tb
-    double beamPlasmaDensityRat; // beam and plasma density ratio - rbd
-    double plsmDensity;          // plasma density - ni
-    double externalMagnFieldX;   // external magnetic field (along X)
-    double lx;                   // domain size X
-    double ly;                   // domain size Y
-    double lz;                   // domain size Z
-    double px;                   // plasma size X
-    double py;                   // plasma size Y
-    double bx;                   // beam size X
-    double by;                   // beam size Y
-    double bz;                   // beam size Z
-    int lp;                      // average number of particles in cell
-    int nx;                      // number of mesh nodes along X
-    int ny;                      // number of mesh nodes along Y
-    int nz;                      // number of mesh nodes along Z
-    double tau;                  // timestep
-    int beamPlasma;              // 1 if beam-plasma interaction, 0 if beam-beam
-
     int jmp;
     int total_particles;
     int size_ctrlParticles;
@@ -84,21 +58,7 @@ typedef struct {
     double *dbgEx, *dbgEy, *dbgEz, *dbgHx, *dbgHy, *dbgHz, *dbgJx, *dbgJy, *dbgJz;
     std::vector <GPUCell> *AllCells;
     FILE *f_prec_report;
+} PlasmaConfig;
 
-} PlasmaData;
-
-typedef struct {
-    int startFromFile;           // moment to start from saved
-    int phase;                   // phase to start from save
-    int ts;                      // total steps
-    int ms;                      // number of steps between diagnostic files
-    int nsteps;                  //
-    int saveStep;                // save every saveStep step
-    int startSave;               // start save from startSave step
-    int checkOnStep;             // check on checkOnStep step
-    int st;                      // start step
-    std::string checkFile;       // file to check with
-
-} PlasmaComputationConfig;
 
 #endif //ATOM_PLASMACONFIG_H

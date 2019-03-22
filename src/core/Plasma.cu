@@ -23,6 +23,10 @@ Plasma::Plasma(int nx, int ny, int nz, double lx, double ly, double lz, double n
     dataFileEndPattern = ".nc";
 }
 
+Plasma::Plasma(PlasmaConfig *p) {
+    this->pd = p;
+}
+
 Plasma::~Plasma() {}
 
 void Plasma::copyCells(std::string where, int nt) {

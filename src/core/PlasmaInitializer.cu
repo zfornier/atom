@@ -4,7 +4,7 @@
 
 #include "../../include/PlasmaInitializer.h"
 
-PlasmaInitializer::PlasmaInitializer(PlasmaData * p) {
+PlasmaInitializer::PlasmaInitializer(PlasmaConfig * p) {
     this->p = p;
 }
 
@@ -75,24 +75,24 @@ void PlasmaInitializer::AssignArraysToCells() {
     }
 }
 
-void PlasmaInitializer::InitializeCPU(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd) {
+void PlasmaInitializer::InitializeCPU() {
     std::vector <Particle> ion_vp, el_vp, beam_vp;
     std::vector <Particle> ion_vp1, el_vp1, beam_vp1;
     double Lx = p->lx, Ly = p->ly, Lz = p->lz;
 
     initMeshArrays();
 
-    getUniformMaxwellianParticles(ion_vp1, el_vp1, beam_vp1, tex0, tey0, tez0, Tb, rimp, rbd, p->plsmDensity, Lx, Ly, Lz);
+    getUniformMaxwellianParticles(ion_vp1, el_vp1, beam_vp1, p->tempX, p->tempY, p->tempZ, p->beamVelDisp, p->beamImp, p->beamPlasmaDensityRat, p->plsmDensity, Lx, Ly, Lz);
 
     addAllParticleListsToCells(ion_vp1, el_vp1, beam_vp1);
 
     AssignArraysToCells();
 }
 
-void PlasmaInitializer::Initialize(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd) {
-    int err = getLastError();
+void PlasmaInitializer::Initialize() {
+    int err;
 
-    InitializeCPU(tex0, tey0, tez0, Tb, rimp, rbd);
+    InitializeCPU();
 
     copyCellsWithParticlesToGPU();
 

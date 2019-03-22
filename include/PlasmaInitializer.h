@@ -11,11 +11,11 @@
 
 class PlasmaInitializer {
 private:
-    PlasmaData * p;
+    PlasmaConfig * p;
 public:
-    PlasmaInitializer(PlasmaData * plasma);
+    PlasmaInitializer(PlasmaConfig * plasma);
 
-    void Initialize(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd);
+    void Initialize();
 
 private:
     int InitializeGPU();
@@ -24,7 +24,7 @@ private:
 
     void AssignArraysToCells();
 
-    virtual void InitializeCPU(double tex0, double tey0, double tez0, double Tb, double rimp, double rbd);
+    virtual void InitializeCPU();
 
     void InitGPUParticles();
 

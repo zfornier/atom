@@ -184,16 +184,7 @@ int in_range(double z0, double z, double z1) {
     return ((z > z0) && (z < z1)) || ((fabs(z - z0) < 1e-13) && (fabs(z - z1) < 1e-13));
 }
 
-int AllocateBinaryParticleArraysOneSort(
-        double **dbg_x,
-        double **dbg_y,
-        double **dbg_z,
-        double **dbg_px,
-        double **dbg_py,
-        double **dbg_pz,
-        double **m,
-        int total_particles
-) {
+int AllocateBinaryParticleArraysOneSort(double **dbg_x, double **dbg_y, double **dbg_z, double **dbg_px, double **dbg_py, double **dbg_pz, double **m, int total_particles) {
     *dbg_x = (double *) malloc(sizeof(double) * total_particles);
 
     *dbg_y = (double *) malloc(sizeof(double) * total_particles);
@@ -271,8 +262,6 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
         wi[j - 1] = 0.0;
     }
 
-//    parasetrandombeam_();
-/*     END RANDOM GENERATOR */
 /* ****************** BEAM **************************************** */
     *jmb_real = 0;
     for (j = 1; j <= jmb; j++) {
@@ -314,19 +303,8 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
         printf("beam %10d %25.15e  %25.15e    %25.15e %25.15e %25.15e   %25.15e \n", j,  xb[j - 1],yb[j - 1],vb0,    ub[j-1],vb[j - 1],wb[j - 1]);
 #endif
     }
-/*     MAKING THE RANDOM GENERATOR WORK THE SAME */
-//    parasetrandomelectrons_();
-/*     END RANDOM GENERATOR */
 
-//     vy = rnd_gaussian(0.0,tey0,1);
-//     vz = rnd_gaussian(0.0,tez0,1);
-//  
-//     termx = rnd_gaussian(0.0,tex0,1); 
-    j = 1;
     for (j = 1; j <= jmb; j++) {
-        if ((2 * j - 1) == 24933) {
-//    		   int qq = 0;
-        }
         xf[2 * j - 1 - 1] = xi[j - 1];
         yf[2 * j - 1 - 1] = yi[j - 1];
         zf[2 * j - 1 - 1] = zi[j - 1];
@@ -335,13 +313,13 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
         yf[2 * j - 1] = yi[j - 1];
         zf[2 * j - 1] = zi[j - 1];
 
-//         FIRST SETTING TRANVERSE
-// razbros v skorostyax
+//      FIRST SETTING TRANVERSE
+//      razbros v skorostyax
 
         vy = rnd_gaussian(0.0, tey0, 0);
         vz = rnd_gaussian(0.0, tez0, 0);
 
-//          INVERSE CURRENT
+//      INVERSE CURRENT
 
         termx = rnd_gaussian(0.0, tex0, 0);
 
@@ -360,9 +338,6 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
         pinv2 = vf02 * pow((1.0 - pow(vf02, 2) - vy * vy - vz * vz), -0.5);
 
         vf[2 * j - 2] = vy * pow((1.0 - pow(vf01, 2) - vy * vy - vz * vz), -0.5);
-// 	  write(37,127) 2*j-1,vy,vf01,vz,                                                                                                                                                                        
-//      +    vy/dsqrt((1d0-vf01**2-vy**2-vz**2))
-//           printf("%10d vy %15.5e vf01 %15.5e vz %15.5e vf %15.5e \n",2*j-1,vy,vf01,vz,vy*pow((1.0-pow(vf02,2)-vy*vy-vz*vz),-0.5));
         vf[2 * j - 1] = -vy * pow((1.0 - pow(vf02, 2) - vy * vy - vz * vz), -0.5);
 
         wf[2 * j - 2] = vz * pow((1.0 - pow(vf01, 2) - vy * vy - vz * vz), -0.5);
@@ -370,10 +345,6 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
 
         uf[2 * j - 2] = pinv1 + 0.01 * sin(mfrq * 2.0 * M_PI * xf[2 * j - 2] / lx);
         uf[2 * j - 1] = pinv2 + 0.01 * sin(mfrq * 2.0 * M_PI * xf[2 * j - 1] / lx);
-
-// c my correct end
-//           printf("j %10d ub(j) %15.5e uf(j) %15.5e gb0 %15.5e vb0 %15.5e vf0 %15.5e pinv  %15.5e termx %15.5e\n",
-// 		  j,     ub[j-1],     uf[j-1],     gb0,       vb0,       vf01,      pinv1,       termx);
 
 #ifdef DEBUG_INITIAL_PARTICLE_PRINTS
         printf("electron %10d %25.15e %25.15e %25.15e %25.15e \n",2*j-2,yi[j - 1],uf[2*j-2],vf[2*j-2],wf[2*j-2]);
@@ -394,7 +365,7 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
 
 int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons, double ni, double rbd, int lp) {
     //int lp = ((double)N)/(Nx*Ny*Nz);
-    electrons->m[0] = -ni / lp / 2.0;                 //!!!!!!
+    electrons->m[0] = -ni / lp / 2.0;     //!!!!!!
     ions->m[0] = (ni + rbd) / lp;
     beam_electrons->m[0] = -rbd / lp;
 

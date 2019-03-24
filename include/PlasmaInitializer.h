@@ -17,12 +17,13 @@ public:
 
     void Initialize();
 
+    void AssignArraysToCells();
+
 private:
+
     int InitializeGPU();
 
     int initMeshArrays();
-
-    void AssignArraysToCells();
 
     virtual void InitializeCPU();
 

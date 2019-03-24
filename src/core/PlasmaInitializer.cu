@@ -256,7 +256,6 @@ void PlasmaInitializer::InitGPUParticles() {
 #ifdef ATTRIBUTES_CHECK
     GPU_WriteControlSystem<<<dimGrid, dimBlockOne,16000>>>(d_CellArray);
 #endif
-    size = 0;
 
     err = getLastError();
     if (err != cudaSuccess) {

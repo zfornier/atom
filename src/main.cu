@@ -49,12 +49,11 @@ int main(int argc, char *argv[]) {
 
         cout << "begin Particle size " <<  sizeof(Particle) << endl;
 
-        // TODO: why are those magic constants here? ----------------------------------------------\_______/---
-        plasma = new Plasma(conf.nx, conf.ny, conf.nz, conf.lx, conf.ly, conf.lz, conf.plsmDensity, 2000, 1.0, conf.tau);
+        plasma = new Plasma(&conf);
 
-        plasma->Initialize(conf.tempX, conf.tempY, conf.tempZ, conf.beamVelDisp, conf.beamImp, conf.beamPlasmaDensityRat);
+        plasma->Initialize();
 
-        plasma->Compute(conf.st, conf.ts);
+        plasma->Compute();
 
         CloseMPI();
 

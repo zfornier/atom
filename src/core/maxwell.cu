@@ -158,7 +158,7 @@ doublereal wrapg05cae_(doublereal *x, int dbg_print) {
 // #ifdef DEBUG_PLASMA
     n++;
     if (dbg_print == 1) {
-        printf("%10d %25.15e \n", n, t);
+        std::cout << n << " " << t << std::endl;
     }
 // #endif
 

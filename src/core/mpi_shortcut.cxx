@@ -27,7 +27,7 @@ int sumMPI(int size, double *d_jx, double *d_jy, double *d_jz) {
     int err = MemoryCopy(jx, d_jx, size * sizeof(double), DEVICE_TO_HOST);
     int err1 = MemoryCopy(jy, d_jy, size * sizeof(double), DEVICE_TO_HOST);
     int err2 = MemoryCopy(jz, d_jz, size * sizeof(double), DEVICE_TO_HOST);
-    printf("sumMPI: err %d err1 %d err2 %d \n", err, err1, err2);
+    std::cout << "sumMPI: err " << err << " err1 " << err1 << " err2 " << err2 << std::endl;
 
     snd = (double *) malloc(3 * size * sizeof(double));
     rcv = (double *) malloc(3 * size * sizeof(double));
@@ -49,7 +49,7 @@ int sumMPI(int size, double *d_jx, double *d_jy, double *d_jz) {
     err = MemoryCopy(d_jx, jx, size * sizeof(double), HOST_TO_DEVICE);
     err1 = MemoryCopy(d_jy, jy, size * sizeof(double), HOST_TO_DEVICE);
     err2 = MemoryCopy(d_jz, jz, size * sizeof(double), HOST_TO_DEVICE);
-    printf("sumMPI-after: err %d err1 %d err2 %d \n", err, err1, err2);
+    std::cout << "sumMPI: err " << err << " err1 " << err1 << " err2 " << err2 << std::endl;
 
     return 0;
 }

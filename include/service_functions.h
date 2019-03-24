@@ -10,7 +10,7 @@
 
 #include <string>
 #include <stdio.h>
-
+#include <iostream>
 #include "archAPI.h"
 #include "particle.h"
 

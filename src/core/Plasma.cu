@@ -84,7 +84,6 @@ double Plasma::checkGPUArray(double *a, double *d_a, std::string name, std::stri
 
     sprintf(fname, "diff_%s_at_%s_nt%08d.dat", name.c_str(), where.c_str(), nt);
 
-
     if (f1 == 1) {
         t = (double *) malloc(sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
         f1 = 0;
@@ -180,7 +179,9 @@ int Plasma::checkFields_afterMagneticStageOne(int nt) {
 void Plasma::checkCudaError() {
     cudaError_t err;
     err = cudaGetLastError();
-    if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err)); }
+    if(err != cudaSuccess) {
+        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err));
+    }
 }
 
 void Plasma::ComputeField_FirstHalfStep(int nt) {
@@ -205,12 +206,7 @@ void Plasma::ElectricFieldComponentEvaluateTrace(double *E, double *H1, double *
     ElectricFieldTrace(E, H1, H2, J, dir, c1, c2, tau);
 }
 
-void Plasma::ElectricFieldComponentEvaluatePeriodic(
-        double *E,
-        int dir,
-        int dir_1, int start1_1, int end1_1, int start2_1, int end2_1, int N_1,
-        int dir_2, int start1_2, int end1_2, int start2_2, int end2_2, int N_2
-) {
+void Plasma::ElectricFieldComponentEvaluatePeriodic(double *E, int dir, int dir_1, int start1_1, int end1_1, int start2_1, int end2_1, int N_1, int dir_2, int start1_2, int end1_2, int start2_2, int end2_2, int N_2) {
     if (dir != 0) {
         PeriodicBoundaries(E, dir_1, start1_1, end1_1, start2_1, end2_1, N_1);
     }
@@ -684,7 +680,7 @@ void Plasma::checkControlPoint(int num, int nt) {
     memory_monitor("checkControlPoint6", nt);
 
     double cp = checkControlPointParticles(num, f, fn_copy, nt);
-    printf("STEP: %d\n", nt);
+    cout << "STEP: " <<  nt << endl;
     pd->f_prec_report = fopen("control_points.dat", "at");
     fprintf(pd->f_prec_report,
             " nt %5d\n num %6d\n Ex %15.5e\n Ey %15.5e\n Ez %15.5e\n Hx %15.5e\n Hy %15.5e\n Hz %15.5e\n Jx %15.5e\n Jy %15.5e\n Jz %15.5e\n Qx %15.5e\n Qy %15.5e\n Qz %15.5e\n particles %15.5e\n",
@@ -723,8 +719,7 @@ double Plasma::CheckArray(double *a, double *dbg_a, FILE *f) {
         }
     }
 #ifdef CHECK_ARRAY_DETAIL_PRINTS
-    fprintf(f,"  end array checking============================= %.4f less than %15.5e diff %15.5e \n",
-            (1.0-((double)wrong/((Nx + 2)*(Ny + 2)*(Nz + 2)))),TOLERANCE, pow(diff/((Nx + 2)*(Ny + 2)*(Nz + 2)),0.5));
+    fprintf(f,"  end array checking============================= %.4f less than %15.5e diff %15.5e \n",(1.0-((double)wrong/((Nx + 2)*(Ny + 2)*(Nz + 2)))),TOLERANCE, pow(diff/((Nx + 2)*(Ny + 2)*(Nz + 2)),0.5));
 #endif
 
     return pow(diff, 0.5);
@@ -735,10 +730,6 @@ double Plasma::CheckArray(double *a, double *dbg_a) {
     int wrong = 0;
     double diff = 0.0;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
-
-#ifdef CHECK_ARRAY_DETAIL_PRINTS
-    puts("begin array checking2=============================");
-#endif
 
     for (int n = 0; n < (Nx + 2) * (Ny + 2) * (Nz + 2); n++) {
         diff += pow(a[n] - dbg_a[n], 2.0);
@@ -909,10 +900,11 @@ int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
 int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
     dim3 dimGrid((unsigned int)(Nx + 2), (unsigned int)(Ny + 2), (unsigned int)(Nz + 2)), dimBlockOne(1, 1, 1);
+
     cudaError_t before_MakeDepartureLists, after_MakeDepartureLists;
 
     before_MakeDepartureLists = cudaGetLastError();
-    printf("before_MakeDepartureLists %d %s blockdim %d %d %d\n", before_MakeDepartureLists, cudaGetErrorString(before_MakeDepartureLists), dimGrid.x, dimGrid.y, dimGrid.z);
+    cout << "before_MakeDepartureLists" << before_MakeDepartureLists << " " <<  cudaGetErrorString(before_MakeDepartureLists) << " blockdim " << dimGrid.x << " : " << dimGrid.y << " : " <<  dimGrid.z << endl;
 
     cudaMalloc((void **) d_stage, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
 
@@ -936,7 +928,7 @@ int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) 
     after_MakeDepartureLists = cudaGetLastError();
 
     if (after_MakeDepartureLists != cudaSuccess) {
-        printf("after_MakeDepartureLists %d %s\n", after_MakeDepartureLists, cudaGetErrorString(after_MakeDepartureLists));
+        cout << "after_MakeDepartureLists " << after_MakeDepartureLists << " : " << cudaGetErrorString(after_MakeDepartureLists) << endl;
     }
 
     cudaDeviceSynchronize();
@@ -944,13 +936,13 @@ int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) 
     int err = cudaGetLastError();
 
     if (err != cudaSuccess) {
-        printf("MakeParticleList sync error %d %s\n", err, getErrorString(err));
+        cout << "MakeParticleList sync error " << err << " : " << getErrorString(err) << endl;
     }
 
     err = MemoryCopy(stage, *d_stage, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
 
     if (err != cudaSuccess) {
-        printf("MakeParticleList error %d %s\n", err, getErrorString(err));
+        cout << "MakeParticleList error " << err << " : " << getErrorString(err) << endl;
         exit(0);
     }
 
@@ -1267,10 +1259,10 @@ void Plasma::Step(int step) {
 
     PushParticles(step);
 
-    puts("push ended");
+    cout << "push ended" << endl;
 
     ComputeField_SecondHalfStep(step);
-    puts("field computed-2");
+    cout << "field computed-2" << endl;
 
     sumMPI((Nx + 2) * (Ny + 2) * (Nz + 2), pd->d_Jx, pd->d_Jy, pd->d_Jz);
 
@@ -1278,7 +1270,7 @@ void Plasma::Step(int step) {
 }
 
 int Plasma::Compute() {
-    printf("----------------------------------------------------------- \n");
+    cout << "----------------------------------------------------------- " << endl;
     size_t m_free, m_total;
 
     cudaMemGetInfo(&m_free, &m_total);
@@ -1300,9 +1292,10 @@ int Plasma::Compute() {
 
         memory_status_print(step);
 
-        printf("step %d ===================\n", step);
+        cout << "step " << step << " ===================" << endl;
     }
-    printf("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ \n");
+
+    cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 
     return 0;
 }

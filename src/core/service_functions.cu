@@ -5,18 +5,18 @@ using namespace std;
 int setPrintfLimit() {
     size_t sizeP;
 
-    printf("Particle size %lu %lu CurrentTensor %d short %d\n", sizeof(Particle), sizeof(Particle) / sizeof(double), (int)sizeof(CurrentTensor), (int)sizeof(char));
+    std::cout << "Particle size " << sizeof(Particle) << " : " << sizeof(Particle) / sizeof(double) << ". CurrentTensor " << (int)sizeof(CurrentTensor) << " short " << (int)sizeof(char) << std::endl;
 
     cudaDeviceGetLimit(&sizeP, cudaLimitPrintfFifoSize);
 
-    printf("printf default limit %lu \n", sizeP / 1024 / 1024);
+    std::cout << "print default limit " << sizeP / 1024 / 1024 << std::endl;
 
     sizeP *= 10000;
     cudaDeviceSetLimit(cudaLimitPrintfFifoSize, sizeP);
 
     cudaDeviceGetLimit(&sizeP, cudaLimitPrintfFifoSize);
 
-    printf("printf limit set to %lu \n", sizeP / 1024 / 1024);
+    std::cout << "print limit set to " << sizeP / 1024 / 1024 << std::endl;
 
     return 0;
 }

@@ -716,12 +716,6 @@ virtual
 void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau, CurrentTensor *t1, int num, Particle *p) {
     double dx, dy, dz, a, dx1, dy1, dz1, su, sv, sw, s1, s2, s3;
 
-#ifdef PARTICLE_TRACE
-    if(p->fortran_number == 32587 && p->sort == 2) {
-            printf("pqr 32587 x1 %25.15e \n",x1.x);
-        }
-#endif
-
     dx = getCenterRelatedShift(x.x, x1.x, i.x, hx, x0); //0.5d0*(x+x1)-h1*(i-1.5d0)
     dy = getCenterRelatedShift(x.y, x1.y, i.y, hy, y0); //0.5d0*(y+y1)-y0-h2*(l-1.5d0)
     dz = getCenterRelatedShift(x.z, x1.z, i.z, hz, z0); //0.5d0*(z+z1)-h3*(k-1.5d0)
@@ -744,11 +738,7 @@ void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau, Current
     su = x1.x - x.x;
     sv = x1.y - x.y;
     sw = x1.z - x.z;
-#ifdef PARTICLE_TRACE
-    if(p->fortran_number == 32587 && p->sort == 2) {
-            printf("pqr su 32587 x1 %25.15e %25.15e \n",x1.x,su);
-        }
-#endif
+
     s1 = sv * sw / 12.0;
     s2 = su * sw / 12.0;
     s3 = su * sv / 12.0;

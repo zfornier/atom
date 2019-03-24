@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 
         delete plasma;
     } else {
-        printf("Try -h or --help for usage information.\n");
+        cout << "Try -h or --help for usage information." << endl;
     }
 
     return 0;

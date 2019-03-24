@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <vector>
+#include <iostream>
 
 #include "particle.h"
 #include "run_control.h"

@@ -45,12 +45,12 @@ if(${CMAKE_BUILD_TYPE_LOWER} STREQUAL "debug")
 endif()
 
 if(${CMAKE_BUILD_TYPE_LOWER} STREQUAL "release")
-    set(NVCC_OPTS "-O3 ${NVCC_OPTS}")
+    set(NVCC_OPTS "${NVCC_OPTS}")
     set(CXX_OPTS "-O3 ${CXX_OPTS}")
 endif()
 
 if(${CMAKE_BUILD_TYPE_LOWER} STREQUAL "relwithdebinfo")
-    set(NVCC_OPTS "-O3 -g ${NVCC_OPTS}")
+    set(NVCC_OPTS "-g ${NVCC_OPTS}")
     set(CXX_OPTS "-O3 -lineinfo ${CXX_OPTS}")
 endif()
 

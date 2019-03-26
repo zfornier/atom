@@ -4,25 +4,6 @@
 
 #include "../../include/Plasma.h"
 
-//Plasma::Plasma(int nx, int ny, int nz, double lx, double ly, double lz, double ni1, int n_per_cell1, double q_m, double TAU) {
-//    Nx = nx;
-//    Ny = ny;
-//    Nz = nz;
-//
-//    Lx = lx;
-//    Ly = ly;
-//    Lz = lz;
-//
-//    ni = ni1;
-//
-//    n_per_cell = n_per_cell1;
-//    ion_q_m = q_m;
-//    tau = TAU;
-//
-//    dataFileStartPattern = "data";
-//    dataFileEndPattern = ".nc";
-//}
-
 Plasma::Plasma(PlasmaConfig *p) {
     this->pd = p;
 

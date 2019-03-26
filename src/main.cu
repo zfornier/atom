@@ -72,10 +72,11 @@ void printHelp() {
 
 PlasmaConfig readConfig(std::ifstream &is) {
     Properties properties;
-    properties.load(is);
-
     PlasmaConfig conf = PlasmaConfig();
+
     try {
+        properties.load(is);
+
         conf.tempX = properties.stringToDouble(properties.getProperty("tempX"));
         conf.tempY = properties.stringToDouble(properties.getProperty("tempY"));
         conf.tempZ = properties.stringToDouble(properties.getProperty("tempZ"));
@@ -109,11 +110,9 @@ PlasmaConfig readConfig(std::ifstream &is) {
         conf.checkOnStep = properties.stringToInt(properties.getProperty("checkOnStep"));
         conf.checkFile = properties.getProperty("checkFile");
     }
-    catch (std::invalid_argument e) {
-        throw 1;  // todo: make normal exception
-    }
-    catch (std::out_of_range e) {
-        throw 1;  // todo: make normal exception
+    catch (std::exception &e) {
+        std::cout << "Config parsing error: " << e.what() << std::endl;
+        exit(-1);
     }
 
     return conf;

@@ -63,9 +63,26 @@ std::string Properties::trim(std::string str) {
 }
 
 double Properties::stringToDouble(std::string str) {
-    return std::stod(str);
+    try {
+        return std::stod(str);
+    }
+    catch (std::invalid_argument &e) {
+        throw std::invalid_argument("Error at parsing value: " + str);
+    }
+    catch (std::out_of_range &e) {
+        throw std::out_of_range("Error at parsing value: " + str);
+    }
+
 }
 
 int Properties::stringToInt(std::string str) {
-    return std::stoi(str);
+    try {
+        return std::stoi(str);
+    }
+    catch (std::invalid_argument &e) {
+        throw std::invalid_argument("invalid argument: " + str);
+    }
+    catch (std::out_of_range &e) {
+        throw std::out_of_range("out of range: " + str);
+    }
 }

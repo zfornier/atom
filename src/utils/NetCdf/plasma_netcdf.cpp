@@ -80,7 +80,7 @@ namespace plasmanetcdf {
         }
     }
 
-    Error_t NetCDFManipulator::plsm_save_1D_int_array(const char *fileName, int *pTab, char *label, char *dim_label, const char *unit, const char *desc) {
+    Error_t NetCDFManipulator::plsm_save_1D_double_array(const char *fileName, double *pTab, char *label, char *dim_label, const char *unit, const char *desc) {
         NcFile dataFile(fileName, NcFile::write);
         try {
             NcDim xDim = dataFile.getDim(dim_label);

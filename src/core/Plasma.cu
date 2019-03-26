@@ -1152,8 +1152,7 @@ int Plasma::memory_monitor(std::string legend, int nt) {
     cudaError_t err = cudaMemGetInfo(&m_free, &m_total);
 
     sysinfo(&info);
-    fprintf(f, "step %10d %50s GPU memory total %10d free %10d free CPU memory %10u \n", nt, legend.c_str(),
-            ((int) m_total) / 1024 / 1024, ((int) m_free) / 1024 / 1024, ((int) info.freeram) / 1024 / 1024);
+    fprintf(f, "step %10d %50s GPU memory total %10d free %10d free CPU memory %10u \n", nt, legend.c_str(), ((int) m_total) / 1024 / 1024, ((int) m_free) / 1024 / 1024, ((int) info.freeram) / 1024 / 1024);
 
     return 0;
 }

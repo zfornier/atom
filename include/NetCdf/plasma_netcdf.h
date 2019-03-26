@@ -83,12 +83,12 @@ namespace plasmanetcdf {
 	/*!
 		Save a 1d array in the NetCDF file
 		\param fileName    Name of the NetCDF file to open in writing mode
-		\param pTab        Tab containing all the data in  of the 1d array, ints
+		\param pTab        Tab containing all the data in  of the 1d array, doubles
 		\param label       Name of the 1d array to save
 		\param unit	       Units of the 1d array
 		\param desc	       Description of the 1d array   
 	*/
-	static Error_t plsm_save_1D_int_array(const char* fileName, int* pTab, char* label, char* dim_label,const char* unit,const char* desc);
+	static Error_t plsm_save_1D_double_array(const char* fileName, double * pTab, char* label, char* dim_label,const char* unit,const char* desc);
 
 	/*!
 		Save a double variable in the NetCDF file

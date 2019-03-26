@@ -10,38 +10,21 @@ int copyFile(const char *binaryFileName, const char *netCdfFileName) {
     NetCDFManipulator::plsm_add_dimension(netCdfFileName, "y", NY);
     NetCDFManipulator::plsm_add_dimension(netCdfFileName, "z", NZ);
 
-/*   	NcDim xDim = dataFile.addDim("x", NX);	
-	NcDim yDim = dataFile.addDim("y", NY);
-	NcDim zDim = dataFile.addDim("z", NZ);
-  */
-    copyOne3DArray(ifs, netCdfFileName, ELECTRIC_FIELD_LABEL + X_LABEL, UNITS_ELECTRIC_FIELD,
-                   DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + X_LABEL);
-    copyOne3DArray(ifs, netCdfFileName, ELECTRIC_FIELD_LABEL + Y_LABEL, UNITS_ELECTRIC_FIELD,
-                   DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Y_LABEL);
-    copyOne3DArray(ifs, netCdfFileName, ELECTRIC_FIELD_LABEL + Z_LABEL, UNITS_ELECTRIC_FIELD,
-                   DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Z_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, ELECTRIC_FIELD_LABEL + X_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + X_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, ELECTRIC_FIELD_LABEL + Y_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Y_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, ELECTRIC_FIELD_LABEL + Z_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Z_LABEL);
 
-    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_FIELD_LABEL + X_LABEL, UNITS_MAGNETIC_FIELD,
-                   DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + X_LABEL);
-    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_FIELD_LABEL + Y_LABEL, UNITS_MAGNETIC_FIELD,
-                   DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Y_LABEL);
-    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_FIELD_LABEL + Z_LABEL, UNITS_MAGNETIC_FIELD,
-                   DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Z_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_FIELD_LABEL + X_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + X_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_FIELD_LABEL + Y_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Y_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_FIELD_LABEL + Z_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Z_LABEL);
 
-    copyOne3DArray(ifs, netCdfFileName, CURRENT_FIELD_LABEL + X_LABEL, UNITS_NO,
-                   CURRENT + CURRENT_FIELD_LABEL + X_LABEL);
-    copyOne3DArray(ifs, netCdfFileName, CURRENT_FIELD_LABEL + Y_LABEL, UNITS_NO,
-                   CURRENT + CURRENT_FIELD_LABEL + Y_LABEL);
-    copyOne3DArray(ifs, netCdfFileName, CURRENT_FIELD_LABEL + Z_LABEL, UNITS_NO,
-                   CURRENT + CURRENT_FIELD_LABEL + Z_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, CURRENT_FIELD_LABEL + X_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + X_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, CURRENT_FIELD_LABEL + Y_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + Y_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, CURRENT_FIELD_LABEL + Z_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + Z_LABEL);
 
-    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL, UNITS_NO,
-                   DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL);
-    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL, UNITS_NO,
-                   DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL);
-    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL, UNITS_NO,
-                   DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL);
-
+    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL);
+    copyOne3DArray(ifs, netCdfFileName, MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL);
 
     copyOneSortParticle(ifs, netCdfFileName, SORT_0_LABEL);
     copyOneSortParticle(ifs, netCdfFileName, SORT_1_LABEL);
@@ -78,19 +61,14 @@ int copyOneSortParticle(ifstream &ifs, const char *netCdfFileName, string label)
     //extra number
     readInt(ifs);
 
-    copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + X_LABEL + label, name_dim, UNITS_NO,
-                X_LABEL + DESC_COORDINATES + label);
-    copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + Y_LABEL + label, name_dim, UNITS_NO,
-                Y_LABEL + DESC_COORDINATES + label);
-    copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + Z_LABEL + label, name_dim, UNITS_NO,
-                Z_LABEL + DESC_COORDINATES + label);
+    copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + X_LABEL + label, name_dim, UNITS_NO, X_LABEL + DESC_COORDINATES + label);
+    copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + Y_LABEL + label, name_dim, UNITS_NO, Y_LABEL + DESC_COORDINATES + label);
+    copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + Z_LABEL + label, name_dim, UNITS_NO, Z_LABEL + DESC_COORDINATES + label);
 
-    copy1dArray(ifs, netCdfFileName, IMPULSES_LABEL + X_LABEL + label, name_dim, UNITS_IMPULSES,
-                X_LABEL + DESC_IMPULSES + label);
-    copy1dArray(ifs, netCdfFileName, IMPULSES_LABEL + Y_LABEL + label, name_dim, UNITS_IMPULSES,
-                Y_LABEL + DESC_IMPULSES + label);
-    copy1dArray(ifs, netCdfFileName, IMPULSES_LABEL + Z_LABEL + label, name_dim, UNITS_IMPULSES,
-                Z_LABEL + DESC_IMPULSES + label);
+    copy1dArray(ifs, netCdfFileName, IMPULSES_LABEL + X_LABEL + label, name_dim, UNITS_IMPULSES, X_LABEL + DESC_IMPULSES + label);
+    copy1dArray(ifs, netCdfFileName, IMPULSES_LABEL + Y_LABEL + label, name_dim, UNITS_IMPULSES, Y_LABEL + DESC_IMPULSES + label);
+    copy1dArray(ifs, netCdfFileName, IMPULSES_LABEL + Z_LABEL + label, name_dim, UNITS_IMPULSES, Z_LABEL + DESC_IMPULSES + label);
+
     return 0;
 }
 
@@ -140,7 +118,7 @@ double *read3dArray(ifstream &ifs) {
 }
 
 int copy1dArray(ifstream &ifs, const char *netCdfFileName, string label, string dim_label, string unit, string desc) {
-    int *tdArray;
+    double *tdArray;
     int res;
     tdArray = read1dArray(ifs);
     char *pLabel = new char[label.length() + 1];
@@ -151,7 +129,7 @@ int copy1dArray(ifstream &ifs, const char *netCdfFileName, string label, string 
     strcpy(pDesc, desc.c_str());
     char *pDim = new char[dim_label.length() + 1];
     strcpy(pDim, dim_label.c_str());
-    res = NetCDFManipulator::plsm_save_1D_int_array(netCdfFileName, tdArray, pLabel, pDim, pUnit, pDesc);
+    res = NetCDFManipulator::plsm_save_1D_double_array(netCdfFileName, tdArray, pLabel, pDim, pUnit, pDesc);
     delete[] pLabel;
     delete[] pUnit;
     delete[] pDesc;
@@ -161,23 +139,24 @@ int copy1dArray(ifstream &ifs, const char *netCdfFileName, string label, string 
     return res;
 }
 
-int *read1dArray(ifstream &ifs) {
+double *read1dArray(ifstream &ifs) {
 
     // read length of array
     char *pBufferLength = (char *) malloc(sizeof(int));
 
-    int *pLength = (int *) pBufferLength;
+    int *pLength = (int*)pBufferLength;
+
     ifs.read(pBufferLength, sizeof(int));
     pLength = (int *) pBufferLength;
 
     // read content of the array (there are pLength ints)
-    char *pBuffer = (char *) malloc((sizeof(int) * (*pLength)));
+    char *pBuffer = (char *) malloc((sizeof(double) * (*pLength)));
     ifs.read(pBuffer, (*pLength));
 
     // read length of array again (end of the array)
     ifs.read(pBufferLength, sizeof(int));
 
-    int *pTab = (int *) pBuffer;
+    double *pTab = (double *) pBuffer;
 
     free(pBufferLength);
 

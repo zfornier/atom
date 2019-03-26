@@ -40,8 +40,6 @@ const int MAX_particles_per_cell = MAX_PPC;
 
 __host__ __device__ int isNan(double t);
 
-//QUESTION: what was the reason to have class implementation in .h file?
-
 class Cell {
 public:
     int i, l, k;

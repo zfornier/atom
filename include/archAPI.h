@@ -7,8 +7,8 @@
 #define DEVICE_TO_DEVICE -131316
 
 #define CHECK_ERROR(msg, err) \
-                        if (err != 0) { \
-                            std::cerr << (msg) << " code: " << (err) << " : " << __FILE__ << " : " << __LINE__ << " : " << getErrorString((err)) << std::endl; \
+                        if ((err) != 0) { \
+                            std::cerr << (msg) << ": code: " << (err) << " : " << __FILE__ << " : " << __LINE__ << " : " << getErrorString((err)) << std::endl; \
                             exit(-1); \
                         }
 

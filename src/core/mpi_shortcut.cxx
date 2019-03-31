@@ -19,15 +19,20 @@ int InitMPI(int argc, char *argv[]) {
 int sumMPI(int size, double *d_jx, double *d_jy, double *d_jz) {
     double *snd, *rcv, *jx, *jy, *jz;
     int i;
+    int err;
 
     jx = new double[size];
     jy = new double[size];
     jz = new double[size];
 
-    int err = MemoryCopy(jx, d_jx, size * sizeof(double), DEVICE_TO_HOST);
-    int err1 = MemoryCopy(jy, d_jy, size * sizeof(double), DEVICE_TO_HOST);
-    int err2 = MemoryCopy(jz, d_jz, size * sizeof(double), DEVICE_TO_HOST);
-    std::cout << "sumMPI: err " << err << " err1 " << err1 << " err2 " << err2 << std::endl;
+    err = MemoryCopy(jx, d_jx, size * sizeof(double), DEVICE_TO_HOST);
+    CHECK_ERROR("Sum mpi", err);
+
+    err = MemoryCopy(jy, d_jy, size * sizeof(double), DEVICE_TO_HOST);
+    CHECK_ERROR("Sum mpi", err);
+
+    err = MemoryCopy(jz, d_jz, size * sizeof(double), DEVICE_TO_HOST);
+    CHECK_ERROR("Sum mpi", err);
 
     snd = new double[3 * size];
     rcv = new double[3 * size];
@@ -47,9 +52,13 @@ int sumMPI(int size, double *d_jx, double *d_jy, double *d_jz) {
     }
 
     err = MemoryCopy(d_jx, jx, size * sizeof(double), HOST_TO_DEVICE);
-    err1 = MemoryCopy(d_jy, jy, size * sizeof(double), HOST_TO_DEVICE);
-    err2 = MemoryCopy(d_jz, jz, size * sizeof(double), HOST_TO_DEVICE);
-    std::cout << "sumMPI: err " << err << " err1 " << err1 << " err2 " << err2 << std::endl;
+    CHECK_ERROR("Sum mpi", err);
+
+    err = MemoryCopy(d_jy, jy, size * sizeof(double), HOST_TO_DEVICE);
+    CHECK_ERROR("Sum mpi", err);
+
+    err = MemoryCopy(d_jz, jz, size * sizeof(double), HOST_TO_DEVICE);
+    CHECK_ERROR("Sum mpi", err);
 
     delete[] jx;
     delete[] jy;

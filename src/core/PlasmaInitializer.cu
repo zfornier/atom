@@ -9,19 +9,10 @@ PlasmaInitializer::PlasmaInitializer(PlasmaConfig * p) {
 }
 
 int PlasmaInitializer::InitializeGPU() {
-    int err = getLastError();
+    int err;
     int Nx = p->nx, Ny = p->ny, Nz = p->nz;
 
-    if (err != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-    }
-
     InitGPUParticles();
-
-    err = getLastError();
-    if (err != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-    }
 
     InitGPUFields(
             &p->d_Ex, &p->d_Ey, &p->d_Ez,
@@ -36,16 +27,10 @@ int PlasmaInitializer::InitializeGPU() {
             p->Qx, p->Qy, p->Qz,
             Nx, Ny, Nz);
 
-    err = getLastError();
-    if (err != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-    }
-
     setPrintfLimit();
 
     err = cudaSetDevice(0);
-
-    printf("InitializeGPU error %d \n", err);
+    CHECK_ERROR("DEVICE SET", err);
 
     return 0;
 }
@@ -55,13 +40,9 @@ int PlasmaInitializer::initMeshArrays() {
 
     Alloc();
 
-    Cell c000;
-
     InitCells();
-    c000 = (*p->AllCells)[0];
 
     InitFields();
-    c000 = (*p->AllCells)[0]; // TODO: why twice?
 
     InitCurrents();
 
@@ -90,107 +71,51 @@ void PlasmaInitializer::InitializeCPU() {
 }
 
 void PlasmaInitializer::Initialize() {
-    int err;
-
     InitializeCPU();
 
     copyCellsWithParticlesToGPU();
 
-    err = getLastError();
-    if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
-
     InitializeGPU();
-
-    err = getLastError();
-    if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
 }
 
 void PlasmaInitializer::InitGPUParticles() {
-    int size;
+    int size, err;
     GPUCell *d_c, *h_ctrl;
     GPUCell *n;
     int Nx = p->nx, Ny = p->ny, Nz = p->nz;
 
     dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimBlockOne(1, 1, 1);
 
-    int err = getLastError();
-    if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
-
-    err = getLastError();
-    if (err != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-        exit(0);
-    }
     readControlFile(START_STEP_NUMBER);
-    err = getLastError();
-    if (err != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-        exit(0);
-    }
-
-    err = getLastError();
-    if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
 
     size = (int)(*p->AllCells).size();
-    err = getLastError();
-    if (err != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-        exit(0);
-    }
     size_t m_free, m_total;
 
     h_ctrl = new GPUCell;
     n = new GPUCell;
 
-    err = getLastError();
-    if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
-    err = getLastError();
-    if (err != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-        exit(0);
-    }
 
     p->h_CellArray = (GPUCell **) malloc(size * sizeof(Cell * ));
     err = cudaMalloc((void **) &p->d_CellArray, size * sizeof(Cell * ));
+    CHECK_ERROR("CUDA MALLOC", err);
 
-    if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
-
-    err = getLastError();
-    if (err != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-        exit(0);
-    }
     printf("%s : size = %d\n", __FILE__, size);
+
     for (int i = 0; i < size; i++) {
         GPUCell c;
         c = (*p->AllCells)[i];
 
         /////////////////////////////////////////
         *n = c;
-        err = getLastError();
-        if (err != cudaSuccess) {
-            printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-            exit(0);
-        }
+
 #ifdef ATTRIBUTES_CHECK
         c.SetControlSystem(p->jmp, p->d_ctrlParticles);
 #endif
         d_c = c.copyCellToDevice();
-        err = getLastError();
-        if (err != cudaSuccess) {
-            printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-            exit(0);
-        }
-        err = getLastError();
-        if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
 
-        cudaMemGetInfo(&m_free, &m_total);
+        err = cudaMemGetInfo(&m_free, &m_total);
+        CHECK_ERROR("CUDA MEM GET INFO", err);
 
-        err = getLastError();
-        if (err != cudaSuccess) {
-            printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-            exit(0);
-        }
 #ifdef COPY_CELL_PRINTS
         double mfree, mtot;
         mtot  = m_total;
@@ -206,20 +131,11 @@ void PlasmaInitializer::InitGPUParticles() {
             t = c.compareToCell(*h_copy);
         }
 #endif
-        err = getLastError();
-        if (err != cudaSuccess) {
-            printf("%s:%d - error %d %s cell %d \n", __FILE__, __LINE__, err, getErrorString(err), i);
-            exit(0);
-        }
 
         p->h_CellArray[i] = d_c;
         err = MemoryCopy(h_ctrl, d_c, sizeof(Cell), DEVICE_TO_HOST);
+        CHECK_ERROR("MEM COPY", err);
 
-        //  err = getLastError();
-        if (err != cudaSuccess) {
-            printf("%s:%d - error %d %s cell %d\n", __FILE__, __LINE__, err, getErrorString(err), i);
-            exit(0);
-        }
 #ifdef InitGPUParticles_PRINTS
         dbgPrintGPUParticleAttribute(d_c,50,1," CPY " );
 
@@ -232,34 +148,14 @@ void PlasmaInitializer::InitGPUParticles() {
         printf("i %d l %d k n %d %d %e src %e num %d\n",h_ctrl->i,h_ctrl->l,h_ctrl->k,i, c.ParticleArrayRead(0,7),c.number_of_particles);
         printf("GPU cell %d ended ******************************************************\n",i);
 #endif
-        err = getLastError();
-        if (err != cudaSuccess) {
-            printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-            exit(0);
-        }
     }
 
-    err = getLastError();
-    if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
-
-    //int err;
     err = MemoryCopy(p->d_CellArray, p->h_CellArray, size * sizeof(Cell * ), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("bGPU_WriteControlSystem err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
-
-    err = getLastError();
-    if (err != cudaSuccess) { printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err)); }
+    CHECK_ERROR("MEM COPY", err);
 
 #ifdef ATTRIBUTES_CHECK
     GPU_WriteControlSystem<<<dimGrid, dimBlockOne,16000>>>(d_CellArray);
 #endif
-
-    err = getLastError();
-    if (err != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, getErrorString(err));
-    }
 }
 
 void PlasmaInitializer::Alloc() {
@@ -287,7 +183,7 @@ void PlasmaInitializer::Alloc() {
 
 #ifdef DEBUG_PLASMA
     p->dbgEx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    p-> dbgEy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    p->dbgEy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     p->dbgEz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
 
     p->dbgHx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
@@ -314,12 +210,14 @@ void PlasmaInitializer::InitFields() {
         p->Hy[i] = 0.0;
         p->Hz[i] = 0.0;
 
+#ifdef DEBUG_PLASMA // todo: возможно можно убрать тк инициализируется в Plasma::checkControlPoint
         p->dbgEx[i] = 0.0;
         p->dbgEy[i] = 0.0;
         p->dbgEz[i] = 0.0;
         p->dbgHx[i] = 0.0;
         p->dbgHy[i] = 0.0;
         p->dbgHz[i] = 0.0;
+#endif
     }
 }
 
@@ -403,28 +301,16 @@ int PlasmaInitializer::copyCellsWithParticlesToGPU() {
     int Nx = p->nx, Ny = p->ny, Nz = p->nz;
 
     Cell c000 = (*p->AllCells)[0];
-    cudaError_t err;
 
     int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
 
     p->cp = (GPUCell **) malloc(size * sizeof(GPUCell *));
 
-    if ((err = cudaGetLastError()) != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err));
-    }
-
     for (int i = 0; i < size; i++) {
         GPUCell c, *d_c;
         d_c = c.allocateCopyCellFromDevice();
-        if ((err = cudaGetLastError()) != cudaSuccess) {
-            printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err));
-        }
 
         p->cp[i] = d_c;
-    }
-
-    if ((err = cudaGetLastError()) != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err));
     }
 
     return 0;

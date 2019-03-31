@@ -15,14 +15,13 @@ void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char
 
     h_c = new Cell;
 
-    err = (int) MemoryCopy(h_c, d_c, sizeof(Cell), DEVICE_TO_HOST);
-    if (err != cudaSuccess) {
-        printf("pyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    err = MemoryCopy(h_c, d_c, sizeof(Cell), DEVICE_TO_HOST);
+    CHECK_ERROR("pyFieldsToGPU err", err);
+
     double *vec = h_c->doubParticleArray + shift;
 
-    MemoryCopy(&t, vec, sizeof(double), DEVICE_TO_HOST);
+    err = MemoryCopy(&t, vec, sizeof(double), DEVICE_TO_HOST);
+    CHECK_ERROR("pyFieldsToGPU err", err);
 
     printf("%s %10.3e \n", name, t);
 }
@@ -40,9 +39,7 @@ GPUCell::GPUCell(int i1, int l1, int k1, double Lx, double Ly, double Lz, int Nx
 
 GPUCell *GPUCell::copyCellToDevice() {
     GPUCell *h_src, *d_dst;
-    int err1, err2, err3, err4, err5, err6, err7, err8, err9, err10;
-    int err11, err12, err13, err14, err15, err16, err17, err18, err19, err20;
-    int err21, err22, err23, err24, err25;
+    int err;
 
     h_src = new GPUCell;
 
@@ -67,110 +64,80 @@ GPUCell *GPUCell::copyCellToDevice() {
     h_src->d_ctrlParticles = Cell::d_ctrlParticles;
     h_src->busyParticleArray = Cell::busyParticleArray;
 
-    cudaMalloc((void **) &(h_src->doubParticleArray), sizeof(Particle) * MAX_particles_per_cell);
-    err1 = getLastError();
+    err = cudaMalloc((void **) &(h_src->doubParticleArray), sizeof(Particle) * MAX_particles_per_cell);
+    CHECK_ERROR("", err);
 
-    cudaMemset((void **) h_src->doubParticleArray, 0, sizeof(Particle) * MAX_particles_per_cell);
-    err2 = getLastError();
+    err = cudaMemset((void **) h_src->doubParticleArray, 0, sizeof(Particle) * MAX_particles_per_cell);
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->doubParticleArray, Cell::doubParticleArray, sizeof(Particle) * MAX_particles_per_cell, HOST_TO_DEVICE);
-    err3 = getLastError();
+    err = MemoryCopy(h_src->doubParticleArray, Cell::doubParticleArray, sizeof(Particle) * MAX_particles_per_cell, HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    MemoryAllocate((void **) &(h_src->Jx), sizeof(CellDouble));
-    err4 = getLastError();
+    err = MemoryAllocate((void **) &(h_src->Jx), sizeof(CellDouble));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->Jx, Cell::Jx, sizeof(CellDouble), HOST_TO_DEVICE);
-    err5 = getLastError();
+    err = MemoryCopy(h_src->Jx, Cell::Jx, sizeof(CellDouble), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    MemoryAllocate((void **) &(h_src->Jy), sizeof(CellDouble));
-    err6 = getLastError();
+    err = MemoryAllocate((void **) &(h_src->Jy), sizeof(CellDouble));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->Jy, Cell::Jy, sizeof(CellDouble), HOST_TO_DEVICE);
-    err7 = getLastError();
+    err = MemoryCopy(h_src->Jy, Cell::Jy, sizeof(CellDouble), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    MemoryAllocate((void **) &(h_src->Jz), sizeof(CellDouble));
-    err8 = getLastError();
+    err = MemoryAllocate((void **) &(h_src->Jz), sizeof(CellDouble));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->Jz, Cell::Jz, sizeof(CellDouble), HOST_TO_DEVICE);
-    err9 = getLastError();
+    err = MemoryCopy(h_src->Jz, Cell::Jz, sizeof(CellDouble), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    MemoryAllocate((void **) &(h_src->Ex), sizeof(CellDouble));
-    err10 = getLastError();
+    err = MemoryAllocate((void **) &(h_src->Ex), sizeof(CellDouble));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->Ex, Cell::Ex, sizeof(CellDouble), HOST_TO_DEVICE);
-    err11 = getLastError();
+    err = MemoryCopy(h_src->Ex, Cell::Ex, sizeof(CellDouble), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    MemoryAllocate((void **) &(h_src->Ey), sizeof(CellDouble));
-    err12 = getLastError();
+    err = MemoryAllocate((void **) &(h_src->Ey), sizeof(CellDouble));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->Ey, Cell::Ey, sizeof(CellDouble), HOST_TO_DEVICE);
-    err13 = getLastError();
+    err = MemoryCopy(h_src->Ey, Cell::Ey, sizeof(CellDouble), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    MemoryAllocate((void **) &(h_src->Ez), sizeof(CellDouble));
-    err14 = getLastError();
+    err = MemoryAllocate((void **) &(h_src->Ez), sizeof(CellDouble));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->Ez, Cell::Ez, sizeof(CellDouble), HOST_TO_DEVICE);
-    err15 = getLastError();
+    err = MemoryCopy(h_src->Ez, Cell::Ez, sizeof(CellDouble), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    MemoryAllocate((void **) &(h_src->Hx), sizeof(CellDouble));
-    err16 = getLastError();
+    err = MemoryAllocate((void **) &(h_src->Hx), sizeof(CellDouble));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->Hx, Cell::Hx, sizeof(CellDouble), HOST_TO_DEVICE);
-    err17 = getLastError();
+    err = MemoryCopy(h_src->Hx, Cell::Hx, sizeof(CellDouble), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    cudaMalloc((void **) &(h_src->Hy), sizeof(CellDouble));
-    err18 = getLastError();
+    err = cudaMalloc((void **) &(h_src->Hy), sizeof(CellDouble));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->Hy, Cell::Hy, sizeof(CellDouble), HOST_TO_DEVICE);
-    err19 = getLastError();
+    err = MemoryCopy(h_src->Hy, Cell::Hy, sizeof(CellDouble), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    MemoryAllocate((void **) &(h_src->Hz), sizeof(CellDouble));
-    err20 = getLastError();
+    err = MemoryAllocate((void **) &(h_src->Hz), sizeof(CellDouble));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->Hz, Cell::Hz, sizeof(CellDouble), HOST_TO_DEVICE);
-    err21 = getLastError();
+    err = MemoryCopy(h_src->Hz, Cell::Hz, sizeof(CellDouble), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    MemoryAllocate((void **) &(h_src->Rho), sizeof(CellDouble));
-    err22 = getLastError();
+    err = MemoryAllocate((void **) &(h_src->Rho), sizeof(CellDouble));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(h_src->Rho, Cell::Rho, sizeof(CellDouble), HOST_TO_DEVICE);
-    err23 = getLastError();
+    err = MemoryCopy(h_src->Rho, Cell::Rho, sizeof(CellDouble), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
-    MemoryAllocate((void **) &d_dst, sizeof(GPUCell));
-    err24 = getLastError();
+    err = MemoryAllocate((void **) &d_dst, sizeof(GPUCell));
+    CHECK_ERROR("", err);
 
-    MemoryCopy(d_dst, h_src, sizeof(GPUCell), HOST_TO_DEVICE);
-    err25 = getLastError();
-
-    if (
-            (err1 != 0) ||
-            (err2 != 0) ||
-            (err3 != 0) ||
-            (err4 != 0) ||
-            (err5 != 0) ||
-            (err6 != 0) ||
-            (err7 != 0) ||
-            (err8 != 0) ||
-            (err9 != 0) ||
-            (err10 != 0) ||
-            (err11 != 0) ||
-            (err12 != 0) ||
-            (err13 != 0) ||
-            (err14 != 0) ||
-            (err15 != 0) ||
-            (err16 != 0) ||
-            (err17 != 0) ||
-            (err18 != 0) ||
-            (err19 != 0) ||
-            (err20 != 0) ||
-            (err21 != 0) ||
-            (err22 != 0) ||
-            (err23 != 0) ||
-            (err24 != 0) ||
-            (err25 != 0)
-            ) {
-        printf("copyCellToDevice error d_dst %p\n", d_dst);
-    }
+    err = MemoryCopy(d_dst, h_src, sizeof(GPUCell), HOST_TO_DEVICE);
+    CHECK_ERROR("", err);
 
     return d_dst;
 }
@@ -179,70 +146,54 @@ void GPUCell::copyCellFromDevice(GPUCell *d_src, GPUCell *h_dst, std::string whe
     static GPUCell *h_copy_of_d_src;
     static int first = 1;
     int code;
+    int err;
 
     if (first == 1) {
         first = 0;
         h_copy_of_d_src = new GPUCell;
         h_copy_of_d_src->Init();
-
     }
 
-    int err = getLastError();
-    if (err != 0) {
-        printf(" copyCellFromDevice enter %d %s \n ", err, getErrorString(err));
-        exit(0);
-    }
-
-    cudaThreadSynchronize();
+    err = cudaThreadSynchronize();
+    CHECK_ERROR("Thread synchronize", err);
 
     err = MemoryCopy(h_copy_of_d_src, d_src, sizeof(GPUCell), DEVICE_TO_HOST);
-    if (err != 0) {
-        printf(" copyCellFromDevice1 %d %s \n ", err, getErrorString(err));
-        exit(0);
-    }
-
-#ifdef COPY_CELLS_MEMORY_PRINTS
-    printf("step %d %s number of particles %5d %3d %3d %d \n",nt,where.c_str(),h_copy_of_d_src->i,h_copy_of_d_src->l,h_copy_of_d_src->k,h_copy_of_d_src->number_of_particles);
-#endif
+    CHECK_ERROR("copyCellFromDevice1", err);
 
     h_dst->number_of_particles = h_copy_of_d_src->number_of_particles;
 
     code = MemoryCopy(h_dst->doubParticleArray, h_copy_of_d_src->doubParticleArray, sizeof(Particle) * MAX_particles_per_cell, DEVICE_TO_HOST);
-    if (code != 0) {
-        printf(" copyCellFromDevice3 %d %s \n ", code, getErrorString(code));
-        exit(0);
-    }
+    CHECK_ERROR("copyCellFromDevice2", code);
 
     code = MemoryCopy(h_dst->Jx, h_copy_of_d_src->Jx, sizeof(CellDouble), DEVICE_TO_HOST);
-    if (code != 0) {
-        printf(" copyCellFromDevice4 %d \n ", code);
-        exit(0);
-    }
+    CHECK_ERROR("copyCellFromDevice3", code);
 
     code = MemoryCopy(h_dst->Jy, h_copy_of_d_src->Jy, sizeof(CellDouble), DEVICE_TO_HOST);
-    if (code != 0) {
-        printf(" copyCellFromDevice5 %d \n ", code);
-        exit(0);
-    }
+    CHECK_ERROR("copyCellFromDevice4", code);
 
     code = MemoryCopy(h_dst->Jz, h_copy_of_d_src->Jz, sizeof(CellDouble), DEVICE_TO_HOST);
-    if (code != 0) {
-        printf(" copyCellFromDevice6 %d \n ", code);
-        exit(0);
-    }
+    CHECK_ERROR("copyCellFromDevice5", code);
 
     code = MemoryCopy(h_dst->Ex, h_copy_of_d_src->Ex, sizeof(CellDouble), DEVICE_TO_HOST);
-    code = MemoryCopy(h_dst->Ey, h_copy_of_d_src->Ey, sizeof(CellDouble), DEVICE_TO_HOST);
-    code = MemoryCopy(h_dst->Ez, h_copy_of_d_src->Ez, sizeof(CellDouble), DEVICE_TO_HOST);
-    code = MemoryCopy(h_dst->Hx, h_copy_of_d_src->Hx, sizeof(CellDouble), DEVICE_TO_HOST);
-    code = MemoryCopy(h_dst->Hy, h_copy_of_d_src->Hy, sizeof(CellDouble), DEVICE_TO_HOST);
-    code = MemoryCopy(h_dst->Hz, h_copy_of_d_src->Hz, sizeof(CellDouble), DEVICE_TO_HOST);
-    code = MemoryCopy(h_dst->Rho, h_copy_of_d_src->Rho, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice6", code);
 
-    if (code != 0) {
-        printf(" copyCellFromDevice10 %d \n ", code);
-        exit(0);
-    }
+    code = MemoryCopy(h_dst->Ey, h_copy_of_d_src->Ey, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice7", code);
+
+    code = MemoryCopy(h_dst->Ez, h_copy_of_d_src->Ez, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice8", code);
+
+    code = MemoryCopy(h_dst->Hx, h_copy_of_d_src->Hx, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice9", code);
+
+    code = MemoryCopy(h_dst->Hy, h_copy_of_d_src->Hy, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice10", code);
+
+    code = MemoryCopy(h_dst->Hz, h_copy_of_d_src->Hz, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice11", code);
+
+    code = MemoryCopy(h_dst->Rho, h_copy_of_d_src->Rho, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice12", code);
 }
 
 GPUCell *GPUCell::allocateCopyCellFromDevice() {

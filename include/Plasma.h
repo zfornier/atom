@@ -67,8 +67,6 @@ private:
 
     int checkFields_afterMagneticStageOne(int);
 
-    void checkCudaError();
-
     void ComputeField_FirstHalfStep(int);
 
     virtual void ComputeField_SecondHalfStep(int);
@@ -144,8 +142,6 @@ private:
     double checkControlPointParticles(int, FILE *, char *, int);
 
     int memory_monitor(std::string, int);
-
-    int memory_status_print(int);
 
     void writeDataToFile(int);
 

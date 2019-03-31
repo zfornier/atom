@@ -32,9 +32,13 @@ double CheckArraySilent(double *a, double *dbg_a, int size) {
 }
 
 void cudaMalloc3D(double **X, double **Y, double **Z, int nx, int ny, int nz) {
-    cudaMalloc((void **) X, sizeof(double) * (nx + 2) * (ny + 2) * (nz + 2));
-    cudaMalloc((void **) Y, sizeof(double) * (nx + 2) * (ny + 2) * (nz + 2));
-    cudaMalloc((void **) Z, sizeof(double) * (nx + 2) * (ny + 2) * (nz + 2));
+    int err;
+    err = cudaMalloc((void **) X, sizeof(double) * (nx + 2) * (ny + 2) * (nz + 2));
+    CHECK_ERROR("CUDA MALLOC", err);
+    err = cudaMalloc((void **) Y, sizeof(double) * (nx + 2) * (ny + 2) * (nz + 2));
+    CHECK_ERROR("CUDA MALLOC", err);
+    err = cudaMalloc((void **) Z, sizeof(double) * (nx + 2) * (ny + 2) * (nz + 2));
+    CHECK_ERROR("CUDA MALLOC", err);
 }
 
 void copyFieldsToGPU(
@@ -52,98 +56,50 @@ void copyFieldsToGPU(
 ) {
     int err;
 
-// TODO: It's better to define a macros and wrap  all MemoryCopy-s with it
-// Moreover you dont need to write  numbers and any line... print __FILE__ and __LINE__ and optionaly
-// You will print error code if build_type is debug (and not here but in ArchAPI.cu)
-
     err = MemoryCopy(d_Ex, Ex, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("1copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("1copyFieldsToGPU", err);
+
     err = MemoryCopy(d_Ey, Ey, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("2copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("2copyFieldsToGPU", err);
 
     err = MemoryCopy(d_Ez, Ez, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("3copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("3copyFieldsToGPU", err);
 
     err = MemoryCopy(d_Hx, Hx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("4copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("4copyFieldsToGPU", err);
 
     err = MemoryCopy(d_Hy, Hy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("5copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("5copyFieldsToGPU", err);
 
     err = MemoryCopy(d_Hz, Hz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("6copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("6copyFieldsToGPU", err);
 
     err = MemoryCopy(d_Jx, Jx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("7copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("7copyFieldsToGPU", err);
 
     err = MemoryCopy(d_Jy, Jy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("8copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("8copyFieldsToGPU", err);
 
     err = MemoryCopy(d_Jz, Jz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("9copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("9copyFieldsToGPU", err);
 
     err = MemoryCopy(d_npJx, npJx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("10copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("10copyFieldsToGPU", err);
 
     err = MemoryCopy(d_npJy, npJy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("11copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("11copyFieldsToGPU", err);
 
     err = MemoryCopy(d_npJz, npJz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("12copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("12copyFieldsToGPU", err);
 
     err = MemoryCopy(d_Qx, Qx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("13copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("13copyFieldsToGPU", err);
 
     err = MemoryCopy(d_Qy, Qy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("14copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("14copyFieldsToGPU", err);
 
     err = MemoryCopy(d_Qz, Qz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), HOST_TO_DEVICE);
-    if (err != cudaSuccess) {
-        printf("15copyFieldsToGPU err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("15copyFieldsToGPU", err);
 }
 
 void InitGPUFields(

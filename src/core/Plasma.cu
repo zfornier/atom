@@ -27,7 +27,9 @@ void Plasma::copyCells(std::string where, int nt) {
     memory_monitor("beforeCopyCells", nt);
 
     for (int i = 0; i < size; i++) {
-        cudaError_t err = cudaMemGetInfo(&m_free, &m_total);
+        int err = cudaMemGetInfo(&m_free, &m_total);
+        CHECK_ERROR("MEM GET INFO", err);
+
         sysinfo(&info);
         m1 = info.freeram;
         GPUCell c, *d_c, *z0;
@@ -71,10 +73,7 @@ double Plasma::checkGPUArray(double *a, double *d_a, std::string name, std::stri
     }
     int err;
     err = MemoryCopy(t, d_a, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    if (err != cudaSuccess) {
-        printf("bCheckArray err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
+    CHECK_ERROR("MEM COPY", err);
 
     int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
     res = CheckArraySilent(a, t, size);
@@ -98,7 +97,7 @@ void Plasma::emeGPUIterate(int3 s, int3 f, double *E, double *H1, double *H2, do
                     (void *) &d2,
                     0};
 
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    int cudaStatus = cudaLaunchKernel(
             (const void *) GPU_eme,        // pointer to kernel func.
             dimGrid,                       // grid
             dimBlock,                      // block
@@ -106,6 +105,9 @@ void Plasma::emeGPUIterate(int3 s, int3 f, double *E, double *H1, double *H2, do
             0,
             0
     );
+
+    CHECK_ERROR("Launch kernel", cudaStatus);
+
 }
 
 void Plasma::GetElectricFieldStartsDirs(int3 *start, int3 *d1, int3 *d2, int dir) {
@@ -133,10 +135,7 @@ int Plasma::ElectricFieldTrace(double *E, double *H1, double *H2, double *J, int
 }
 
 int Plasma::checkFields_beforeMagneticStageOne(int nt) {
-
     memory_monitor("beforeComputeField_FirstHalfStep", nt);
-
-    checkCudaError();
 
     return 0;
 }
@@ -145,22 +144,10 @@ int Plasma::checkFields_afterMagneticStageOne(int nt) {
     checkControlPoint(50, nt);
     memory_monitor("afterComputeField_FirstHalfStep", nt);
 
-    checkCudaError();
-
     return 0;
 }
 
-void Plasma::checkCudaError() {
-    cudaError_t err;
-    err = cudaGetLastError();
-    if(err != cudaSuccess) {
-        printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err));
-    }
-}
-
 void Plasma::ComputeField_FirstHalfStep(int nt) {
-    checkCudaError();
-
     checkFields_beforeMagneticStageOne(nt);
 
     MagneticStageOne(pd->d_Qx, pd->d_Qy, pd->d_Qz, pd->d_Hx, pd->d_Hy, pd->d_Hz, pd->d_Ex, pd->d_Ey, pd->d_Ez);
@@ -228,7 +215,6 @@ void Plasma::MagneticStageOne(double *Qx, double *Qy, double *Qz, double *Hx, do
     MagneticFieldTrace(Qy, Hy, Ez, Ex, Nx, Ny + 1, Nz, c1.x, c1.z, 1);
     MagneticFieldTrace(Qz, Hz, Ex, Ey, Nx, Ny, Nz + 1, c1.y, c1.x, 2);
 
-    checkCudaError();
 }
 
 void Plasma::MagneticFieldStageTwo(double *Hx, double *Hy, double *Hz, int nt, double *Qx, double *Qy, double *Qz) {
@@ -276,7 +262,7 @@ double Plasma::getElectricEnergy() {
                     (void *) &pd->d_Ez,
                     0};
 
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    int cudaStatus = cudaLaunchKernel(
             (const void *) GPU_getCellEnergy, // pointer to kernel func.
             dimGrid,                          // grid
             dimBlockOne,                      // block
@@ -285,7 +271,11 @@ double Plasma::getElectricEnergy() {
             0
     );
 
-    MemoryCopy(&ee, d_ee, sizeof(double), DEVICE_TO_HOST);
+    CHECK_ERROR("Launch kernel", cudaStatus);
+
+    cudaStatus = MemoryCopy(&ee, d_ee, sizeof(double), DEVICE_TO_HOST);
+
+    CHECK_ERROR("MEM COPY", cudaStatus);
 
     return ee;
 }
@@ -341,7 +331,7 @@ int Plasma::MagneticFieldTrace(double *Q, double *H, double *E1, double *E2, int
                     (void *) &d2,
                     0};
 
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    int cudaStatus = cudaLaunchKernel(
             (const void *) GPU_emh1, // pointer to kernel func.
             dimGrid,                 // grid
             dimBlock,                // block
@@ -349,6 +339,8 @@ int Plasma::MagneticFieldTrace(double *Q, double *H, double *E1, double *E2, int
             0,
             0
     );
+
+    CHECK_ERROR("Launch kernel", cudaStatus);
 
     return 0;
 }
@@ -368,7 +360,7 @@ int Plasma::SimpleMagneticFieldTrace(Cell &c, double *Q, double *H, int i_end, i
                     (void *) &H,
                     0};
 
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    int cudaStatus = cudaLaunchKernel(
             (const void *) GPU_emh2,       // pointer to kernel func.
             dimGrid,                       // grid
             dimBlock,                      // block
@@ -376,6 +368,8 @@ int Plasma::SimpleMagneticFieldTrace(Cell &c, double *Q, double *H, int i_end, i
             0,
             0
     );
+
+    CHECK_ERROR("Launch kernel", cudaStatus);
 
     return 0;
 }
@@ -395,7 +389,7 @@ int Plasma::PeriodicBoundaries(double *E, int dir, int start1, int end1, int sta
                     (void *) &N,
                     0};
 
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    int cudaStatus = cudaLaunchKernel(
             (const void *) GPU_periodic,   // pointer to kernel func.
             dimGrid,                       // grid
             dimBlock,                      // block
@@ -403,6 +397,8 @@ int Plasma::PeriodicBoundaries(double *E, int dir, int start1, int end1, int sta
             0,
             0
     );
+
+    CHECK_ERROR("Launch kernel", cudaStatus);
 
     int one = 1;
     int N1 = N + 1;
@@ -425,6 +421,8 @@ int Plasma::PeriodicBoundaries(double *E, int dir, int start1, int end1, int sta
             0
     );
 
+    CHECK_ERROR("Launch kernel", cudaStatus);
+
     return 0;
 }
 
@@ -444,7 +442,7 @@ int Plasma::SetPeriodicCurrentComponent(GPUCell **cells, double *J, int dir, uns
                     (void *) &N,
                     0};
 
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    int cudaStatus = cudaLaunchKernel(
             (const void *) GPU_CurrentPeriodic, // pointer to kernel func.
             dimGridX,                           // grid
             dimBlock,                           // block
@@ -452,6 +450,8 @@ int Plasma::SetPeriodicCurrentComponent(GPUCell **cells, double *J, int dir, uns
             16000,
             0
     );
+
+    CHECK_ERROR("Launch kernel", cudaStatus);
 
     dir2 = 1;
     N = Ny + 2;
@@ -464,6 +464,8 @@ int Plasma::SetPeriodicCurrentComponent(GPUCell **cells, double *J, int dir, uns
             0
     );
 
+    CHECK_ERROR("Launch kernel", cudaStatus);
+
     dir2 = 2;
     N = Nz + 2;
     cudaStatus = cudaLaunchKernel(
@@ -474,6 +476,8 @@ int Plasma::SetPeriodicCurrentComponent(GPUCell **cells, double *J, int dir, uns
             16000,
             0
     );
+
+    CHECK_ERROR("Launch kernel", cudaStatus);
 
     return 0;
 }
@@ -493,18 +497,21 @@ void Plasma::SetPeriodicCurrents(int nt) {
 
 void Plasma::AssignCellsToArraysGPU() {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
-
-    dim3 dimGrid(Nx, Ny, Nz), dimBlockExt(CellExtent, CellExtent, CellExtent);
-    cudaError_t err = cudaGetLastError();
-    printf("%s:%d - error %d %s\n", __FILE__, __LINE__, err, cudaGetErrorString(err));
-
+    int err;
     size_t sz;
+    dim3 dimGrid(Nx, Ny, Nz), dimBlockExt(CellExtent, CellExtent, CellExtent);
+
     err = cudaDeviceGetLimit(&sz, cudaLimitStackSize);
-    printf("%s:%d - stack limit %d err = %d\n", __FILE__, __LINE__, ((int) sz), err);
+    CHECK_ERROR("DEVICE LIMIT", err);
+    printf("%s:%d - stack limit %d\n", __FILE__, __LINE__, ((int) sz));
+
     err = cudaDeviceSetLimit(cudaLimitStackSize, 64 * 1024);
-    printf("%s:%d - set stack limit %d \n", __FILE__, __LINE__, err);
+    CHECK_ERROR("DEVICE LIMIT", err);
+    printf("%s:%d - set stack limit \n", __FILE__, __LINE__);
+
     err = cudaDeviceGetLimit(&sz, cudaLimitStackSize);
-    printf("%s:%d - stack limit %d err %d\n", __FILE__, __LINE__, ((int) sz), err);
+    CHECK_ERROR("DEVICE LIMIT", err);
+    printf("%s:%d - stack limit %d \n", __FILE__, __LINE__, ((int) sz));
 
     void *args[] = {(void *) &pd->d_CellArray, &pd->d_Ex, &pd->d_Ey, &pd->d_Ez, &pd->d_Hx, &pd->d_Hy, &pd->d_Hz, 0};
     cudaError_t cudaStatus = cudaLaunchKernel(
@@ -518,7 +525,6 @@ void Plasma::AssignCellsToArraysGPU() {
 
     cudaDeviceSynchronize();
 
-    checkCudaError();
 }
 
 void Plasma::readControlPoint(FILE **f1, char *fncpy, int num, int nt, int part_read, int field_assign,
@@ -609,7 +615,6 @@ void Plasma::checkControlPoint(int num, int nt) {
     t_hx = CheckGPUArraySilent(pd->dbgHx, pd->d_Hx);
     t_hy = CheckGPUArraySilent(pd->dbgHy, pd->d_Hy);
     t_hz = CheckGPUArraySilent(pd->dbgHz, pd->d_Hz);
-
     t_qx = CheckGPUArraySilent(pd->dbg_Qx, pd->d_Qx);
     t_qy = CheckGPUArraySilent(pd->dbg_Qy, pd->d_Qy);
     t_qz = CheckGPUArraySilent(pd->dbg_Qz, pd->d_Qz);
@@ -676,7 +681,7 @@ void Plasma::checkControlPoint(int num, int nt) {
 double Plasma::CheckGPUArraySilent(double *a, double *d_a) {
     static double *t;
     static int f = 1;
-    cudaError_t err;
+    int err;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
     if (f == 1) {
@@ -684,37 +689,28 @@ double Plasma::CheckGPUArraySilent(double *a, double *d_a) {
         f = 0;
     }
 
-    MemoryCopy(t, d_a, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    err = cudaGetLastError();
-    if (err != cudaSuccess) {
-        printf("CheckArraySilent err %d %s \n", err, cudaGetErrorString(err));
-        exit(0);
-    }
+    err = MemoryCopy(t, d_a, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
 
     return CheckArraySilent(a, t, (Nx + 2) * (Ny + 2) * (Nz + 2));
 }
 
 int Plasma::SetCurrentArraysToZero() {
-    checkCudaError();
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
+    int err;
 
     memset(pd->Jx, 0, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
-    checkCudaError();
-
     memset(pd->Jy, 0, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
-    checkCudaError();
-
     memset(pd->Jz, 0, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
-    checkCudaError();
 
-    cudaMemset(pd->d_Jx, 0, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
-    checkCudaError();
+    err = cudaMemset(pd->d_Jx, 0, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+    CHECK_ERROR("MEM SET", err);
 
-    cudaMemset(pd->d_Jy, 0, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
-    checkCudaError();
+    err = cudaMemset(pd->d_Jy, 0, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+    CHECK_ERROR("MEM SET", err);
 
-    cudaMemset(pd->d_Jz, 0, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
-    checkCudaError();
+    err = cudaMemset(pd->d_Jz, 0, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+    CHECK_ERROR("MEM SET", err);
 
     return 0;
 }
@@ -725,7 +721,7 @@ int Plasma::SetCurrentsInCellsToZero() {
     dim3 dimGrid((unsigned int)(Nx + 2), (unsigned int)(Ny + 2), (unsigned int)(Nz + 2)), dimBlockExt(CellExtent, CellExtent, CellExtent);
 
     void *args[] = {(void *) &pd->d_CellArray, 0};
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    cudaLaunchKernel(
             (const void *) GPU_SetAllCurrentsToZero, // pointer to kernel func.
             dimGrid,                                 // grid
             dimBlockExt,                             // block
@@ -785,8 +781,6 @@ int Plasma::StepAllCells(int nt) {
 
 void Plasma::StepAllCells_post_diagnostic(int nt) {
     memory_monitor("CellOrder_StepAllCells4", nt);
-
-    checkCudaError();
 }
 
 int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
@@ -803,7 +797,7 @@ int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
                     (void *) &pd->d_Rho,
                     0};
 
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    cudaLaunchKernel(
             (const void *) GPU_WriteAllCurrents, // pointer to kernel func.
             dimGrid,                             // grid
             dimExt,                              // block
@@ -814,25 +808,19 @@ int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
 
     memory_monitor("CellOrder_StepAllCells5", nt);
 
-    memory_monitor("CellOrder_StepAllCells6", nt);
-
-    checkCudaError();
-
     return 0;
 }
 
 int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
+    int err;
     dim3 dimGrid((unsigned int)(Nx + 2), (unsigned int)(Ny + 2), (unsigned int)(Nz + 2)), dimBlockOne(1, 1, 1);
 
-    cudaError_t before_MakeDepartureLists, after_MakeDepartureLists;
+    err = cudaMalloc((void **) d_stage, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+    CHECK_ERROR("MEM COPY", err);
 
-    before_MakeDepartureLists = cudaGetLastError();
-    cout << "before_MakeDepartureLists" << before_MakeDepartureLists << " " <<  cudaGetErrorString(before_MakeDepartureLists) << " blockdim " << dimGrid.x << " : " << dimGrid.y << " : " <<  dimGrid.z << endl;
-
-    cudaMalloc((void **) d_stage, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
-
-    cudaMalloc((void **) d_stage1, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+    err = cudaMalloc((void **) d_stage1, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+    CHECK_ERROR("MEM COPY", err);
 
     void *args[] = {
             (void *) &pd->d_CellArray,
@@ -840,7 +828,7 @@ int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) 
             (void *) d_stage,
             0};
 
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    err = cudaLaunchKernel(
             (const void *) GPU_MakeDepartureLists, // pointer to kernel func.
             dimGrid,                               // grid
             dimBlockOne,                           // block
@@ -849,26 +837,13 @@ int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) 
             0
     );
 
-    after_MakeDepartureLists = cudaGetLastError();
+    CHECK_ERROR("Launch kernel", err);
 
-    if (after_MakeDepartureLists != cudaSuccess) {
-        cout << "after_MakeDepartureLists " << after_MakeDepartureLists << " : " << cudaGetErrorString(after_MakeDepartureLists) << endl;
-    }
-
-    cudaDeviceSynchronize();
-
-    int err = cudaGetLastError();
-
-    if (err != cudaSuccess) {
-        cout << "MakeParticleList sync error " << err << " : " << getErrorString(err) << endl;
-    }
+    err = cudaDeviceSynchronize();
+    CHECK_ERROR("DEVICE SYNC", err);
 
     err = MemoryCopy(stage, *d_stage, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-
-    if (err != cudaSuccess) {
-        cout << "MakeParticleList error " << err << " : " << getErrorString(err) << endl;
-        exit(0);
-    }
+    CHECK_ERROR("MEM COPY", err);
 
     return err;
 }
@@ -915,10 +890,7 @@ int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1
     cudaDeviceSynchronize();
 #endif
     err = MemoryCopy(stage1, d_stage1, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    if (err != cudaSuccess) {
-        std::cout << "copy error" << std::endl;
-        exit(0);
-    }
+    CHECK_ERROR("MEM COPY", err);
 
     memory_monitor("CellOrder_StepAllCells7", nt);
     return err;
@@ -933,8 +905,6 @@ int Plasma::reorder_particles(int nt) {
 
     err = reallyPassParticlesToAnotherCells(nt, stage1, d_stage1);
 
-    checkCudaError();
-
     return err;
 }
 
@@ -948,20 +918,13 @@ void Plasma::Push(int nt) {
 }
 
 int Plasma::SetCurrentsToZero() {
-
-    checkCudaError();
-
     SetCurrentArraysToZero();
 
     return SetCurrentsInCellsToZero();
 }
 
 void Plasma::CellOrder_StepAllCells(int nt) {
-    checkCudaError();
-
     SetCurrentsToZero();
-
-    checkCudaError();
 
     Push(nt);
 
@@ -1077,39 +1040,19 @@ double Plasma::checkControlPointParticles(int check_point_num, FILE *f, char *fn
 }
 
 int Plasma::memory_monitor(std::string legend, int nt) {
-    static int first = 1;
-    static FILE *f;
 
 #ifndef FREE_RAM_MONITOR
     return 1;
 #endif
 
-    if (first == 1) {
-        first = 0;
-        f = fopen("memory_monitor.log", "wt");
-    }
-
     size_t m_free, m_total;
     struct sysinfo info;
 
-    cudaError_t err = cudaMemGetInfo(&m_free, &m_total);
+    int err = cudaMemGetInfo(&m_free, &m_total);
+    CHECK_ERROR("cudaMemGetInfo", err);
 
     sysinfo(&info);
-    fprintf(f, "step %10d %50s GPU memory total %10d free %10d free CPU memory %10u \n", nt, legend.c_str(), ((int) m_total) / 1024 / 1024, ((int) m_free) / 1024 / 1024, ((int) info.freeram) / 1024 / 1024);
-
-    return 0;
-}
-
-int Plasma::memory_status_print(int nt) {
-    size_t m_free, m_total;
-    struct sysinfo info;
-
-    cudaMemGetInfo(&m_free, &m_total);
-    sysinfo(&info);
-
-#ifdef MEMORY_PRINTS
-    printf("before Step  %10d CPU memory free %10u GPU memory total %10d free %10d\n", nt,info.freeram/1024/1024,m_total/1024/1024,m_free/1024/1024);
-#endif
+    printf("step %10d %50s GPU memory total %10d free %10d free CPU memory %10u \n", nt, legend.c_str(), ((int) m_total) / 1024 / 1024, ((int) m_free) / 1024 / 1024, ((int) info.freeram) / 1024 / 1024);
 
     return 0;
 }
@@ -1137,39 +1080,46 @@ void Plasma::writeDataToFile(int step) {
     int err;
 
     err = MemoryCopy(t, pd->d_Ex, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + X_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + X_LABEL);
     err = MemoryCopy(t, pd->d_Ey, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + Y_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Y_LABEL);
     err = MemoryCopy(t, pd->d_Ez, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + Z_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Z_LABEL);
 
     err = MemoryCopy(t, pd->d_Hx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + X_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + X_LABEL);
     err = MemoryCopy(t, pd->d_Hy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + Y_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Y_LABEL);
     err = MemoryCopy(t, pd->d_Hz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + Z_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Z_LABEL);
 
     err = MemoryCopy(t, pd->d_Jx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + X_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + X_LABEL);
     err = MemoryCopy(t, pd->d_Jy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + Y_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + Y_LABEL);
     err = MemoryCopy(t, pd->d_Jz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + Z_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + Z_LABEL);
 
     err = MemoryCopy(t, pd->d_Qx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL);
     err = MemoryCopy(t, pd->d_Qy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL);
     err = MemoryCopy(t, pd->d_Qz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL);
 
     delete[] t;
-
-    if (err != cudaSuccess) {
-        printf("bCheckArray err %d %s \n", err, getErrorString(err));
-        exit(0);
-    }
 }
 
 /**
@@ -1204,7 +1154,7 @@ int Plasma::Compute() {
     }
 
     for (int step = pd->st; step <= pd->ts; step++) {
-        memory_status_print(step);
+        memory_monitor("before step", step);
 
         Step(step);
 
@@ -1213,7 +1163,7 @@ int Plasma::Compute() {
             writeDataToFile(step);
         }
 
-        memory_status_print(step);
+        memory_monitor("after step", step);
 
         cout << "step " << step << " ===================" << endl;
     }

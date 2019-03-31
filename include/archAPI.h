@@ -6,13 +6,13 @@
 #define DEVICE_TO_HOST   -131315
 #define DEVICE_TO_DEVICE -131316
 
-#ifndef __CUDACC__
-
 #define CHECK_ERROR(msg, err) \
                         if (err != 0) { \
                             std::cerr << (msg) << " code: " << (err) << " : " << __FILE__ << " : " << __LINE__ << " : " << getErrorString((err)) << std::endl; \
                             exit(-1); \
                         }
+
+#ifndef __CUDACC__
 
 typedef struct {
     unsigned int x, y, z;

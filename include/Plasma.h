@@ -30,6 +30,7 @@
 #include "NetCdf/read_file.h"
 #include "PlasmaTypes.h"
 #include "PlasmaInitializer.h"
+#include "archAPI.h"
 
 #define FORTRAN_ORDER
 

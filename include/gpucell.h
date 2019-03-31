@@ -7,11 +7,6 @@
 
 #ifndef GPUCELL_H_
 #define GPUCELL_H_
-#ifdef __CUDACC__
-#define host_device __host__ __device__
-#else
-#define host_device
-#endif
 
 #include "cell.h"
 #include "archAPI.h"
@@ -23,13 +18,13 @@ __global__ void testKernel(double *vec);
 class GPUCell : public Cell {
 public:
 
-host_device
+    __host__ __device__
     GPUCell();
 
-host_device
+    __host__ __device__
     ~GPUCell();
 
-host_device
+    __host__ __device__
     GPUCell(int i1, int l1, int k1, double Lx, double Ly, double Lz, int Nx1, int Ny1, int Nz1, double tau1);
 
     GPUCell *copyCellToDevice();

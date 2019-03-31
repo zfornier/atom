@@ -8,6 +8,7 @@
 #include "PlasmaTypes.h"
 #include "maxwell.h"
 #include "service_functions.h"
+#include "archAPI.h"
 
 class PlasmaInitializer {
 private:

@@ -16,7 +16,7 @@ __host__ __device__ int isNan(double t) {
     return 0;
 }
 
-host_device
+__host__ __device__
 int Cell::AllocParticles() {
     int size = sizeof(Particle) / sizeof(double);
 
@@ -27,17 +27,17 @@ int Cell::AllocParticles() {
     return 0;
 }
 
-host_device
+__host__ __device__
 double Cell::ParticleArrayRead(int n_particle, int attribute) {
     return doubParticleArray[attribute + n_particle * sizeof(Particle) / sizeof(double)];
 }
 
-host_device
+__host__ __device__
 void Cell::ParticleArrayWrite(int n_particle, int attribute, double t) {
     doubParticleArray[attribute + n_particle * sizeof(Particle) / sizeof(double)] = t;
 }
 
-host_device
+__host__ __device__
 void Cell::writeParticleToSurface(int n, Particle *p) {
     ParticleArrayWrite(n, 0, p->m);
     ParticleArrayWrite(n, 1, p->x);
@@ -53,14 +53,14 @@ void Cell::writeParticleToSurface(int n, Particle *p) {
     ParticleArrayWrite(n, 11, ((double) p->sort));
 }
 
-host_device
+__host__ __device__
 void Cell::addParticleToSurface(Particle *p, int *number_of_particles) {
     writeParticleToSurface(*number_of_particles, p);
 
     (*number_of_particles)++;
 }
 
-host_device
+__host__ __device__
 Particle Cell::readParticleFromSurfaceDevice(int n) {
     Particle p;
 
@@ -81,7 +81,7 @@ Particle Cell::readParticleFromSurfaceDevice(int n) {
     return p;
 }
 
-host_device
+__host__ __device__
 void Cell::removeParticleFromSurfaceDevice(int n, Particle *p, int *number_of_particles) {
     int i, k;
     double b;
@@ -113,17 +113,17 @@ void Cell::removeParticleFromSurfaceDevice(int n, Particle *p, int *number_of_pa
     }
 }
 
-host_device
+__host__ __device__
 double Cell::get_hx() {
     return hx;
 }
 
-host_device
+__host__ __device__
 double Cell::get_hy() {
     return hy;
 }
 
-host_device
+__host__ __device__
 double Cell::get_hz() {
     return hz;
 }
@@ -134,33 +134,33 @@ double *Cell::GetParticles() { return doubParticleArray; }
 thrust::host_vector<Particle>&  Cell::GetParticles(){return all_particles;}
 #endif
 
-host_device
+__host__ __device__
 double Cell::getCellFraction(double x, double x0, double hx) {
     return (x - x0) / hx;
 }
 
-host_device
+__host__ __device__
 int Cell::getCellNumber(double x, double x0, double hx) {
     return ((int) (getCellFraction(x, x0, hx) + 1.0) + 1);
 }
 
-host_device
+__host__ __device__
 int Cell::getCellNumberCenter(double x, double x0, double hx) {
     return (int)((getCellFraction(x, x0, hx) + 1.0) + 1.5);         // Fortran-style numbering used for particle shift computation
 }
 
-host_device
+__host__ __device__
 int Cell::getCellNumberCenterCurrent(double x, double x0, double hx) {
     double t = (getCellFraction(x, x0, hx) + 1.5);         // Fortran-style numbering used for particle shift computation
     return (int) (t + 1);
 }
 
-host_device
+__host__ __device__
 int Cell::getPointPosition(double x, double x0, double hx) {
     return (int) getCellFraction(x, x0, hx);
 }
 
-host_device
+__host__ __device__
 int Cell::getPointCell(double3 x) { // for Particle to Cell distribution:
     int i = getPointPosition(x.x, 0.0, hx);
     int l = getPointPosition(x.y, 0.0, hy);
@@ -168,57 +168,57 @@ int Cell::getPointCell(double3 x) { // for Particle to Cell distribution:
     return getGlobalCellNumber(i, l, k);
 }
 
-host_device
+__host__ __device__
 double Cell::getCellTransitAverage(double hz, int i1, int i2, double x0) {
     return (hz * (((double) i1 + (double) i2) * 0.5 - 2.0) + x0);
 }
 
-host_device
+__host__ __device__
 double Cell::getCellTransitRatio(double z1, double z, double z2) {
     return (z2 - z) / (z1 - z);
 }
 
-host_device
+__host__ __device__
 double Cell::getCellTransitProduct(double z1, double z, double z2) {
     return (z2 - z) * (z1 - z);
 }
 
-host_device
+__host__ __device__
 double Cell::getRatioBasedX(double x1, double x, double s) {
     return (x + (x1 - x) * s);
 }
 
-host_device
+__host__ __device__
 double Cell::getCenterRelatedShift(double x, double x1, int i, double hx, double x0) {
     return (0.50 * (x + x1) - hx * ((double) i - 2.50) - x0);
 }
 
-host_device
+__host__ __device__
 void Cell::flyDirection(Particle *p, int *dx, int *dy, int *dz) {
     *dx = (((p->x > x0 + hx) && (p->x < x0 + 2 * hx)) || ((p->x < hx) && (i == Nx - 1))) ? 2 : (((p->x < x0) || ((p->x > xm - hx) && (i == 0))) ? 0 : 1);
     *dy = (((p->y > y0 + hy) && (p->y < y0 + 2 * hy)) || ((p->y < hy) && (l == Ny - 1))) ? 2 : (((p->y < y0) || ((p->y > ym - hy) && (l == 0))) ? 0 : 1);
     *dz = (((p->z > z0 + hz) && (p->z < z0 + 2 * hz)) || ((p->z < hz) && (k == Nz - 1))) ? 2 : (((p->z < z0) || ((p->z > zm - hz) && (k == 0))) ? 0 : 1);
 }
 
-host_device
+__host__ __device__
 void Cell::inverseDirection(int *dx, int *dy, int *dz) {
     *dx = (*dx == 2) ? 0 : (*dx == 0 ? 2 : 1);
     *dy = (*dy == 2) ? 0 : (*dy == 0 ? 2 : 1);
     *dz = (*dz == 2) ? 0 : (*dz == 0 ? 2 : 1);
 }
 
-host_device
+__host__ __device__
 bool Cell::isPointInCell(double3 x) {
     return ((x0 <= x.x) && (x.x < x0 + hx) && (y0 <= x.y) && (x.y < y0 + hy) && (z0 <= x.z) && (x.z < z0 + hz));
 }
 
-host_device
+__host__ __device__
 Cell::Cell() {}
 
-host_device
+__host__ __device__
 Cell::~Cell() {}
 
-host_device
+__host__ __device__
 Cell::Cell(int i1, int l1, int k1, double Lx, double Ly, double Lz, int Nx1, int Ny1, int Nz1, double tau1) {
     Cell();
     Nx = Nx1;
@@ -242,7 +242,7 @@ Cell::Cell(int i1, int l1, int k1, double Lx, double Ly, double Lz, int Nx1, int
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
-host_device
+__host__ __device__
 double3 Cell::GetElectricField(
         int3 i, int3 i1,
         double &s1, double &s2, double &s3, double &s4, double &s5, double &s6,
@@ -270,7 +270,7 @@ double3 Cell::GetElectricField(
     return E;
 }
 
-host_device
+__host__ __device__
 int3 Cell::getCellTripletNumber(int n) {
     int3 i;
     i.z = n % (Nz + 2);
@@ -279,7 +279,7 @@ int3 Cell::getCellTripletNumber(int n) {
     return i;
 }
 
-host_device
+__host__ __device__
 int Cell::getGlobalCellNumberTriplet(int *i, int *l, int *k) {
     if (*i >= Nx + 2) *i -= Nx + 2;
     if (*l >= Ny + 2) *l -= Ny + 2;
@@ -288,7 +288,7 @@ int Cell::getGlobalCellNumberTriplet(int *i, int *l, int *k) {
     return 0;
 }
 
-host_device
+__host__ __device__
 int Cell::getGlobalCellNumber(int i, int l, int k) {
 
     getGlobalCellNumberTriplet(&i, &l, &k);
@@ -296,7 +296,7 @@ int Cell::getGlobalCellNumber(int i, int l, int k) {
     return (i * (Ny + 2) * (Nz + 2) + l * (Nz + 2) + k);
 }
 
-host_device
+__host__ __device__
 int Cell::getWrapCellNumberTriplet(int *i, int *l, int *k) {
     if (*i >= Nx) {
         *i -= Nx;
@@ -324,19 +324,19 @@ int Cell::getWrapCellNumberTriplet(int *i, int *l, int *k) {
     return 0;
 }
 
-host_device
+__host__ __device__
 int Cell::getWrapCellNumber(int i, int l, int k) {
     getWrapCellNumberTriplet(&i, &l, &k);
 
     return (i * (Ny + 2) * (Nz + 2) + l * (Nz + 2) + k);
 }
 
-host_device
+__host__ __device__
 int Cell::getFortranCellNumber(int i, int l, int k) {
     return getGlobalCellNumber(i - 1, l - 1, k - 1);
 }
 
-host_device
+__host__ __device__
 void Cell::getFortranCellTriplet(int n, int *i, int *l, int *k) {
     *i = n / ((Ny + 2) * (Nz + 2));
     *l = (n - (*i) * (Ny + 2) * (Nz + 2)) / Nz;
@@ -347,7 +347,7 @@ void Cell::getFortranCellTriplet(int n, int *i, int *l, int *k) {
     (*k) += 1;
 }
 
-host_device
+__host__ __device__
 int Cell::getGlobalBoundaryCellNumber(int i, int k, int dir, int N) {
     int i1 = (dir == 0) * N + (dir == 1) * i + (dir == 2) * i;
     int l1 = (dir == 0) * i + (dir == 1) * N + (dir == 2) * k;
@@ -355,12 +355,12 @@ int Cell::getGlobalBoundaryCellNumber(int i, int k, int dir, int N) {
     return getGlobalCellNumber(i1, l1, k1);
 }
 
-host_device
+__host__ __device__
 void Cell::ClearParticles() {
     number_of_particles = 0;
 }
 
-host_device
+__host__ __device__
 void Cell::Init() {
     Jx = new CellDouble;
     Jy = new CellDouble;
@@ -376,7 +376,7 @@ void Cell::Init() {
     AllocParticles();
 }
 
-host_device
+__host__ __device__
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -409,7 +409,7 @@ void Cell::InverseKernel(double3 x, int3 &i, int3 &i1,
     s61 = 1. - s6;
 }
 
-host_device
+__host__ __device__
 double Cell::Interpolate3D(CellDouble *E, int3 *cell, double sx, double sx1, double sy, double sy1, double sz, double sz1, Particle *p, int n) {
     double t, t1, t2;
     double t_ilk, t_ilk1, t_il1k, t_il1k1, t_i1lk, t_i1lk1, t_i1l1k, t_i1l1k1;
@@ -471,7 +471,7 @@ double Cell::Interpolate3D(CellDouble *E, int3 *cell, double sx, double sx1, dou
     return t;
 }
 
-host_device
+__host__ __device__
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -502,37 +502,37 @@ double3 Cell::GetMagneticField(
     return H;
 }
 
-host_device
+__host__ __device__
 double Cell::s1_interpolate(double x) {
     return (int) (x / hx + 1.0) - x / hx;
 }
 
-host_device
+__host__ __device__
 double Cell::s2_interpolate(double x) {
     return (int) (x / hx + 1.5) - 0.5 - x / hx;
 }
 
-host_device
+__host__ __device__
 double Cell::s3_interpolate(double y) {
     return (int) (y / hy + 1.0) - y / hy;
 }
 
-host_device
+__host__ __device__
 double Cell::s5_interpolate(double z) {
     return (int) (z / hz + 1.0) - z / hz;
 }
 
-host_device
+__host__ __device__
 double Cell::s4_interpolate(double y) {
     return (int) (y / hy + 1.5) - 0.5 - y / hy;
 }
 
-host_device
+__host__ __device__
 double Cell::s6_interpolate(double z) {
     return (int) (z / hz + 1.5) - 0.5 - z / hz;
 }
 
-host_device
+__host__ __device__
 Field Cell::GetField(Particle *p, CellTotalField cf) {
     int3 i, i1;
     double s1, s2, s3, s4, s5, s6, s11, s21, s31, s41, s51, s61;
@@ -557,7 +557,7 @@ Field Cell::GetField(Particle *p, CellTotalField cf) {
     return fd;
 }
 
-host_device
+__host__ __device__
 void Cell::CurrentToMesh(double tau, int *cells, DoubleCurrentTensor *dt, Particle *p) {
     double3 x2;
     double s;
@@ -674,7 +674,7 @@ void Cell::CurrentToMesh(double tau, int *cells, DoubleCurrentTensor *dt, Partic
     return;
 }
 
-host_device
+__host__ __device__
 void Cell::Reflect(Particle *p) {
     double3 x1 = p->GetX();
 
@@ -685,7 +685,7 @@ void Cell::Reflect(Particle *p) {
     p->SetX(x1);
 }
 
-host_device
+__host__ __device__
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -709,7 +709,7 @@ void Cell::Kernel(CellDouble &Jx,
     Jx.M[i41][i42][i43] += t4;//su*(dy*dz+s1);
 }
 
-host_device
+__host__ __device__
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -847,7 +847,7 @@ void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau, Current
 #endif
 }
 
-host_device
+__host__ __device__
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -882,7 +882,7 @@ void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau) {
     Kernel(*Jz, i.x, i.y, i.z, i.x, i.y + 1, i.z, i.x + 1, i.y, i.z, i.x + 1, i.y + 1, i.z, sw, dx, dy, dx1, dy1, s3);
 }
 
-host_device
+__host__ __device__
 bool Cell::Insert(Particle &p) {
     if (isPointInCell(p.GetX())) {
         addParticleToSurface(&p, &number_of_particles);
@@ -890,7 +890,7 @@ bool Cell::Insert(Particle &p) {
     } else return false;
 }
 
-host_device
+__host__ __device__
 #ifdef VIRTUAL_FUNCTIONS
 virtual
 #endif
@@ -906,7 +906,7 @@ void Cell::MoveSingleParticle(unsigned int i, CellTotalField cf) {
     writeParticleToSurface(i, &p);
 }
 
-host_device
+__host__ __device__
 DoubleCurrentTensor Cell::AccumulateCurrentSingleParticle(unsigned int i, int *cells, DoubleCurrentTensor *dt) {
     Particle p;
     if (i >= number_of_particles) {
@@ -930,7 +930,7 @@ DoubleCurrentTensor Cell::AccumulateCurrentSingleParticle(unsigned int i, int *c
     return (*dt);
 }
 
-host_device
+__host__ __device__
 void Cell::SetAllCurrentsToZero(uint3 threadIdx) {
     int i1, l1, k1;
 
@@ -943,7 +943,7 @@ void Cell::SetAllCurrentsToZero(uint3 threadIdx) {
     Jz->M[i1][l1][k1] = 0;
 }
 
-host_device
+__host__ __device__
 double Cell::getFortranArrayValue(double *E, int i, int l, int k) {
     int n = getFortranCellNumber(i, l, k);
 
@@ -954,7 +954,7 @@ double Cell::getFortranArrayValue(double *E, int i, int l, int k) {
 
 // MAPPING: fORTRAN NODE i GOES TO 2nd NODE OF C++ CELL i-1
 // Simple : C++ (i+i1) ----->>>> F(i+i1-1)
-host_device
+__host__ __device__
 void Cell::readField(double *E, CellDouble &Ec, uint3 threadIdx) {
     int i_f, l_f, k_f;
     int i1, l1, k1;
@@ -969,7 +969,7 @@ void Cell::readField(double *E, CellDouble &Ec, uint3 threadIdx) {
     Ec.M[i1][l1][k1] = t;
 }
 
-host_device
+__host__ __device__
 void Cell::readField(double *E, CellDouble &Ec) {
     int i_f, l_f, k_f;
 
@@ -985,7 +985,7 @@ void Cell::readField(double *E, CellDouble &Ec) {
     }
 }
 
-host_device
+__host__ __device__
 void Cell::readFieldsFromArrays(double *glob_Ex, double *glob_Ey, double *glob_Ez, double *glob_Hx, double *glob_Hy, double *glob_Hz, uint3 threadIdx) {
     readField(glob_Ex, *Ex, threadIdx);
     readField(glob_Ey, *Ey, threadIdx);
@@ -995,7 +995,7 @@ void Cell::readFieldsFromArrays(double *glob_Ex, double *glob_Ey, double *glob_E
     readField(glob_Hz, *Hz, threadIdx);
 }
 
-host_device
+__host__ __device__
 void Cell::readFieldsFromArrays(double *glob_Ex, double *glob_Ey, double *glob_Ez, double *glob_Hx, double *glob_Hy, double *glob_Hz) {
     readField(glob_Ex, *Ex);
     readField(glob_Ey, *Ey);
@@ -1005,7 +1005,7 @@ void Cell::readFieldsFromArrays(double *glob_Ex, double *glob_Ey, double *glob_E
     readField(glob_Hz, *Hz);
 }
 
-host_device
+__host__ __device__
 Cell &Cell::operator=(Cell const &src) {
     i = src.i;
     l = src.l;
@@ -1201,7 +1201,7 @@ void Cell::SetControlSystem(int j, double *c) {
 #endif
 }
 
-host_device
+__host__ __device__
 void Cell::SetControlSystemToParticles() {
     Particle p;
     int i;

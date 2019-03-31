@@ -23,7 +23,7 @@ void Plasma::copyCells(std::string where, int nt) {
         pd->cp = (GPUCell **) malloc(size * sizeof(GPUCell *));
     }
 
-    unsigned long m1, m2, delta, accum;
+    unsigned long m1, m2, delta, accum = 0;
     memory_monitor("beforeCopyCells", nt);
 
     for (int i = 0; i < size; i++) {
@@ -66,7 +66,7 @@ double Plasma::checkGPUArray(double *a, double *d_a, std::string name, std::stri
     sprintf(fname, "diff_%s_at_%s_nt%08d.dat", name.c_str(), where.c_str(), nt);
 
     if (f1 == 1) {
-        t = (double *) malloc(sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+        t = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
         f1 = 0;
     }
     int err;
@@ -737,7 +737,7 @@ double Plasma::CheckGPUArraySilent(double *a, double *d_a) {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
     if (f == 1) {
-        t = (double *) malloc(sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+        t = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
         f = 0;
     }
 
@@ -1058,13 +1058,13 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, FILE *f, G
 
     memory_monitor("checkControlPointParticlesOneSort3", nt);
 
-    free(pd->dbg_x);
-    free(pd->dbg_y);
-    free(pd->dbg_z);
+    delete[] pd->dbg_x;
+    delete[] pd->dbg_y;
+    delete[] pd->dbg_z;
 
-    free(pd->dbg_px);
-    free(pd->dbg_py);
-    free(pd->dbg_pz);
+    delete[] pd->dbg_px;
+    delete[] pd->dbg_py;
+    delete[] pd->dbg_pz;
 
     memory_monitor("checkControlPointParticlesOneSort4", nt);
 #endif
@@ -1190,7 +1190,7 @@ void Plasma::writeDataToFile(int step) {
     NetCDFManipulator::plsm_add_dimension(filename.c_str(), "y", NY);
     NetCDFManipulator::plsm_add_dimension(filename.c_str(), "z", NZ);
 
-    double *t = (double *) malloc(sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2));
+    double *t = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     int err;
 
     err = MemoryCopy(t, pd->d_Ex, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
@@ -1221,7 +1221,7 @@ void Plasma::writeDataToFile(int step) {
     err = MemoryCopy(t, pd->d_Qz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL);
 
-    free(t);
+    delete[] t;
 
     if (err != cudaSuccess) {
         printf("bCheckArray err %d %s \n", err, getErrorString(err));

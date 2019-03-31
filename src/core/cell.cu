@@ -1140,8 +1140,6 @@ Cell::compareToCell(Cell &src) {
 double Cell::checkCellParticles(int check_point_num, double *x, double *y, double *z, double *px, double *py, double *pz, double q_m, double m) {
     int i, num = 0, j, num_sort = 0, correct_particle;
     double t, dm, dqm, dx, dy, dz, dpx, dpy, dpz;
-    if (number_of_particles < 0 || number_of_particles > MAX_particles_per_cell) {
-    }
 
     for (i = 0; i < number_of_particles; i++) {
         Particle p;

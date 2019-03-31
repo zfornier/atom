@@ -76,38 +76,30 @@ int readBinaryParticleArraysOneSort(
 
 //WARNING: check if memory was allocated
 //Why do you need temorary wars for memory allocation? why not to allocate mem and assigne the pointr to the var without `1`?
-    double *dbg_x1 = (double *) malloc(sizeof(double) * total_particles);
-    double *dbg_y1 = (double *) malloc(sizeof(double) * total_particles);
-    double *dbg_z1 = (double *) malloc(sizeof(double) * total_particles);
-    double *dbg_px1 = (double *) malloc(sizeof(double) * total_particles);
-    double *dbg_py1 = (double *) malloc(sizeof(double) * total_particles);
-    double *dbg_pz1 = (double *) malloc(sizeof(double) * total_particles);
+    *dbg_x = new double[total_particles];
+    *dbg_y = new double[total_particles];
+    *dbg_z = new double[total_particles];
+    *dbg_px = new double[total_particles];
+    *dbg_py = new double[total_particles];
+    *dbg_pz = new double[total_particles];
 
     //Reading X coordinates for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Coordinates_x") + patch::to_string(sort)).c_str(), (void *) dbg_x1);
+    readVar("mumu60000000005.nc", (std::string("Coordinates_x") + patch::to_string(sort)).c_str(), (void *) *dbg_x);
 
     //Reading Y coordinates for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Coordinates_y") + patch::to_string(sort)).c_str(), (void *) dbg_y1);
+    readVar("mumu60000000005.nc", (std::string("Coordinates_y") + patch::to_string(sort)).c_str(), (void *) *dbg_y);
 
     //Reading Z coordinates for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Coordinates_z") + patch::to_string(sort)).c_str(), (void *) dbg_z1);
+    readVar("mumu60000000005.nc", (std::string("Coordinates_z") + patch::to_string(sort)).c_str(), (void *) *dbg_z);
 
     //Reading X impulses for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Impulses_x") + patch::to_string(sort)).c_str(), (void *) dbg_px1);
+    readVar("mumu60000000005.nc", (std::string("Impulses_x") + patch::to_string(sort)).c_str(), (void *) *dbg_px);
 
     //Reading Y impulses for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Impulses_y") + patch::to_string(sort)).c_str(), (void *) dbg_py1);
+    readVar("mumu60000000005.nc", (std::string("Impulses_y") + patch::to_string(sort)).c_str(), (void *) *dbg_py);
 
     //Reading Z impulses for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Impulses_z") + patch::to_string(sort)).c_str(), (void *) dbg_pz1);
-
-    *dbg_x = dbg_x1;
-    *dbg_y = dbg_y1;
-    *dbg_z = dbg_z1;
-
-    *dbg_px = dbg_px1;
-    *dbg_py = dbg_py1;
-    *dbg_pz = dbg_pz1;
+    readVar("mumu60000000005.nc", (std::string("Impulses_z") + patch::to_string(sort)).c_str(), (void *) *dbg_pz);
 
     debugPrintParticleCharacteristicArray(*dbg_x, total_particles, nt, (char*)"x", sort);
     debugPrintParticleCharacteristicArray(*dbg_y, total_particles, nt, (char*)"y", sort);

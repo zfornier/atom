@@ -249,8 +249,8 @@ GPUCell *GPUCell::allocateCopyCellFromDevice() {
     GPUCell *h_dst;
 
     h_dst = new GPUCell;
-
-    h_dst->doubParticleArray = (double *) malloc(sizeof(Particle) * MAX_particles_per_cell);
+    int size = sizeof(Particle) / sizeof(double);
+    h_dst->doubParticleArray = new double[size * MAX_particles_per_cell];
 
     h_dst->Jx = new CellDouble;
     h_dst->Jy = new CellDouble;

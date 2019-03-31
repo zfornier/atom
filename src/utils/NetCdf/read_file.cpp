@@ -58,8 +58,6 @@ int copyOneSortParticle(ifstream &ifs, const char *netCdfFileName, string label)
 
     copyDouble(ifs, netCdfFileName, CHARGE_LABEL + label, UNITS_CHARGE_PARTICLES, DESC_CHARGE + label);
     copyDouble(ifs, netCdfFileName, MASS_LABEL + label, UNITS_MASS_PARTICLES, DESC_MASS + label);
-    //extra number
-    readInt(ifs);
 
     copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + X_LABEL + label, name_dim, UNITS_NO, X_LABEL + DESC_COORDINATES + label);
     copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + Y_LABEL + label, name_dim, UNITS_NO, Y_LABEL + DESC_COORDINATES + label);
@@ -68,6 +66,11 @@ int copyOneSortParticle(ifstream &ifs, const char *netCdfFileName, string label)
     copy1dArray(ifs, netCdfFileName, IMPULSES_LABEL + X_LABEL + label, name_dim, UNITS_IMPULSES, X_LABEL + DESC_IMPULSES + label);
     copy1dArray(ifs, netCdfFileName, IMPULSES_LABEL + Y_LABEL + label, name_dim, UNITS_IMPULSES, Y_LABEL + DESC_IMPULSES + label);
     copy1dArray(ifs, netCdfFileName, IMPULSES_LABEL + Z_LABEL + label, name_dim, UNITS_IMPULSES, Z_LABEL + DESC_IMPULSES + label);
+
+    delete[] pLabel;
+    delete[] pUnit;
+    delete[] pDesc;
+    delete[] pDim;
 
     return 0;
 }
@@ -88,7 +91,7 @@ int copyOne3DArray(ifstream &ifs, const char *filename, string label, string uni
     delete[] pLabel;
     delete[] pUnit;
     delete[] pDesc;
-    free(tdArray);
+    delete[] tdArray;
 
     return res;
 }
@@ -96,14 +99,14 @@ int copyOne3DArray(ifstream &ifs, const char *filename, string label, string uni
 double *read3dArray(ifstream &ifs) {
 
     // read length of array
-    char *pBufferLength = (char *) malloc(sizeof(int));
+    char *pBufferLength = new char[sizeof(int)];
 
-    int *pLength = (int *) pBufferLength;
+    int *pLength;
     ifs.read(pBufferLength, sizeof(int));
     pLength = (int *) pBufferLength;
 
     // read content of the array (there are pLength doubles)
-    char *pBuffer = (char *) malloc((sizeof(double) * (*pLength)));
+    char *pBuffer = new char[sizeof(double) * (*pLength)];
     ifs.read(pBuffer, (*pLength));
 
     // read length of array again (end of the array)
@@ -111,8 +114,7 @@ double *read3dArray(ifstream &ifs) {
 
     double *pTab = (double *) pBuffer;
 
-    free(pBufferLength);
-
+    delete[] pBufferLength;
 
     return pTab;
 }
@@ -134,7 +136,7 @@ int copy1dArray(ifstream &ifs, const char *netCdfFileName, string label, string 
     delete[] pUnit;
     delete[] pDesc;
     delete[] pDim;
-    free(tdArray);
+    delete[] tdArray;
 
     return res;
 }
@@ -142,23 +144,23 @@ int copy1dArray(ifstream &ifs, const char *netCdfFileName, string label, string 
 double *read1dArray(ifstream &ifs) {
 
     // read length of array
-    char *pBufferLength = (char *) malloc(sizeof(int));
+    char *pBufferLength = new char[sizeof(int)];;
 
-    int *pLength = (int*)pBufferLength;
+    int *pLength;
 
     ifs.read(pBufferLength, sizeof(int));
     pLength = (int *) pBufferLength;
 
     // read content of the array (there are pLength ints)
-    char *pBuffer = (char *) malloc((sizeof(double) * (*pLength)));
+    char *pBuffer = new char[sizeof(double) * (*pLength)];
     ifs.read(pBuffer, (*pLength));
 
     // read length of array again (end of the array)
     ifs.read(pBufferLength, sizeof(int));
 
-    double *pTab = (double *) pBuffer;
+    double *pTab = (double *)pBuffer;
 
-    free(pBufferLength);
+    delete[] pBufferLength;
 
     return pTab;
 }
@@ -174,15 +176,18 @@ int copyDouble(ifstream &ifs, const char *netCdfFileName, string label, string u
     char *pDesc = new char[desc.length() + 1];
     strcpy(pDesc, desc.c_str());
     res = NetCDFManipulator::plsm_save_double(netCdfFileName, tdArray, pLabel, pUnit, pDesc);
+
     delete[] pLabel;
-    free(tdArray);
+    delete[] pUnit;
+    delete[] pDesc;
+    delete[] tdArray;
 
     return res;
 }
 
 double *readDouble(ifstream &ifs) {
 
-    char *pBuffer = (char *) malloc(sizeof(double));
+    char *pBuffer = new char[sizeof(double)];
     ifs.read(pBuffer, sizeof(double));
 
     double *pTab = (double *) pBuffer;
@@ -201,18 +206,18 @@ int copyInt(ifstream &ifs, const char *netCdfFileName, string label, string unit
     char *pDesc = new char[desc.length() + 1];
     strcpy(pDesc, desc.c_str());
     res = NetCDFManipulator::plsm_save_int(netCdfFileName, tdArray, pLabel, pUnit, pDesc);
+
     delete[] pLabel;
     delete[] pUnit;
     delete[] pDesc;
-
-    free(tdArray);
+    delete[] tdArray;
 
     return res;
 }
 
 int *readInt(ifstream &ifs) {
 
-    char *pBuffer = (char *) malloc(sizeof(int));
+    char *pBuffer = new char[sizeof(int)];
     ifs.read(pBuffer, sizeof(int));
 
     int *pTab = (int *) pBuffer;

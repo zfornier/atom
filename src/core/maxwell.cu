@@ -185,19 +185,15 @@ int in_range(double z0, double z, double z1) {
 }
 
 int AllocateBinaryParticleArraysOneSort(double **dbg_x, double **dbg_y, double **dbg_z, double **dbg_px, double **dbg_py, double **dbg_pz, double **m, int total_particles) {
-    *dbg_x = (double *) malloc(sizeof(double) * total_particles);
+    *dbg_x = new double[total_particles];
+    *dbg_y = new double[total_particles];
+    *dbg_z = new double[total_particles];
 
-    *dbg_y = (double *) malloc(sizeof(double) * total_particles);
+    *dbg_px = new double[total_particles];
+    *dbg_py = new double[total_particles];
+    *dbg_pz = new double[total_particles];
 
-    *dbg_z = (double *) malloc(sizeof(double) * total_particles);
-
-    *dbg_px = (double *) malloc(sizeof(double) * total_particles);
-
-    *dbg_py = (double *) malloc(sizeof(double) * total_particles);
-
-    *dbg_pz = (double *) malloc(sizeof(double) * total_particles);
-
-    *m = (double *) malloc(sizeof(double) * total_particles);
+    *m = new double[total_particles];
 
     return 0;
 }
@@ -245,9 +241,9 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
 
     int j;
 
-    ux = (double *) malloc(jmb * sizeof(double));
-    uy = (double *) malloc(jmb * sizeof(double));
-    uz = (double *) malloc(jmb * sizeof(double));
+    ux = new double[jmb];
+    uy = new double[jmb];
+    uz = new double[jmb];
 
     for (j = 1; j <= jmb; j++) {
         z = lz * rnd_uniform(0);

@@ -76,15 +76,8 @@ double Plasma::checkGPUArray(double *a, double *d_a, std::string name, std::stri
         exit(0);
     }
 
-#ifdef CHECK_ARRAY_DETAIL_PRINTS
-    if((f = fopen(fname,"wt")) != NULL) {
-        res = CheckArray(a,t,f);
-        fclose(f);
-    }
-#else
     int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
     res = CheckArraySilent(a, t, size);
-#endif
 
     return res;
 }
@@ -678,56 +671,6 @@ void Plasma::checkControlPoint(int num, int nt) {
     memory_monitor("checkControlPoint7", nt);
 
     fclose(f);
-}
-
-double Plasma::CheckArray(double *a, double *dbg_a, FILE *f) {
-    Cell c = (*pd->AllCells)[0];
-    double diff = 0.0;
-    int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
-
-#ifdef CHECK_ARRAY_DETAIL_PRINTS
-    fprintf(f,"begin array checking=============================\n");
-#endif
-    for (int n = 0; n < (Nx + 2) * (Ny + 2) * (Nz + 2); n++) {
-        diff += pow(a[n] - dbg_a[n], 2.0);
-
-        if (fabs(a[n] - dbg_a[n]) > TOLERANCE) {
-
-            int3 i = c.getCellTripletNumber(n);
-#ifdef CHECK_ARRAY_DETAIL_PRINTS
-            fprintf(f,"n %5d i %3d l %3d k %3d %15.5e dbg %15.5e diff %15.5e wrong %10d \n", n,i.x+1,i.y+1,i.z+1,a[n],dbg_a[n],fabs(a[n] - dbg_a[n]),wrong++);
-#endif
-        }
-    }
-#ifdef CHECK_ARRAY_DETAIL_PRINTS
-    fprintf(f,"  end array checking============================= %.4f less than %15.5e diff %15.5e \n",(1.0-((double)wrong/((Nx + 2)*(Ny + 2)*(Nz + 2)))),TOLERANCE, pow(diff/((Nx + 2)*(Ny + 2)*(Nz + 2)),0.5));
-#endif
-
-    return pow(diff, 0.5);
-}
-
-double Plasma::CheckArray(double *a, double *dbg_a) {
-    Cell c = (*pd->AllCells)[0];
-    int wrong = 0;
-    double diff = 0.0;
-    int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
-
-    for (int n = 0; n < (Nx + 2) * (Ny + 2) * (Nz + 2); n++) {
-        diff += pow(a[n] - dbg_a[n], 2.0);
-
-        if (fabs(a[n] - dbg_a[n]) > TOLERANCE) {
-
-            int3 i = c.getCellTripletNumber(n);
-#ifdef CHECK_ARRAY_DETAIL_PRINTS
-            printf("n %5d i %3d l %3d k %3d %15.5e dbg %15.5e diff %15.5e wrong %10d \n", n,i.x+1,i.y+1,i.z+1,a[n],dbg_a[n],fabs(a[n] - dbg_a[n]),wrong++);
-#endif
-        }
-    }
-#ifdef CHECK_ARRAY_DETAIL_PRINTS
-    printf("  end array checking============================= %.4f less than %15.5e diff %15.5e \n", (1.0-((double)wrong/((Nx + 2)*(Ny + 2)*(Nz + 2)))),TOLERANCE, pow(diff/((Nx + 2)*(Ny + 2)*(Nz + 2)),0.5));
-#endif
-
-    return (1.0 - ((double) wrong / ((Nx + 2) * (Ny + 2) * (Nz + 2))));
 }
 
 double Plasma::CheckGPUArraySilent(double *a, double *d_a) {

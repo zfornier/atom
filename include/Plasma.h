@@ -110,10 +110,6 @@ private:
 
     void checkControlPoint(int, int);
 
-    double CheckArray(double *, double *, FILE *);
-
-    double CheckArray(double *, double *);
-
     double CheckGPUArraySilent(double *, double *);
 
     int SetCurrentArraysToZero();

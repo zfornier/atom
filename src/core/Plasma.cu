@@ -253,7 +253,7 @@ int Plasma::PushParticles(int nt) {
     memory_monitor("before_CellOrder_StepAllCells", nt);
 
     CellOrder_StepAllCells(nt);
-    puts("cell_order");
+    std::cout << "cell_order" << std::endl;
 
     memory_monitor("after_CellOrder_StepAllCells", nt);
 
@@ -804,7 +804,7 @@ int Plasma::StepAllCells(int nt) {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
     dim3 dimGrid((unsigned int)(Nx + 2), (unsigned int)(Ny + 2), (unsigned int)(Nz + 2)), dimBlock(512, 1, 1);
     cudaDeviceSynchronize();
-    puts("begin step");
+    std::cout << "begin step" << std::endl;
 
     void *args[] = {(void *) &pd->d_CellArray, 0};
 
@@ -832,10 +832,10 @@ int Plasma::StepAllCells(int nt) {
     );
 
     std::cout << "GPU_CurrentsAllCells returns " << cudaStatus << " " << cudaGetErrorString(cudaStatus) << std::endl;
-    puts("end step");
+    std::cout << "end step" << std::endl;
     cudaDeviceSynchronize();
 
-    puts("end step-12");
+    std::cout << "end step-12" << std::endl;
 
     return 0;
 }
@@ -973,7 +973,7 @@ int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1
 #endif
     err = MemoryCopy(stage1, d_stage1, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     if (err != cudaSuccess) {
-        puts("copy error");
+        std::cout << "copy error" << std::endl;
         exit(0);
     }
 
@@ -999,7 +999,7 @@ void Plasma::Push(int nt) {
     StepAllCells_fore_diagnostic(nt);
 
     StepAllCells(nt);
-    puts("after StepAllCell");
+    std::cout << "after StepAllCell" << std::endl;
 
     StepAllCells_post_diagnostic(nt);
 }
@@ -1022,11 +1022,11 @@ void Plasma::CellOrder_StepAllCells(int nt) {
 
     Push(nt);
 
-    puts("Push");
+    std::cout << "Push" << std::endl;
 
     WriteCurrentsFromCellsToArrays(nt);
 
-    puts("writeCut2arr");
+    std::cout << "writeCut2arr" << std::endl;
 
     reorder_particles(nt);
 }

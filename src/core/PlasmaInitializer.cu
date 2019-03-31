@@ -196,10 +196,9 @@ void PlasmaInitializer::InitGPUParticles() {
         mtot  = m_total;
         mfree = m_free;
         printf("cell %10d Device cell array allocated error %d %s memory: free %10.2f total %10.2f\n",i,err,getErrorString(err),mfree/1024/1024/1024,mtot/1024/1024/1024);
-        puts("");
 
         dbgPrintGPUParticleAttribute(d_c,50,1," CO2DEV " );
-        puts("COPY----------------------------------");
+        std::cout << "COPY----------------------------------" << std::endl;
 #endif
 
 #ifdef PARTICLE_PRINTS
@@ -444,7 +443,7 @@ int PlasmaInitializer::readControlFile(int nt) {
     sprintf(fname,"ctrl%05d",nt);
 
     if((f = fopen(fname,"rb")) == NULL) {
-        puts("no ini-file");
+        std::cout << "no ini-file" << std::endl;
         exit(0);
     }
 

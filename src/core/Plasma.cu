@@ -527,27 +527,14 @@ void Plasma::AssignCellsToArraysGPU() {
 
 }
 
-void Plasma::readControlPoint(FILE **f1, char *fncpy, int num, int nt, int part_read, int field_assign,
-                              double *ex, double *ey, double *ez,
+void Plasma::readControlPoint(const char * fn, int num, int nt, int part_read, int field_assign,
                               double *hx, double *hy, double *hz,
+                              double *ex, double *ey, double *ez,
                               double *jx, double *jy, double *jz,
                               double *qx, double *qy, double *qz
 ) {
-    char fn[100], fn_next[100];
-    FILE *f;
-
-    sprintf(fn, "mumu%03d%08d.nc", num, nt);
-    strcpy(fncpy, fn);
-    sprintf(fn_next, "mumu%03d%05d.nc", num, nt + 1);
-    if ((f = fopen(fn, "rb")) == NULL) {
-        std::cerr << "Error: file " << fn << " not found" << std::endl;
-        return;
-    }
-    if (part_read) {
-        *f1 = f;
-    }
-
     std::cout << fn << std::endl;
+
     readVar(fn, "Ex", (void *) ex);
     readVar(fn, "Ey", (void *) ey);
     readVar(fn, "Ez", (void *) ez);
@@ -578,16 +565,13 @@ void Plasma::checkControlPoint(int num, int nt) {
 #endif
     }
 
-    FILE *f;
-    char fn_copy[100];
-
     memory_monitor("checkControlPoint1", nt);
 
     if (nt % FORTRAN_NUMBER_OF_SMALL_STEPS != 0) return;
 
     memory_monitor("checkControlPoint2", nt);
 
-    readControlPoint(&f, fn_copy, num, nt, 1, 0,
+    readControlPoint(pd->checkFile, num, nt, 1, 0,
                      pd->dbgEx, pd->dbgEy, pd->dbgEz,
                      pd->dbgHx, pd->dbgHy, pd->dbgHz,
                      pd->dbgJx, pd->dbgJy, pd->dbgJz,
@@ -658,7 +642,7 @@ void Plasma::checkControlPoint(int num, int nt) {
 
     memory_monitor("checkControlPoint6", nt);
 
-    double cp = checkControlPointParticles(num, f, fn_copy, nt);
+    double cp = checkControlPointParticles(num, pd->checkFile, nt);
     cout << "STEP: " <<  nt << endl;
     pd->f_prec_report = fopen("control_points.dat", "at");
     fprintf(pd->f_prec_report,
@@ -674,8 +658,6 @@ void Plasma::checkControlPoint(int num, int nt) {
     fclose(pd->f_prec_report);
 
     memory_monitor("checkControlPoint7", nt);
-
-    fclose(f);
 }
 
 double Plasma::CheckGPUArraySilent(double *a, double *d_a) {
@@ -937,7 +919,7 @@ void Plasma::CellOrder_StepAllCells(int nt) {
     reorder_particles(nt);
 }
 
-double Plasma::checkControlPointParticlesOneSort(int check_point_num, FILE *f, GPUCell **copy_cells, int nt, int sort) {
+double Plasma::checkControlPointParticlesOneSort(int check_point_num, const char * filename, GPUCell **copy_cells, int nt, int sort) {
 
     double t = 0.0;
     int size;
@@ -948,7 +930,7 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, FILE *f, G
 
     Cell c0 = (*pd->AllCells)[0];
 
-    pd->total_particles = readBinaryParticleArraysOneSort(f, &pd->dbg_x, &pd->dbg_y, &pd->dbg_z, &pd->dbg_px, &pd->dbg_py, &pd->dbg_pz, &q_m, &m, nt, sort);
+    pd->total_particles = readBinaryParticleArraysOneSort(filename, &pd->dbg_x, &pd->dbg_y, &pd->dbg_z, &pd->dbg_px, &pd->dbg_py, &pd->dbg_pz, &q_m, &m, nt, sort);
     memory_monitor("checkControlPointParticlesOneSort2", nt);
 
     size = (*pd->AllCells).size();
@@ -977,7 +959,7 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, FILE *f, G
     return t / size;
 }
 
-double Plasma::checkControlPointParticles(int check_point_num, FILE *f, char *fname, int nt) {
+double Plasma::checkControlPointParticles(int check_point_num, const char * filename, int nt) {
     double te = 0.0, ti = 0.0, tb = 0.0;
     struct sysinfo info;
 #ifdef CPU_DEBUG_RUN
@@ -1007,7 +989,7 @@ double Plasma::checkControlPointParticles(int check_point_num, FILE *f, char *fn
 #endif
 #endif
 
-    ti = checkControlPointParticlesOneSort(check_point_num, f, pd->cp, nt, ION);
+    ti = checkControlPointParticlesOneSort(check_point_num, filename, pd->cp, nt, ION);
 #ifdef FREE_RAM_MONITOR
     sysinfo(&info);
 #ifdef checkControlPointParticles_PRINTS
@@ -1015,7 +997,7 @@ double Plasma::checkControlPointParticles(int check_point_num, FILE *f, char *fn
 #endif
 #endif
 
-    te = checkControlPointParticlesOneSort(check_point_num, f, pd->cp, nt, PLASMA_ELECTRON);
+    te = checkControlPointParticlesOneSort(check_point_num, filename, pd->cp, nt, PLASMA_ELECTRON);
 
 #ifdef FREE_RAM_MONITOR
     sysinfo(&info);
@@ -1024,7 +1006,7 @@ double Plasma::checkControlPointParticles(int check_point_num, FILE *f, char *fn
 #endif
 #endif
 
-    tb = checkControlPointParticlesOneSort(check_point_num, f, pd->cp, nt, BEAM_ELECTRON);
+    tb = checkControlPointParticlesOneSort(check_point_num, filename, pd->cp, nt, BEAM_ELECTRON);
 
 #ifdef FREE_RAM_MONITOR
     sysinfo(&info);

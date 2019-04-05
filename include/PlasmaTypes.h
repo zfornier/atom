@@ -41,7 +41,7 @@ typedef struct {
     int startSave;               // start save from startSave step
     int checkOnStep;             // check on checkOnStep step
     int st;                      // start step
-    std::string checkFile;       // file to check with
+    const char * checkFile;      // file to check with
 
     int jmp;
     int total_particles;

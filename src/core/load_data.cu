@@ -25,19 +25,14 @@ void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, char *n
 }
 
 int readBinaryParticleArraysOneSort(
-        FILE *f, // What for?
+        const char * filename,
         double **dbg_x, double **dbg_y, double **dbg_z, double **dbg_px, double **dbg_py, double **dbg_pz, double *qq_m, double *mm,
-        int nt, // what for?
+        int nt,
         int sort
 ) {
     double q_m, m;
     int t;
     int total_particles;
-    int err;
-
-    if ((err = ferror(f)) != 0) {
-        return err;
-    }
 
     /*
 * name + sort
@@ -57,25 +52,21 @@ int readBinaryParticleArraysOneSort(
 */
     //Reading extra number placed by Fortran
 
-//EXPLAIN: why do you use this magic name? move it to config file!
-//EXPLAIN: what is `FILE *f` for here?
-    readVar("mumu60000000005.nc", (std::string("Extra_number_") + patch::to_string(sort)).c_str(), &t);
+    readVar(filename, (std::string("Extra_number_") + patch::to_string(sort)).c_str(), &t);
 
     //Reading number of particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Nb_particles_") + patch::to_string(sort)).c_str(), &total_particles);
+    readVar(filename, (std::string("Nb_particles_") + patch::to_string(sort)).c_str(), &total_particles);
 
     //Reading charge for sort "sort"
 
-    readVar("mumu60000000005.nc", (std::string("Charge_") + patch::to_string(sort)).c_str(), &q_m);
+    readVar(filename, (std::string("Charge_") + patch::to_string(sort)).c_str(), &q_m);
 
     //Reading mass for sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Mass_") + patch::to_string(sort)).c_str(), &m);
+    readVar(filename, (std::string("Mass_") + patch::to_string(sort)).c_str(), &m);
 
     // Reading extra number placed by Fortran
-    readVar("mumu60000000005.nc", (std::string("Extra_number_") + patch::to_string(sort)).c_str(), &t);
+    readVar(filename, (std::string("Extra_number_") + patch::to_string(sort)).c_str(), &t);
 
-//WARNING: check if memory was allocated
-//Why do you need temorary wars for memory allocation? why not to allocate mem and assigne the pointr to the var without `1`?
     *dbg_x = new double[total_particles];
     *dbg_y = new double[total_particles];
     *dbg_z = new double[total_particles];
@@ -84,22 +75,22 @@ int readBinaryParticleArraysOneSort(
     *dbg_pz = new double[total_particles];
 
     //Reading X coordinates for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Coordinates_x") + patch::to_string(sort)).c_str(), (void *) *dbg_x);
+    readVar(filename, (std::string("Coordinates_x") + patch::to_string(sort)).c_str(), (void *) *dbg_x);
 
     //Reading Y coordinates for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Coordinates_y") + patch::to_string(sort)).c_str(), (void *) *dbg_y);
+    readVar(filename, (std::string("Coordinates_y") + patch::to_string(sort)).c_str(), (void *) *dbg_y);
 
     //Reading Z coordinates for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Coordinates_z") + patch::to_string(sort)).c_str(), (void *) *dbg_z);
+    readVar(filename, (std::string("Coordinates_z") + patch::to_string(sort)).c_str(), (void *) *dbg_z);
 
     //Reading X impulses for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Impulses_x") + patch::to_string(sort)).c_str(), (void *) *dbg_px);
+    readVar(filename, (std::string("Impulses_x") + patch::to_string(sort)).c_str(), (void *) *dbg_px);
 
     //Reading Y impulses for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Impulses_y") + patch::to_string(sort)).c_str(), (void *) *dbg_py);
+    readVar(filename, (std::string("Impulses_y") + patch::to_string(sort)).c_str(), (void *) *dbg_py);
 
     //Reading Z impulses for particles of sort "sort"
-    readVar("mumu60000000005.nc", (std::string("Impulses_z") + patch::to_string(sort)).c_str(), (void *) *dbg_pz);
+    readVar(filename, (std::string("Impulses_z") + patch::to_string(sort)).c_str(), (void *) *dbg_pz);
 
     debugPrintParticleCharacteristicArray(*dbg_x, total_particles, nt, (char*)"x", sort);
     debugPrintParticleCharacteristicArray(*dbg_y, total_particles, nt, (char*)"y", sort);
@@ -110,11 +101,6 @@ int readBinaryParticleArraysOneSort(
 
     *qq_m = q_m;
     *mm = m;
-
-//EXPLAIN: how will you destinguish error and number of particles 
-    if ((err = ferror(f)) != 0) {
-        return err;
-    }
 
     return total_particles;
 }

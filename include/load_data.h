@@ -29,7 +29,7 @@
 void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, std::string name, int sort);
 
 int readBinaryParticleArraysOneSort(
-        FILE *f,
+        const char * ,
         double **dbg_x,
         double **dbg_y,
         double **dbg_z,

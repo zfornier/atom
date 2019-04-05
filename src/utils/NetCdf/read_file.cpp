@@ -122,7 +122,7 @@ double *read3dArray(ifstream &ifs) {
 int copy1dArray(ifstream &ifs, const char *netCdfFileName, string label, string dim_label, string unit, string desc) {
     double *tdArray;
     int res;
-    tdArray = read1dArray(ifs);
+    tdArray = read1dArray<double>(ifs);
     char *pLabel = new char[label.length() + 1];
     strcpy(pLabel, label.c_str());
     char *pUnit = new char[unit.length() + 1];
@@ -141,7 +141,8 @@ int copy1dArray(ifstream &ifs, const char *netCdfFileName, string label, string 
     return res;
 }
 
-double *read1dArray(ifstream &ifs) {
+template <typename T>
+T *read1dArray(ifstream &ifs) {
 
     // read length of array
     char *pBufferLength = new char[sizeof(int)];;
@@ -152,13 +153,13 @@ double *read1dArray(ifstream &ifs) {
     pLength = (int *) pBufferLength;
 
     // read content of the array (there are pLength ints)
-    char *pBuffer = new char[sizeof(double) * (*pLength)];
+    char *pBuffer = new char[sizeof(T) * (*pLength)];
     ifs.read(pBuffer, (*pLength));
 
     // read length of array again (end of the array)
     ifs.read(pBufferLength, sizeof(int));
 
-    double *pTab = (double *)pBuffer;
+    T *pTab = (T *)pBuffer;
 
     delete[] pBufferLength;
 

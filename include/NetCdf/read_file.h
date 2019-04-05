@@ -79,7 +79,7 @@ double *readDouble(ifstream &ifs);
 
 int copy1dArray(ifstream &ifs, const char *netCdfFileName, string label, string dim_label, string unit, string desc);
 
-double *read1dArray(ifstream &ifs);
+template <typename T> T * read1dArray(ifstream &ifs);
 
 int copyOneSortParticle(ifstream &ifs, const char *netCdfFileName, string label);
 

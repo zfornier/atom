@@ -145,7 +145,6 @@ GPUCell *GPUCell::copyCellToDevice() {
 void GPUCell::copyCellFromDevice(GPUCell *d_src, GPUCell *h_dst, std::string where, int nt) {
     static GPUCell *h_copy_of_d_src;
     static int first = 1;
-    int code;
     int err;
 
     if (first == 1) {
@@ -162,38 +161,38 @@ void GPUCell::copyCellFromDevice(GPUCell *d_src, GPUCell *h_dst, std::string whe
 
     h_dst->number_of_particles = h_copy_of_d_src->number_of_particles;
 
-    code = MemoryCopy(h_dst->doubParticleArray, h_copy_of_d_src->doubParticleArray, sizeof(Particle) * MAX_particles_per_cell, DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice2", code);
+    err = MemoryCopy(h_dst->doubParticleArray, h_copy_of_d_src->doubParticleArray, sizeof(Particle) * MAX_particles_per_cell, DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice2", err);
 
-    code = MemoryCopy(h_dst->Jx, h_copy_of_d_src->Jx, sizeof(CellDouble), DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice3", code);
+    err = MemoryCopy(h_dst->Jx, h_copy_of_d_src->Jx, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice3", err);
 
-    code = MemoryCopy(h_dst->Jy, h_copy_of_d_src->Jy, sizeof(CellDouble), DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice4", code);
+    err = MemoryCopy(h_dst->Jy, h_copy_of_d_src->Jy, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice4", err);
 
-    code = MemoryCopy(h_dst->Jz, h_copy_of_d_src->Jz, sizeof(CellDouble), DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice5", code);
+    err = MemoryCopy(h_dst->Jz, h_copy_of_d_src->Jz, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice5", err);
 
-    code = MemoryCopy(h_dst->Ex, h_copy_of_d_src->Ex, sizeof(CellDouble), DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice6", code);
+    err = MemoryCopy(h_dst->Ex, h_copy_of_d_src->Ex, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice6", err);
 
-    code = MemoryCopy(h_dst->Ey, h_copy_of_d_src->Ey, sizeof(CellDouble), DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice7", code);
+    err = MemoryCopy(h_dst->Ey, h_copy_of_d_src->Ey, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice7", err);
 
-    code = MemoryCopy(h_dst->Ez, h_copy_of_d_src->Ez, sizeof(CellDouble), DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice8", code);
+    err = MemoryCopy(h_dst->Ez, h_copy_of_d_src->Ez, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice8", err);
 
-    code = MemoryCopy(h_dst->Hx, h_copy_of_d_src->Hx, sizeof(CellDouble), DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice9", code);
+    err = MemoryCopy(h_dst->Hx, h_copy_of_d_src->Hx, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice9", err);
 
-    code = MemoryCopy(h_dst->Hy, h_copy_of_d_src->Hy, sizeof(CellDouble), DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice10", code);
+    err = MemoryCopy(h_dst->Hy, h_copy_of_d_src->Hy, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice10", err);
 
-    code = MemoryCopy(h_dst->Hz, h_copy_of_d_src->Hz, sizeof(CellDouble), DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice11", code);
+    err = MemoryCopy(h_dst->Hz, h_copy_of_d_src->Hz, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice11", err);
 
-    code = MemoryCopy(h_dst->Rho, h_copy_of_d_src->Rho, sizeof(CellDouble), DEVICE_TO_HOST);
-    CHECK_ERROR("copyCellFromDevice12", code);
+    err = MemoryCopy(h_dst->Rho, h_copy_of_d_src->Rho, sizeof(CellDouble), DEVICE_TO_HOST);
+    CHECK_ERROR("copyCellFromDevice12", err);
 }
 
 GPUCell *GPUCell::allocateCopyCellFromDevice() {

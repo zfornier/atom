@@ -29,4 +29,4 @@ saveStep=0                          # save every saveStep step
 startSave=0                         # start save from startSave step
 checkOnStep=0                       # check on checkOnStep step
 st=1                                # start step
-checkFile=mumu60000000005.nc        # file to check with
+checkFile=mumu60000000005.nc        # path to file to check with

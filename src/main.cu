@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <getopt.h>
+#include <cstring>
 
 #include "../include/mpi_shortcut.h"
 #include "../include/Plasma.h"
@@ -108,7 +109,10 @@ PlasmaConfig readConfig(std::ifstream &is) {
         conf.startSave = properties.stringToInt(properties.getProperty("startSave"));
         conf.st = properties.stringToInt(properties.getProperty("st"));
         conf.checkOnStep = properties.stringToInt(properties.getProperty("checkOnStep"));
-        conf.checkFile = properties.getProperty("checkFile").c_str();
+        std::string file = properties.getProperty("checkFile");
+        int l = (int)file.length() + 1;
+        conf.checkFile = new char[l + 1];
+        memcpy((void*)conf.checkFile, (void*)file.c_str(), (size_t)l + 1);
     }
     catch (std::exception &e) {
         std::cout << "Config parsing error: " << e.what() << std::endl;

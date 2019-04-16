@@ -105,7 +105,7 @@ private:
 
     void AssignCellsToArraysGPU();
 
-    void readControlPoint(const char *, int, int, int, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
+    void readControlPoint(const char *, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
 
     void checkControlPoint(int, int);
 

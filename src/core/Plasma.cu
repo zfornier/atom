@@ -527,9 +527,9 @@ void Plasma::AssignCellsToArraysGPU() {
 
 }
 
-void Plasma::readControlPoint(const char * fn, int num, int nt, int part_read, int field_assign,
-                              double *hx, double *hy, double *hz,
+void Plasma::readControlPoint(const char * fn, int field_assign,
                               double *ex, double *ey, double *ez,
+                              double *hx, double *hy, double *hz,
                               double *jx, double *jy, double *jz,
                               double *qx, double *qy, double *qz
 ) {
@@ -571,7 +571,7 @@ void Plasma::checkControlPoint(int num, int nt) {
 
     memory_monitor("checkControlPoint2", nt);
 
-    readControlPoint(pd->checkFile, num, nt, 1, 0,
+    readControlPoint(pd->checkFile, 0,
                      pd->dbgEx, pd->dbgEy, pd->dbgEz,
                      pd->dbgHx, pd->dbgHy, pd->dbgHz,
                      pd->dbgJx, pd->dbgJy, pd->dbgJz,

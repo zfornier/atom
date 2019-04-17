@@ -6,12 +6,51 @@
 
 Plasma::Plasma(PlasmaConfig *p) {
     this->pd = p;
+    this->temp = new double[(pd->nx + 2) * (pd->ny + 2) * (pd->nz + 2)];
 
     dataFileStartPattern = "data";
     dataFileEndPattern = ".nc";
 }
 
-Plasma::~Plasma() {}
+Plasma::~Plasma() {
+    delete[] temp;
+    delete[] pd->Ex;
+    delete[] pd->Ey;
+    delete[] pd->Ez;
+    delete[] pd->Hx;
+    delete[] pd->Hy;
+    delete[] pd->Hz;
+    delete[] pd->Jx;
+    delete[] pd->Jy;
+    delete[] pd->Jz;
+    delete[] pd->Rho;
+
+    delete[] pd->npJx;
+    delete[] pd->npJy;
+    delete[] pd->npJz;
+
+    delete[] pd->Qx;
+    delete[] pd->Qy;
+    delete[] pd->Qz;
+
+#ifdef DEBUG_PLASMA
+    delete[] pd->dbgEx;
+    delete[] pd->dbgEy;
+    delete[] pd->dbgEz;
+
+    delete[] pd->dbgHx;
+    delete[] pd->dbgHy;
+    delete[] pd->dbgHz;
+
+    delete[] pd->dbgJx;
+    delete[] pd->dbgJy;
+    delete[] pd->dbgJz;
+
+    delete[] pd->dbg_Qx;
+    delete[] pd->dbg_Qy;
+    delete[] pd->dbg_Qz;
+#endif
+}
 
 void Plasma::copyCells(std::string where, int nt) {
     static int first = 1;
@@ -55,8 +94,6 @@ void Plasma::copyCells(std::string where, int nt) {
 }
 
 double Plasma::checkGPUArray(double *a, double *d_a, std::string name, std::string where, int nt) {
-    static double *t;
-    static int f1 = 1;
     char fname[1000];
     double res;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
@@ -67,16 +104,12 @@ double Plasma::checkGPUArray(double *a, double *d_a, std::string name, std::stri
 
     sprintf(fname, "diff_%s_at_%s_nt%08d.dat", name.c_str(), where.c_str(), nt);
 
-    if (f1 == 1) {
-        t = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-        f1 = 0;
-    }
     int err;
-    err = MemoryCopy(t, d_a, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    err = MemoryCopy(this->temp, d_a, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
 
     int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
-    res = CheckArraySilent(a, t, size);
+    res = CheckArraySilent(a, this->temp, size);
 
     return res;
 }
@@ -661,20 +694,13 @@ void Plasma::checkControlPoint(int num, int nt) {
 }
 
 double Plasma::CheckGPUArraySilent(double *a, double *d_a) {
-    static double *t;
-    static int f = 1;
     int err;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
-    if (f == 1) {
-        t = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-        f = 0;
-    }
-
-    err = MemoryCopy(t, d_a, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    err = MemoryCopy(this->temp, d_a, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
 
-    return CheckArraySilent(a, t, (Nx + 2) * (Ny + 2) * (Nz + 2));
+    return CheckArraySilent(a, this->temp, (Nx + 2) * (Ny + 2) * (Nz + 2));
 }
 
 int Plasma::SetCurrentArraysToZero() {
@@ -930,7 +956,18 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, const char
 
     Cell c0 = (*pd->AllCells)[0];
 
-    pd->total_particles = readBinaryParticleArraysOneSort(filename, &pd->dbg_x, &pd->dbg_y, &pd->dbg_z, &pd->dbg_px, &pd->dbg_py, &pd->dbg_pz, &q_m, &m, nt, sort);
+    readParticleParamsOneSort(filename, &pd->total_particles, &q_m, &m, sort);
+
+    pd->dbg_y = new double[pd->total_particles];
+    pd->dbg_x = new double[pd->total_particles];
+    pd->dbg_z = new double[pd->total_particles];
+
+    pd->dbg_px = new double[pd->total_particles];
+    pd->dbg_py = new double[pd->total_particles];
+    pd->dbg_pz = new double[pd->total_particles];
+
+    readBinaryParticleArraysOneSort(filename, pd->dbg_x, pd->dbg_y, pd->dbg_z, pd->dbg_px, pd->dbg_py, pd->dbg_pz, pd->total_particles, nt, sort);
+
     memory_monitor("checkControlPointParticlesOneSort2", nt);
 
     size = (*pd->AllCells).size();
@@ -1058,50 +1095,48 @@ void Plasma::writeDataToFile(int step) {
     NetCDFManipulator::plsm_add_dimension(filename.c_str(), "y", NY);
     NetCDFManipulator::plsm_add_dimension(filename.c_str(), "z", NZ);
 
-    double *t = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     int err;
 
-    err = MemoryCopy(t, pd->d_Ex, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    err = MemoryCopy(this->temp, pd->d_Ex, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + X_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + X_LABEL);
-    err = MemoryCopy(t, pd->d_Ey, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    writeOne3DArray(filename.c_str(), this->temp, ELECTRIC_FIELD_LABEL + X_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + X_LABEL);
+    err = MemoryCopy(this->temp, pd->d_Ey, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + Y_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Y_LABEL);
-    err = MemoryCopy(t, pd->d_Ez, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    writeOne3DArray(filename.c_str(), this->temp, ELECTRIC_FIELD_LABEL + Y_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Y_LABEL);
+    err = MemoryCopy(this->temp, pd->d_Ez, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, ELECTRIC_FIELD_LABEL + Z_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Z_LABEL);
+    writeOne3DArray(filename.c_str(), this->temp, ELECTRIC_FIELD_LABEL + Z_LABEL, UNITS_ELECTRIC_FIELD, DESC_ELECTRIC_FIELD + ELECTRIC_FIELD_LABEL + Z_LABEL);
 
-    err = MemoryCopy(t, pd->d_Hx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    err = MemoryCopy(this->temp, pd->d_Hx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + X_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + X_LABEL);
-    err = MemoryCopy(t, pd->d_Hy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    writeOne3DArray(filename.c_str(), this->temp, MAGNETIC_FIELD_LABEL + X_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + X_LABEL);
+    err = MemoryCopy(this->temp, pd->d_Hy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + Y_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Y_LABEL);
-    err = MemoryCopy(t, pd->d_Hz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    writeOne3DArray(filename.c_str(), this->temp, MAGNETIC_FIELD_LABEL + Y_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Y_LABEL);
+    err = MemoryCopy(this->temp, pd->d_Hz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_FIELD_LABEL + Z_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Z_LABEL);
+    writeOne3DArray(filename.c_str(), this->temp, MAGNETIC_FIELD_LABEL + Z_LABEL, UNITS_MAGNETIC_FIELD, DESC_MAGNETIC_FIELD + MAGNETIC_FIELD_LABEL + Z_LABEL);
 
-    err = MemoryCopy(t, pd->d_Jx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    err = MemoryCopy(this->temp, pd->d_Jx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + X_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + X_LABEL);
-    err = MemoryCopy(t, pd->d_Jy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    writeOne3DArray(filename.c_str(), this->temp, CURRENT_FIELD_LABEL + X_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + X_LABEL);
+    err = MemoryCopy(this->temp, pd->d_Jy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + Y_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + Y_LABEL);
-    err = MemoryCopy(t, pd->d_Jz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    writeOne3DArray(filename.c_str(), this->temp, CURRENT_FIELD_LABEL + Y_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + Y_LABEL);
+    err = MemoryCopy(this->temp, pd->d_Jz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, CURRENT_FIELD_LABEL + Z_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + Z_LABEL);
+    writeOne3DArray(filename.c_str(), this->temp, CURRENT_FIELD_LABEL + Z_LABEL, UNITS_NO, CURRENT + CURRENT_FIELD_LABEL + Z_LABEL);
 
-    err = MemoryCopy(t, pd->d_Qx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    err = MemoryCopy(this->temp, pd->d_Qx, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL);
-    err = MemoryCopy(t, pd->d_Qy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    writeOne3DArray(filename.c_str(), this->temp, MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + X_LABEL);
+    err = MemoryCopy(this->temp, pd->d_Qy, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL);
-    err = MemoryCopy(t, pd->d_Qz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
+    writeOne3DArray(filename.c_str(), this->temp, MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Y_LABEL);
+    err = MemoryCopy(this->temp, pd->d_Qz, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
-    writeOne3DArray(filename.c_str(), t, MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL);
+    writeOne3DArray(filename.c_str(), this->temp, MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL);
 
-    delete[] t;
 }
 
 /**

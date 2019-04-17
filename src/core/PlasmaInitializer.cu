@@ -210,7 +210,7 @@ void PlasmaInitializer::InitFields() {
         p->Hy[i] = 0.0;
         p->Hz[i] = 0.0;
 
-#ifdef DEBUG_PLASMA // todo: возможно можно убрать тк инициализируется в Plasma::checkControlPoint
+#ifdef DEBUG_PLASMA
         p->dbgEx[i] = 0.0;
         p->dbgEy[i] = 0.0;
         p->dbgEz[i] = 0.0;

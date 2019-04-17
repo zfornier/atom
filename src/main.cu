@@ -12,6 +12,7 @@ using namespace std;
 
 void printHelp();
 PlasmaConfig readConfig(std::ifstream &is);
+bool isFileExist(const char *);
 
 int main(int argc, char *argv[]) {
     Plasma *plasma;
@@ -44,6 +45,11 @@ int main(int argc, char *argv[]) {
         } else {
             cout << "Unable to open file: " << config << endl;
             return 0;
+        }
+
+        if(!isFileExist(conf.checkFile)) {
+            std::cerr << "Check file: " << conf.checkFile << " does not exist" << std::endl;
+            return -1;
         }
 
         InitMPI(argc, argv);
@@ -120,4 +126,9 @@ PlasmaConfig readConfig(std::ifstream &is) {
     }
 
     return conf;
+}
+
+bool isFileExist(const char * name) {
+    ifstream f(name);
+    return f.good();
 }

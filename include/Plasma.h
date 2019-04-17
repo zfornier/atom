@@ -42,6 +42,7 @@ private:
     PlasmaInitializer * pi;
     string dataFileStartPattern;
     string dataFileEndPattern;
+    double * temp;
 
 public:
     Plasma(PlasmaConfig * p);

@@ -62,6 +62,8 @@ int main(int argc, char *argv[]) {
             plasma->Initialize();
 
             plasma->Compute();
+
+            delete plasma;
         } catch (std::bad_alloc &e) {
             std::cerr << "Unable to allocate memory" << std::endl;
         } catch (std::exception &e) {
@@ -70,7 +72,6 @@ int main(int argc, char *argv[]) {
 
         CloseMPI();
 
-        delete plasma;
     } else {
         cout << "Try -h or --help for usage information." << endl;
     }

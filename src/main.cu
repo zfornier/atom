@@ -70,6 +70,8 @@ int main(int argc, char *argv[]) {
             std::cout << e.what() << std::endl;
         }
 
+        delete conf.checkFile;
+
         CloseMPI();
 
     } else {

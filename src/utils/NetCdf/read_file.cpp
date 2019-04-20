@@ -59,6 +59,9 @@ int copyOneSortParticle(ifstream &ifs, const char *netCdfFileName, string label)
     copyDouble(ifs, netCdfFileName, CHARGE_LABEL + label, UNITS_CHARGE_PARTICLES, DESC_CHARGE + label);
     copyDouble(ifs, netCdfFileName, MASS_LABEL + label, UNITS_MASS_PARTICLES, DESC_MASS + label);
 
+    //extra number
+    readInt(ifs);
+
     copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + X_LABEL + label, name_dim, UNITS_NO, X_LABEL + DESC_COORDINATES + label);
     copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + Y_LABEL + label, name_dim, UNITS_NO, Y_LABEL + DESC_COORDINATES + label);
     copy1dArray(ifs, netCdfFileName, COORDINATES_LABEL + Z_LABEL + label, name_dim, UNITS_NO, Z_LABEL + DESC_COORDINATES + label);

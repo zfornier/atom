@@ -35,14 +35,13 @@ typedef struct {
 
     // Computation parameters
     int st;                      // start step
-    int ts;                      // total steps
+    int lst;                      // last step
     int saveStep;                // save every saveStep step
     int startSave;               // start save from startSave step
     const char * checkFile;      // file to check with
 
     int jmp;
     int total_particles;
-    int size_ctrlParticles;
     double ami, amb, amf;
     GPUCell **h_CellArray, **d_CellArray;
     GPUCell **cp;

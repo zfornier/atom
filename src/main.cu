@@ -118,7 +118,7 @@ PlasmaConfig readConfig(std::ifstream &is) {
         conf.meh = properties.stringToInt(properties.getProperty("meh"));
 
         conf.st = properties.stringToInt(properties.getProperty("st"));
-        conf.ts = properties.stringToInt(properties.getProperty("ts"));
+        conf.lst = properties.stringToInt(properties.getProperty("lst"));
         conf.saveStep = properties.stringToInt(properties.getProperty("saveStep"));
         conf.startSave = properties.stringToInt(properties.getProperty("startSave"));
         std::string file = properties.getProperty("checkFile");

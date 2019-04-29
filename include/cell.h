@@ -303,8 +303,6 @@ public:
 
     double checkCellParticles(int check_point_num, double *x, double *y, double *z, double *px, double *py, double *pz, double q_m, double m);
 
-    void SetControlSystem(int j, double *c);
-
     __host__ __device__
     void SetControlSystemToParticles();
 };

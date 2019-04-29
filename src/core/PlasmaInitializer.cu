@@ -83,11 +83,6 @@ void PlasmaInitializer::InitGPUParticles() {
     int size, err;
     GPUCell *d_c, *h_ctrl;
     GPUCell *n;
-    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
-
-    dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimBlockOne(1, 1, 1);
-
-    readControlFile(p->st);
 
     size = (int)(*p->AllCells).size();
     size_t m_free, m_total;
@@ -106,12 +101,8 @@ void PlasmaInitializer::InitGPUParticles() {
         GPUCell c;
         c = (*p->AllCells)[i];
 
-        /////////////////////////////////////////
         *n = c;
 
-#ifdef ATTRIBUTES_CHECK
-        c.SetControlSystem(p->jmp, p->d_ctrlParticles);
-#endif
         d_c = c.copyCellToDevice();
 
         err = cudaMemGetInfo(&m_free, &m_total);
@@ -127,24 +118,12 @@ void PlasmaInitializer::InitGPUParticles() {
         std::cout << "COPY----------------------------------" << std::endl;
 #endif
 
-#ifdef PARTICLE_PRINTS
-        if(t < 1.0) {
-            t = c.compareToCell(*h_copy);
-        }
-#endif
-
         p->h_CellArray[i] = d_c;
         err = MemoryCopy(h_ctrl, d_c, sizeof(Cell), DEVICE_TO_HOST);
         CHECK_ERROR("MEM COPY", err);
 
 #ifdef InitGPUParticles_PRINTS
         dbgPrintGPUParticleAttribute(d_c,50,1," CPY " );
-
-        cudaPrintfInit();
-
-        testKernel<<<1,1>>>(h_ctrl->d_ctrlParticles,h_ctrl->jmp);
-        cudaPrintfDisplay(stdout, true);
-        cudaPrintfEnd();
 
         printf("i %d l %d k n %d %d %e src %e num %d\n",h_ctrl->i,h_ctrl->l,h_ctrl->k,i, c.ParticleArrayRead(0,7),c.number_of_particles);
         printf("GPU cell %d ended ******************************************************\n",i);
@@ -154,9 +133,6 @@ void PlasmaInitializer::InitGPUParticles() {
     err = MemoryCopy(p->d_CellArray, p->h_CellArray, size * sizeof(Cell * ), HOST_TO_DEVICE);
     CHECK_ERROR("MEM COPY", err);
 
-#ifdef ATTRIBUTES_CHECK
-    GPU_WriteControlSystem<<<dimGrid, dimBlockOne,16000>>>(d_CellArray);
-#endif
 }
 
 void PlasmaInitializer::Alloc() {
@@ -315,48 +291,4 @@ int PlasmaInitializer::copyCellsWithParticlesToGPU() {
     }
 
     return 0;
-}
-
-int PlasmaInitializer::readControlFile(int nt) {
-
-#ifndef ATTRIBUTES_CHECK
-    return 0;
-#else
-    FILE *f;
-    char fname[100];
-    static int first = 1;
-    int size;
-
-    sprintf(fname,"ctrl%05d",nt);
-
-    if((f = fopen(fname,"rb")) == NULL) {
-        std::cout << "no ini-file" << std::endl;
-        exit(0);
-    }
-
-    fread(&size,sizeof(int),1,f);
-    fread(&p->ami,sizeof(double),1,f);
-    fread(&p->amf,sizeof(double),1,f);
-    fread(&p->amb,sizeof(double),1,f);
-    fread(&size,sizeof(int),1,f);
-
-    fread(&size,sizeof(int),1,f);
-
-    if(first == 1) {
-        first = 0;
-        p->ctrlParticles = (double *)malloc(size);
-#ifdef ATTRIBUTES_CHECK
-        memset(p->ctrlParticles,0,size);
-        cudaMalloc((void **)&p->d_ctrlParticles,size);
-        cudaMemset(p->d_ctrlParticles,0,size);
-        p->size_ctrlParticles = size;
-#endif
-    }
-    fread(p->ctrlParticles,1,size,f);
-
-
-    p->jmp = size / sizeof(double) / PARTICLE_ATTRIBUTES / 3;
-
-    return 0;
-#endif
 }

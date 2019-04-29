@@ -13,8 +13,6 @@
 
 void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char *name);
 
-__global__ void testKernel(double *vec);
-
 class GPUCell : public Cell {
 public:
 

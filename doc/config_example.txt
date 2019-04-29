@@ -24,7 +24,7 @@ by=15                               # beam size Y
 bz=16                               # beam size Z
 
 st=1                                # start step
-ts=5                                # total steps
+lst=5                               # last step
 startSave=0                         # start save from startSave step
 saveStep=0                          # save every saveStep step
 checkFile=mumu60000000005.nc        # path to file to check with

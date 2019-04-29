@@ -26,8 +26,6 @@ void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char
     printf("%s %10.3e \n", name, t);
 }
 
-__global__ void testKernel(double *vec) {}
-
 __host__ __device__
 GPUCell::GPUCell() {}
 

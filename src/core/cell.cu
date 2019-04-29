@@ -423,31 +423,6 @@ double Cell::Interpolate3D(CellDouble *E, int3 *cell, double sx, double sx1, dou
     if (l < 0 || l > CellExtent) return 0.0;
     if (k < 0 || k > CellExtent) return 0.0;
 
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,110+20*n)] = (sz  * E->M[i][l][k] + sz1 * E->M[i][l][k + 1]);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,111+20*n)] = (sz  * E->M[i][l + 1][k] + sz1 * E->M[i][l + 1][k + 1]);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,112+20*n)] = (sz  * E->M[i + 1][l][k] + sz1 * E->M[i + 1][l][k + 1]);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,113+20*n)] = (sz  * E->M[i + 1][l + 1][k]+ sz1 * E->M[i + 1][l + 1][k + 1]);
-
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,114+20*n)] = sx;//  * E->M[i + 1][l + 1][k]+ sz1 * E->M[i + 1][l + 1][k + 1]);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,115+20*n)] = sx1; //(sz  * E->M[i + 1][l + 1][k]+ sz1 * E->M[i + 1][l + 1][k + 1]);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,116+20*n)] = sy; //+ sz1 * E->M[i + 1][l + 1][k + 1]);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,117+20*n)] = sy1;
-
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,118+20*n)] = i+this->i-1;
-
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,119+20*n)] = l+this->l-1;
-
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,120+20*n)] = E->M[i][l][k];
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,121+20*n)] = E->M[i][l + 1][k];
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,122+20*n)] = E->M[i+1][l][k];
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,123+20*n)] = E->M[i+1][l+1][k];
-
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,124+20*n)] = E->M[i][l][k+1];
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,125+20*n)] = E->M[i][l+1][k+1];
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,126+20*n)] = E->M[i+1][l][k+1];
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,127+20*n)] = E->M[i+1][l+1][k+1];
-#endif
     t_ilk = E->M[i][l][k];
     t_ilk1 = E->M[i][l][k + 1];
     t_il1k = E->M[i][l + 1][k];
@@ -459,13 +434,8 @@ double Cell::Interpolate3D(CellDouble *E, int3 *cell, double sx, double sx1, dou
     t_i1l1k1 = E->M[i + 1][l + 1][k + 1];
 
     t1 = sx * (sy * (sz * t_ilk + sz1 * t_ilk1) + sy1 * (sz * t_il1k + sz1 * t_il1k1));
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,128+20*n)] = t1;
-#endif
     t2 = sx1 * (sy * (sz * t_i1lk + sz1 * t_i1lk1) + sy1 * (sz * t_i1l1k + sz1 * t_i1l1k1));
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,129+20*n)] = t2;
-#endif
+
     t = t2 + t1;
 
     return t;
@@ -719,21 +689,12 @@ void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau, Current
     dx = getCenterRelatedShift(x.x, x1.x, i.x, hx, x0); //0.5d0*(x+x1)-h1*(i-1.5d0)
     dy = getCenterRelatedShift(x.y, x1.y, i.y, hy, y0); //0.5d0*(y+y1)-y0-h2*(l-1.5d0)
     dz = getCenterRelatedShift(x.z, x1.z, i.z, hz, z0); //0.5d0*(z+z1)-h3*(k-1.5d0)
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,48+num)] = dx;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,50+num)] = dy;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,52+num)] = dz;
-#endif
+
     a = a1;
 
     dx1 = hx - dx;
     dy1 = hy - dy;
     dz1 = hz - dz;
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,90+num)] = dx1;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,92+num)] = dy1;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,94+num)] = dz1;
-#endif
 
     su = x1.x - x.x;
     sv = x1.y - x.y;
@@ -742,34 +703,11 @@ void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau, Current
     s1 = sv * sw / 12.0;
     s2 = su * sw / 12.0;
     s3 = su * sv / 12.0;
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,54+num)] = su;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,56+num)] = sv;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,58+num)] = sw;
-#endif
 
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,106)]     = su*a;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,107)]     = tau*hy*hz;
-#endif
     su = su * a / (tau * hy * hz);
     sv = sv * a / (tau * hx * hz);
     sw = sw * a / (tau * hx * hy);
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,96+num)]  = su;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,98+num)]  = sv;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,100+num)] = sw;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,102)]     = a;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,103)]     = tau;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,104)]     = hy;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,105)]     = hz;
-#endif
 
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,60+num)] = i.x+this->i -1;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,62+num)] = i.y+this->l -1;
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,64+num)] = i.z+this->k -1;
-#endif
     t1->Jx.i11 = i.x;
     t1->Jx.i12 = i.y;
     t1->Jx.i13 = i.z;
@@ -789,12 +727,7 @@ void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau, Current
     t1->Jx.i42 = i.y + 1;
     t1->Jx.i43 = i.z + 1;
     t1->Jx.t[3] = su * (dy * dz + s1);
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,66+num)] = su*(dy1*dz1+s1);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,68+num)] = su*(dy1*dz-s1);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,70+num)] = su*(dy*dz1-s1);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,72+num)] = su*(dy*dz+s1);
-#endif
+
     t1->Jy.i11 = i.x;
     t1->Jy.i12 = i.y;
     t1->Jy.i13 = i.z;
@@ -814,12 +747,7 @@ void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau, Current
     t1->Jy.i42 = i.y;
     t1->Jy.i43 = i.z + 1;
     t1->Jy.t[3] = sv * (dx * dz + s2);
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,74+num)] = sv*(dx1*dz1+s2);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,76+num)] = sv*(dx1*dz-s2);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,78+num)] = sv*(dx*dz1-s2);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,80+num)] = sv*(dx*dz+s2);
-#endif
+
     t1->Jz.i11 = i.x;
     t1->Jz.i12 = i.y;
     t1->Jz.i13 = i.z;
@@ -839,12 +767,7 @@ void Cell::pqr(int3 &i, double3 &x, double3 &x1, double &a1, double tau, Current
     t1->Jz.i42 = i.y + 1;
     t1->Jz.i43 = i.z;
     t1->Jz.t[3] = sw * (dx * dy + s3);
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,82+num)] = sw*(dx1*dy1+s3);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,84+num)] = sw*(dx1*dy-s3);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,86+num)] = sw*(dx*dy1-s3);
-        d_ctrlParticles[ParticleAttributePosition(jmp,p->fortran_number,p->sort,88+num)] = sw*(dx*dy+s3);
-#endif
+
 }
 
 __host__ __device__
@@ -1190,15 +1113,6 @@ double Cell::checkCellParticles(int check_point_num, double *x, double *y, doubl
     }
 
     return t;
-}
-
-void Cell::SetControlSystem(int j, double *c) {
-    Particle p;
-
-    jmp = j;
-#ifdef ATTRIBUTES_CHECK
-    d_ctrlParticles = c;
-#endif
 }
 
 __host__ __device__

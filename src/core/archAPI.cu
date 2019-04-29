@@ -21,11 +21,9 @@ int MemoryCopy(void* dst,void *src,size_t size,int dir) {
     return status != 0 ? -1 : 0;
 }
 #else
-
 int MemoryCopy(void *dst, void *src, size_t size, int dir) {
     return 0;
 }
-
 #endif
 
 #ifdef __CUDACC__

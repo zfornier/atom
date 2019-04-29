@@ -592,7 +592,7 @@ void Plasma::checkControlPoint(int num, int nt) {
     double t_qx, t_qy, t_qz;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
-    if ((nt != pd->ts) || (num != 600)) {
+    if ((nt != pd->lst) || (num != 600)) {
 #ifndef CONTROL_POINT_CHECK
         return;
 #endif
@@ -1054,11 +1054,7 @@ double Plasma::checkControlPointParticles(int check_point_num, const char * file
 }
 
 int Plasma::memory_monitor(std::string legend, int nt) {
-
-#ifndef FREE_RAM_MONITOR
-    return 1;
-#endif
-
+#ifdef DEBUG
     size_t m_free, m_total;
     struct sysinfo info;
 
@@ -1067,6 +1063,7 @@ int Plasma::memory_monitor(std::string legend, int nt) {
 
     sysinfo(&info);
     printf("step %10d %50s GPU memory total %10d MB | free %10d MB | free CPU memory %10u MB\n", nt, legend.c_str(), (int) (m_total / 1024 / 1024), (int) (m_free / 1024 / 1024), (int) (info.freeram / 1024 / 1024));
+#endif
 
     return 0;
 }
@@ -1160,12 +1157,12 @@ int Plasma::Compute() {
 
     cudaMemGetInfo(&m_free, &m_total);
 
-    if (pd->st <= 0 || pd->ts <= 0) {
+    if (pd->st <= 0 || pd->lst <= 0) {
         cout << "Invalid computation parameters values!" << endl;
         return 1;
     }
 
-    for (int step = pd->st; step <= pd->ts; step++) {
+    for (int step = pd->st; step <= pd->lst; step++) {
         memory_monitor("before step", step);
 
         Step(step);

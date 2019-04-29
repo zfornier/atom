@@ -46,7 +46,6 @@ private:
 
     int copyCellsWithParticlesToGPU();
 
-    int readControlFile(int);
 };
 
 #endif //ATOM_PLASMAINITIALIZATOR_H

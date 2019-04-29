@@ -8,7 +8,7 @@ Plasma::Plasma(PlasmaConfig *p) {
     this->pd = p;
     this->temp = new double[(pd->nx + 2) * (pd->ny + 2) * (pd->nz + 2)];
 
-    dataFileStartPattern = "data";
+    dataFileStartPattern = "data0";
     dataFileEndPattern = ".nc";
 }
 
@@ -865,11 +865,6 @@ int Plasma::inter_stage_diagnostic(int *stage, int nt) {
         exit(0);
     }
 
-#ifdef BALANCING_PRINTS
-    before_ArrangeFlights = cudaGetLastError();
-    printf("before_ArrangeFlights %d %s\n",before_ArrangeFlights,cudaGetErrorString(before_ArrangeFlights));
-#endif
-
     return 0;
 }
 
@@ -896,11 +891,6 @@ int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1
     );
     CHECK_ERROR("GPU_ArrangeFlights", cudaStatus);
 
-#ifdef BALANCING_PRINTS
-    CUDA_Errot_t after_ArrangeFlights = cudaGetLastError();
-    printf("after_ArrangeFlights %d %s\n",after_ArrangeFlights,cudaGetErrorString(after_ArrangeFlights));
-    cudaDeviceSynchronize();
-#endif
     err = MemoryCopy(stage1, d_stage1, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
 
@@ -1076,7 +1066,7 @@ int Plasma::memory_monitor(std::string legend, int nt) {
     CHECK_ERROR("cudaMemGetInfo", err);
 
     sysinfo(&info);
-    printf("step %10d %50s GPU memory total %10d free %10d free CPU memory %10u \n", nt, legend.c_str(), (int) (m_total / 1024 / 1024), (int) (m_free / 1024 / 1024), (int) (info.freeram / 1024 / 1024));
+    printf("step %10d %50s GPU memory total %10d MB | free %10d MB | free CPU memory %10u MB\n", nt, legend.c_str(), (int) (m_total / 1024 / 1024), (int) (m_free / 1024 / 1024), (int) (info.freeram / 1024 / 1024));
 
     return 0;
 }
@@ -1181,7 +1171,7 @@ int Plasma::Compute() {
         Step(step);
 
         // save file
-        if (pd->startSave >= 0 && pd->saveStep >= 0) {
+        if ((pd->startSave <= step) && pd->saveStep > 0 && ((step - pd->startSave) % pd->saveStep == 0)) {
             writeDataToFile(step);
         }
 

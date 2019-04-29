@@ -219,8 +219,10 @@ void AllocateBinaryParticlesArrays(ParticleArrays *ions, ParticleArrays *electro
 
 int InitUniformMaxwellianParticles(int beamf, int jmb,
                                    double tex0, double tey0, double tez0,
-                                   double beam_lx, double beam_ly, double beam_lz, int *jmb_real,
-                                   double lx, double ly, double lz, int meh, double Tb, double rimp, double rbd,
+                                   double beam_lx, double beam_ly, double beam_lz,
+                                   int *jmb_real,
+                                   double lx, double ly, double lz,
+                                   int meh, double Tb, double rimp, double rbd,
                                    double *xi, double *yi, double *zi, double *ui, double *vi, double *wi,
                                    double *xb, double *yb, double *zb, double *ub, double *vb, double *wb,
                                    double *xf, double *yf, double *zf, double *uf, double *vf, double *wf
@@ -421,12 +423,14 @@ int getUniformMaxwellianParticles(std::vector <Particle> &ion_vp,
                                   std::vector <Particle> &beam_vp,
                                   double tex0, double tey0, double tez0,
                                   double Tb, double rimp, double rbd,
-                                  double ni, double lx, double ly, double lz) {
+                                  double ni, int lp, int meh,
+                                  double lx, double ly, double lz,
+                                  int nx, int ny, int nz) {
+
     ParticleArrays ions, electrons, beam;
 
-    int total = 1600000, jmb;
-    int meh = 0;
-    int lp = 1000;
+    int total = nx * ny * nz * lp;
+    int jmb;
 
     AllocateMemoryForArrays(total, &ions, &electrons, &beam);
 

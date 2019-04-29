@@ -31,16 +31,13 @@ typedef struct {
     int nz;                      // number of mesh nodes along Z
     double tau;                  // timestep
     int beamPlasma;              // 1 if beam-plasma interaction, 0 if beam-beam
+    int meh;                     // horizontal process number (with mixed decomposition)
+
     // Computation parameters
-    int startFromFile;           // moment to start from saved
-    int phase;                   // phase to start from save
+    int st;                      // start step
     int ts;                      // total steps
-    int ms;                      // number of steps between diagnostic files
-    int nsteps;                  //
     int saveStep;                // save every saveStep step
     int startSave;               // start save from startSave step
-    int checkOnStep;             // check on checkOnStep step
-    int st;                      // start step
     const char * checkFile;      // file to check with
 
     int jmp;

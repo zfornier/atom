@@ -115,15 +115,12 @@ PlasmaConfig readConfig(std::ifstream &is) {
         conf.nz = properties.stringToInt(properties.getProperty("nz"));
         conf.tau = properties.stringToDouble(properties.getProperty("tau"));
         conf.beamPlasma = properties.stringToInt(properties.getProperty("beamPlasma"));
-        conf.startFromFile = properties.stringToInt(properties.getProperty("startFromFile"));
-        conf.phase = properties.stringToInt(properties.getProperty("phase"));
+        conf.meh = properties.stringToInt(properties.getProperty("meh"));
+
+        conf.st = properties.stringToInt(properties.getProperty("st"));
         conf.ts = properties.stringToInt(properties.getProperty("ts"));
-        conf.ms = properties.stringToInt(properties.getProperty("ms"));
-        conf.nsteps = properties.stringToInt(properties.getProperty("nsteps"));
         conf.saveStep = properties.stringToInt(properties.getProperty("saveStep"));
         conf.startSave = properties.stringToInt(properties.getProperty("startSave"));
-        conf.st = properties.stringToInt(properties.getProperty("st"));
-        conf.checkOnStep = properties.stringToInt(properties.getProperty("checkOnStep"));
         std::string file = properties.getProperty("checkFile");
         int l = (int)file.length() + 1;
         conf.checkFile = new char[l + 1];

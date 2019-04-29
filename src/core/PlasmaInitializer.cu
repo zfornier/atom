@@ -60,10 +60,11 @@ void PlasmaInitializer::InitializeCPU() {
     std::vector <Particle> ion_vp, el_vp, beam_vp;
     std::vector <Particle> ion_vp1, el_vp1, beam_vp1;
     double Lx = p->lx, Ly = p->ly, Lz = p->lz;
+    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
 
     initMeshArrays();
 
-    getUniformMaxwellianParticles(ion_vp1, el_vp1, beam_vp1, p->tempX, p->tempY, p->tempZ, p->beamVelDisp, p->beamImp, p->beamPlasmaDensityRat, p->plsmDensity, Lx, Ly, Lz);
+    getUniformMaxwellianParticles(ion_vp1, el_vp1, beam_vp1, p->tempX, p->tempY, p->tempZ, p->beamVelDisp, p->beamImp, p->beamPlasmaDensityRat, p->plsmDensity, p->lp, p->meh, Lx, Ly, Lz, Nx, Ny, Nz);
 
     addAllParticleListsToCells(ion_vp1, el_vp1, beam_vp1);
 

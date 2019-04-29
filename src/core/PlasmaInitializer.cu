@@ -86,7 +86,7 @@ void PlasmaInitializer::InitGPUParticles() {
 
     dim3 dimGrid(Nx + 2, Ny + 2, Nz + 2), dimBlockOne(1, 1, 1);
 
-    readControlFile(START_STEP_NUMBER);
+    readControlFile(p->st);
 
     size = (int)(*p->AllCells).size();
     size_t m_free, m_total;

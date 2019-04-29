@@ -566,7 +566,7 @@ void Plasma::readControlPoint(const char * fn, int field_assign,
                               double *jx, double *jy, double *jz,
                               double *qx, double *qy, double *qz
 ) {
-    std::cout << fn << std::endl;
+    std::cout << "Control point " << " | " <<  "Values to check with are read from file: " << fn << std::endl;
 
     readVar(fn, "Ex", (void *) ex);
     readVar(fn, "Ey", (void *) ey);
@@ -592,7 +592,7 @@ void Plasma::checkControlPoint(int num, int nt) {
     double t_qx, t_qy, t_qz;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
-    if ((nt != TOTAL_STEPS) || (num != 600)) {
+    if ((nt != pd->ts) || (num != 600)) {
 #ifndef CONTROL_POINT_CHECK
         return;
 #endif
@@ -768,7 +768,9 @@ int Plasma::StepAllCells(int nt) {
 
     void *args1[] = {(void *) &pd->d_CellArray, &nt, 0};
     cudaStatus = cudaFuncSetCacheConfig((const void *) GPU_CurrentsAllCells, cudaFuncCachePreferShared);
-    std::cout << "cudaFuncSetCacheConfig returns " << cudaStatus << " " << cudaGetErrorString(cudaStatus) << std::endl;
+    CHECK_ERROR("cudaFuncSetCacheConfig", cudaStatus);
+
+
     cudaStatus = cudaLaunchKernel(
             (const void *) GPU_CurrentsAllCells, // pointer to kernel func.
             dimGrid,                             // grid
@@ -778,7 +780,8 @@ int Plasma::StepAllCells(int nt) {
             0
     );
 
-    std::cout << "GPU_CurrentsAllCells returns " << cudaStatus << " " << cudaGetErrorString(cudaStatus) << std::endl;
+    CHECK_ERROR("GPU_CurrentsAllCells", cudaStatus);
+
     std::cout << "end step" << std::endl;
     cudaDeviceSynchronize();
 
@@ -825,10 +828,10 @@ int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) 
     dim3 dimGrid((unsigned int)(Nx + 2), (unsigned int)(Ny + 2), (unsigned int)(Nz + 2)), dimBlockOne(1, 1, 1);
 
     err = cudaMalloc((void **) d_stage, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
-    CHECK_ERROR("MEM COPY", err);
+    CHECK_ERROR("MEM ALLOCATION", err);
 
     err = cudaMalloc((void **) d_stage1, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2));
-    CHECK_ERROR("MEM COPY", err);
+    CHECK_ERROR("MEM ALLOCATION", err);
 
     void *args[] = {
             (void *) &pd->d_CellArray,
@@ -891,6 +894,7 @@ int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1
             16000,
             0
     );
+    CHECK_ERROR("GPU_ArrangeFlights", cudaStatus);
 
 #ifdef BALANCING_PRINTS
     CUDA_Errot_t after_ArrangeFlights = cudaGetLastError();
@@ -901,6 +905,7 @@ int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1
     CHECK_ERROR("MEM COPY", err);
 
     memory_monitor("CellOrder_StepAllCells7", nt);
+
     return err;
 }
 
@@ -1071,7 +1076,7 @@ int Plasma::memory_monitor(std::string legend, int nt) {
     CHECK_ERROR("cudaMemGetInfo", err);
 
     sysinfo(&info);
-    printf("step %10d %50s GPU memory total %10d free %10d free CPU memory %10u \n", nt, legend.c_str(), ((int) m_total) / 1024 / 1024, ((int) m_free) / 1024 / 1024, ((int) info.freeram) / 1024 / 1024);
+    printf("step %10d %50s GPU memory total %10d free %10d free CPU memory %10u \n", nt, legend.c_str(), (int) (m_total / 1024 / 1024), (int) (m_free / 1024 / 1024), (int) (info.freeram / 1024 / 1024));
 
     return 0;
 }

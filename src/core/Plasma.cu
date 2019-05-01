@@ -52,7 +52,7 @@ Plasma::~Plasma() {
 #endif
 }
 
-void Plasma::copyCells(std::string where, int nt) {
+void Plasma::copyCells(int nt) {
     static int first = 1;
     size_t m_free, m_total;
     int size = (int)(*pd->AllCells).size();
@@ -79,7 +79,7 @@ void Plasma::copyCells(std::string where, int nt) {
         } else {
             d_c = pd->cp[i];
         }
-        c.copyCellFromDevice(z0, d_c, where, nt);
+        c.copyCellFromDevice(z0, d_c);
         m2 = info.freeram;
 
         delta = m1 - m2;
@@ -547,7 +547,7 @@ void Plasma::AssignCellsToArraysGPU() {
     printf("%s:%d - stack limit %d \n", __FILE__, __LINE__, ((int) sz));
 
     void *args[] = {(void *) &pd->d_CellArray, &pd->d_Ex, &pd->d_Ey, &pd->d_Ez, &pd->d_Hx, &pd->d_Hy, &pd->d_Hz, 0};
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    err = cudaLaunchKernel(
             (const void *) GPU_SetFieldsToCells, // pointer to kernel func.
             dimGrid,                             // grid
             dimBlockExt,                         // block
@@ -555,9 +555,9 @@ void Plasma::AssignCellsToArraysGPU() {
             16000,
             0
     );
-
-    cudaDeviceSynchronize();
-
+    CHECK_ERROR("GPU_SetFieldsToCells", err);
+    err = cudaDeviceSynchronize();
+    CHECK_ERROR("cudaDeviceSynchronize", err);
 }
 
 void Plasma::readControlPoint(const char * fn, int field_assign,
@@ -750,12 +750,15 @@ int Plasma::StepAllCells_fore_diagnostic(int nt) {
 int Plasma::StepAllCells(int nt) {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
     dim3 dimGrid((unsigned int)(Nx + 2), (unsigned int)(Ny + 2), (unsigned int)(Nz + 2)), dimBlock(512, 1, 1);
-    cudaDeviceSynchronize();
+
+    int err = cudaDeviceSynchronize();
+    CHECK_ERROR("cudaDeviceSynchronize", err);
+
     std::cout << "begin step" << std::endl;
 
     void *args[] = {(void *) &pd->d_CellArray, 0};
 
-    cudaError_t cudaStatus = cudaLaunchKernel(
+    err = cudaLaunchKernel(
             (const void *) GPU_StepAllCells, // pointer to kernel func.
             dimGrid,                         // grid
             dimBlock,                        // block
@@ -763,15 +766,13 @@ int Plasma::StepAllCells(int nt) {
             16000,
             0
     );
-
-    std::cout << "GPU_StepAllCells returns " << cudaStatus << std::endl;
+    CHECK_ERROR("GPU_StepAllCells", err);
 
     void *args1[] = {(void *) &pd->d_CellArray, &nt, 0};
-    cudaStatus = cudaFuncSetCacheConfig((const void *) GPU_CurrentsAllCells, cudaFuncCachePreferShared);
-    CHECK_ERROR("cudaFuncSetCacheConfig", cudaStatus);
+    err = cudaFuncSetCacheConfig((const void *) GPU_CurrentsAllCells, cudaFuncCachePreferShared);
+    CHECK_ERROR("cudaFuncSetCacheConfig", err);
 
-
-    cudaStatus = cudaLaunchKernel(
+    err = cudaLaunchKernel(
             (const void *) GPU_CurrentsAllCells, // pointer to kernel func.
             dimGrid,                             // grid
             dimBlock,                            // block
@@ -780,10 +781,12 @@ int Plasma::StepAllCells(int nt) {
             0
     );
 
-    CHECK_ERROR("GPU_CurrentsAllCells", cudaStatus);
+    CHECK_ERROR("GPU_CurrentsAllCells", err);
 
     std::cout << "end step" << std::endl;
-    cudaDeviceSynchronize();
+
+    err = cudaDeviceSynchronize();
+    CHECK_ERROR("cudaDeviceSynchronize", err);
 
     std::cout << "end step-12" << std::endl;
 
@@ -943,8 +946,8 @@ void Plasma::CellOrder_StepAllCells(int nt) {
 double Plasma::checkControlPointParticlesOneSort(int check_point_num, const char * filename, GPUCell **copy_cells, int nt, int sort) {
 
     double t = 0.0;
-    int size;
-#ifdef CPU_DEBUG_RUN
+    int size = 1;
+#ifdef DEBUG
     double q_m, m;
 
     memory_monitor("checkControlPointParticlesOneSort", nt);
@@ -970,9 +973,6 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, const char
     for (int i = 0; i < size; i++) {
         GPUCell c = *(copy_cells[i]);
 
-#ifdef checkControlPointParticles_PRINT
-        printf("cell %d particles %20d \n",i,c.number_of_particles);
-#endif
         t += c.checkCellParticles(check_point_num, pd->dbg_x, pd->dbg_y, pd->dbg_z, pd->dbg_px, pd->dbg_py, pd->dbg_pz, q_m, m);
     }
 
@@ -993,63 +993,26 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, const char
 
 double Plasma::checkControlPointParticles(int check_point_num, const char * filename, int nt) {
     double te = 0.0, ti = 0.0, tb = 0.0;
-    struct sysinfo info;
-#ifdef CPU_DEBUG_RUN
 
-    int size = (*pd->AllCells).size();
+#ifdef DEBUG
+    copyCells(nt);
 
-    char where[100];
-    sprintf(where, "checkpoint%03d", check_point_num);
-    copyCells(where, nt);
-
-#ifdef FREE_RAM_MONITOR
-    sysinfo(&info);
-#ifdef checkControlPointParticles_PRINTS
-    printf("checkControlPointParticles %u \n",info.freeram/1024/1024);
-#endif
-#endif
-
-    GPUCell c = *(pd->cp[141]);
-#ifdef checkControlPointParticles_PRINTS
-    printf("checkControlPointParticlesOneSort cell 141 particles %20d \n",c.number_of_particles);
-#endif
-
-#ifdef FREE_RAM_MONITOR
-    sysinfo(&info);
-#ifdef checkControlPointParticles_PRINTS
-    printf("checkControlPointParticles0.9 %u \n",info.freeram/1024/1024);
-#endif
-#endif
+    memory_monitor("checkControlPointParticles", nt);
 
     ti = checkControlPointParticlesOneSort(check_point_num, filename, pd->cp, nt, ION);
-#ifdef FREE_RAM_MONITOR
-    sysinfo(&info);
-#ifdef checkControlPointParticles_PRINTS
-    printf("checkControlPointParticles1 %u \n",info.freeram/1024/1024);
-#endif
-#endif
+
+    memory_monitor("checkControlPointParticles1", nt);
 
     te = checkControlPointParticlesOneSort(check_point_num, filename, pd->cp, nt, PLASMA_ELECTRON);
 
-#ifdef FREE_RAM_MONITOR
-    sysinfo(&info);
-#ifdef checkControlPointParticles_PRINTS
-    printf("checkControlPointParticles1.5 %u \n",info.freeram/1024/1024);
-#endif
-#endif
+    memory_monitor("checkControlPointParticles1.5", nt);
 
     tb = checkControlPointParticlesOneSort(check_point_num, filename, pd->cp, nt, BEAM_ELECTRON);
 
-#ifdef FREE_RAM_MONITOR
-    sysinfo(&info);
-#ifdef checkControlPointParticles_PRINTS
-    printf("checkControlPointParticles2 %u \n",info.freeram/1024/1024);
-#endif
-#endif
+    memory_monitor("checkControlPointParticles2", nt);
 
 #endif
 
-    memory_monitor("after_free", nt);
     return (te + ti + tb) / 3.0;
 }
 

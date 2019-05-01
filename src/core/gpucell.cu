@@ -140,7 +140,7 @@ GPUCell *GPUCell::copyCellToDevice() {
     return d_dst;
 }
 
-void GPUCell::copyCellFromDevice(GPUCell *d_src, GPUCell *h_dst, std::string where, int nt) {
+void GPUCell::copyCellFromDevice(GPUCell *d_src, GPUCell *h_dst) {
     static GPUCell *h_copy_of_d_src;
     static int first = 1;
     int err;

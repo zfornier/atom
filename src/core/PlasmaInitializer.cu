@@ -158,7 +158,7 @@ void PlasmaInitializer::Alloc() {
     p->Qy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->Qz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-#ifdef DEBUG_PLASMA
+#ifdef DEBUG_PLASMA // todo: change to DEBUG (seg fault with DEBUG here now
     p->dbgEx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     p->dbgEy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     p->dbgEz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
@@ -166,6 +166,7 @@ void PlasmaInitializer::Alloc() {
     p->dbgHx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     p->dbgHy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     p->dbgHz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+
     p->dbgJx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     p->dbgJy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     p->dbgJz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];

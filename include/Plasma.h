@@ -54,7 +54,7 @@ public:
     virtual ~Plasma();
 
 private:
-    void copyCells(std::string, int);
+    void copyCells(int);
 
     double checkGPUArray(double *, double *, std::string, std::string, int);
 

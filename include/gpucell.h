@@ -27,7 +27,7 @@ public:
 
     GPUCell *copyCellToDevice();
 
-    void copyCellFromDevice(GPUCell *d_src, GPUCell *h_dst, std::string where, int nt);
+    void copyCellFromDevice(GPUCell *d_src, GPUCell *h_dst);
 
     GPUCell *allocateCopyCellFromDevice();
 

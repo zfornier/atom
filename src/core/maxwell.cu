@@ -155,7 +155,7 @@ doublereal g05cae_(doublereal *x, int dbg_print) {
 doublereal wrapg05cae_(doublereal *x, int dbg_print) {
     static int n = 0;
     double t = g05cae_(x, dbg_print);
-// #ifdef DEBUG_PLASMA
+// #ifdef DEBUG
     n++;
     if (dbg_print == 1) {
         std::cout << n << " " << t << std::endl;

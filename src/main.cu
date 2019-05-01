@@ -11,7 +11,9 @@
 using namespace std;
 
 void printHelp();
-PlasmaConfig readConfig(std::ifstream &is);
+PlasmaConfig initConfig(std::ifstream &is);
+void deinitConfig(PlasmaConfig& config);
+
 bool isFileExist(const char *);
 
 int main(int argc, char *argv[]) {
@@ -41,7 +43,7 @@ int main(int argc, char *argv[]) {
         PlasmaConfig conf;
 
         if (myfile.is_open()) {
-            conf = readConfig(myfile);
+            conf = initConfig(myfile);
         } else {
             cout << "Unable to open file: " << config << endl;
             return 0;
@@ -58,7 +60,6 @@ int main(int argc, char *argv[]) {
 
         try {
             plasma = new Plasma(&conf);
-
             plasma->Initialize();
 
             plasma->Compute();
@@ -70,7 +71,7 @@ int main(int argc, char *argv[]) {
             std::cout << e.what() << std::endl;
         }
 
-        delete conf.checkFile;
+        deinitConfig(conf);
 
         CloseMPI();
 
@@ -86,7 +87,7 @@ void printHelp() {
     cout << "Options:\n" << "-h --help\tdisplay usage information" << endl;
 }
 
-PlasmaConfig readConfig(std::ifstream &is) {
+PlasmaConfig initConfig(std::ifstream &is) {
     Properties properties;
     PlasmaConfig conf = PlasmaConfig();
 
@@ -132,6 +133,10 @@ PlasmaConfig readConfig(std::ifstream &is) {
     }
 
     return conf;
+}
+
+void deinitConfig(PlasmaConfig& config) {
+    delete[] config.checkFile;
 }
 
 bool isFileExist(const char * name) {

@@ -33,7 +33,7 @@ Plasma::~Plasma() {
     delete[] pd->Qy;
     delete[] pd->Qz;
 
-#ifdef DEBUG_PLASMA
+#ifdef DEBUG
     delete[] pd->dbgEx;
     delete[] pd->dbgEy;
     delete[] pd->dbgEz;
@@ -588,6 +588,7 @@ void Plasma::readControlPoint(const char * fn, int field_assign,
 }
 
 void Plasma::checkControlPoint(int num, int nt) {
+#ifdef DEBUG
     double t_ex, t_ey, t_ez, t_hx, t_hy, t_hz, t_jx, t_jy, t_jz;
     double t_qx, t_qy, t_qz;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
@@ -598,11 +599,9 @@ void Plasma::checkControlPoint(int num, int nt) {
 #endif
     }
 
-    memory_monitor("checkControlPoint1", nt);
-
     if (nt % FORTRAN_NUMBER_OF_SMALL_STEPS != 0) return;
 
-    memory_monitor("checkControlPoint2", nt);
+    memory_monitor("checkControlPoint1", nt);
 
     readControlPoint(pd->checkFile, 0,
                      pd->dbgEx, pd->dbgEy, pd->dbgEz,
@@ -610,7 +609,7 @@ void Plasma::checkControlPoint(int num, int nt) {
                      pd->dbgJx, pd->dbgJy, pd->dbgJz,
                      pd->dbg_Qx, pd->dbg_Qy, pd->dbg_Qz);
 
-    memory_monitor("checkControlPoint3", nt);
+    memory_monitor("checkControlPoint2", nt);
 
     int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
 
@@ -624,7 +623,7 @@ void Plasma::checkControlPoint(int num, int nt) {
     t_jy = CheckArraySilent(pd->Jy, pd->dbgJy, size);
     t_jz = CheckArraySilent(pd->Jz, pd->dbgJz, size);
 
-    memory_monitor("checkControlPoint4", nt);
+    memory_monitor("checkControlPoint3", nt);
 
     t_ex = CheckGPUArraySilent(pd->dbgEx, pd->d_Ex);
     t_ey = CheckGPUArraySilent(pd->dbgEy, pd->d_Ey);
@@ -660,7 +659,7 @@ void Plasma::checkControlPoint(int num, int nt) {
     t_jy = CheckGPUArraySilent(pd->dbgJy, pd->d_Jy);
     t_jz = CheckGPUArraySilent(pd->dbgJz, pd->d_Jz);
 
-    memory_monitor("checkControlPoint5", nt);
+    memory_monitor("checkControlPoint4", nt);
 
     double t_cmp_jx = checkGPUArray(pd->dbgJx, pd->d_Jx, "Jx", "step", nt);
     double t_cmp_jy = checkGPUArray(pd->dbgJy, pd->d_Jy, "Jy", "step", nt);
@@ -673,7 +672,7 @@ void Plasma::checkControlPoint(int num, int nt) {
     printf("GPU compare : Jx %15.5e Jy %15.5e Jz %15.5e \n",t_cmp_jx,t_cmp_jy,t_cmp_jz);
 #endif
 
-    memory_monitor("checkControlPoint6", nt);
+    memory_monitor("checkControlPoint5", nt);
 
     double cp = checkControlPointParticles(num, pd->checkFile, nt);
     cout << "STEP: " <<  nt << endl;
@@ -690,7 +689,8 @@ void Plasma::checkControlPoint(int num, int nt) {
 
     fclose(pd->f_prec_report);
 
-    memory_monitor("checkControlPoint7", nt);
+    memory_monitor("checkControlPoint6", nt);
+#endif
 }
 
 double Plasma::CheckGPUArraySilent(double *a, double *d_a) {

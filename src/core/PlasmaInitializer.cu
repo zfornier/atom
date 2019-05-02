@@ -158,7 +158,7 @@ void PlasmaInitializer::Alloc() {
     p->Qy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->Qz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-#ifdef DEBUG_PLASMA // todo: change to DEBUG (seg fault with DEBUG here now
+#ifdef DEBUG // todo: change to DEBUG (seg fault with DEBUG here now
     p->dbgEx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     p->dbgEy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
     p->dbgEz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
@@ -188,7 +188,7 @@ void PlasmaInitializer::InitFields() {
         p->Hy[i] = 0.0;
         p->Hz[i] = 0.0;
 
-#ifdef DEBUG_PLASMA
+#ifdef DEBUG
         p->dbgEx[i] = 0.0;
         p->dbgEy[i] = 0.0;
         p->dbgEz[i] = 0.0;
@@ -226,9 +226,11 @@ void PlasmaInitializer::InitCurrents() {
         p->Jz[i] = 0.0;
         p->Rho[i] = 0.0;
 
+#ifdef DEBUG
         p->dbgJx[i] = 0.0;
         p->dbgJy[i] = 0.0;
         p->dbgJz[i] = 0.0;
+#endif
     }
 }
 

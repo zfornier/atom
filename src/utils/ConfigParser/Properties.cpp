@@ -25,7 +25,7 @@ void Properties::load(std::ifstream &is) {
                 this->properties.insert({values[0], values[1]});
             }
             else {
-                throw std::invalid_argument("Bad config entry at line: " + std::to_string(lineNum));
+                this->properties.insert({values[0], ""});
             }
         }
         else {

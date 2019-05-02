@@ -599,7 +599,7 @@ void Plasma::checkControlPoint(int num, int nt) {
 #endif
     }
 
-    if (nt % FORTRAN_NUMBER_OF_SMALL_STEPS != 0) return;
+    if (pd->checkFile == NULL || nt % FORTRAN_NUMBER_OF_SMALL_STEPS != 0) return;
 
     memory_monitor("checkControlPoint1", nt);
 

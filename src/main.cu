@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        if(!isFileExist(conf.checkFile)) {
+        if(conf.checkFile != NULL && !isFileExist(conf.checkFile)) {
             std::cerr << "Check file: " << conf.checkFile << " does not exist" << std::endl;
             return -1;
         }
@@ -123,9 +123,14 @@ PlasmaConfig initConfig(std::ifstream &is) {
         conf.saveStep = properties.stringToInt(properties.getProperty("saveStep"));
         conf.startSave = properties.stringToInt(properties.getProperty("startSave"));
         std::string file = properties.getProperty("checkFile");
-        int l = (int)file.length() + 1;
-        conf.checkFile = new char[l + 1];
-        memcpy((void*)conf.checkFile, (void*)file.c_str(), (size_t)l + 1);
+        if (file.empty()) {
+            conf.checkFile = NULL;
+        }
+        else {
+            int l = (int)file.length() + 1;
+            conf.checkFile = new char[l + 1];
+            memcpy((void*)conf.checkFile, (void*)file.c_str(), (size_t)l + 1);
+        }
     }
     catch (std::exception &e) {
         std::cout << "Config parsing error: " << e.what() << std::endl;

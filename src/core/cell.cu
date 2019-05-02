@@ -1060,7 +1060,7 @@ Cell::compareToCell(Cell &src) {
     return (t + t1 + t_ex + t_ey + t_ez + t_hx + t_hy + t_hz + t_rho) / 9.0;
 }
 
-double Cell::checkCellParticles(int check_point_num, double *x, double *y, double *z, double *px, double *py, double *pz, double q_m, double m) {
+double Cell::checkCellParticles(double *x, double *y, double *z, double *px, double *py, double *pz, double q_m, double m) {
     int i, num = 0, j, num_sort = 0, correct_particle;
     double t, dm, dqm, dx, dy, dz, dpx, dpy, dpz;
 
@@ -1072,8 +1072,8 @@ double Cell::checkCellParticles(int check_point_num, double *x, double *y, doubl
         j = p.fortran_number - 1;
         dm = fabs(p.m - m);
         dqm = fabs(p.q_m - q_m);
-        if ((dm > ABSOLUTE_TOLERANCE) || (dqm > ABSOLUTE_TOLERANCE)) continue;
 
+        if ((dm > ABSOLUTE_TOLERANCE) || (dqm > ABSOLUTE_TOLERANCE)) continue;
 
         dx = fabs(p.x - x[j]);
         dy = fabs(p.y - y[j]);
@@ -1082,11 +1082,7 @@ double Cell::checkCellParticles(int check_point_num, double *x, double *y, doubl
         dpy = fabs(p.pv - py[j]);
         dpz = fabs(p.pw - pz[j]);
 
-        num_sort += (dm < ABSOLUTE_TOLERANCE) &&
-                    (dqm < ABSOLUTE_TOLERANCE);
-
-        if ((fabs(m) < 1e-3) && (check_point_num >= 270)) {
-        }
+        num_sort += (dm < ABSOLUTE_TOLERANCE) && (dqm < ABSOLUTE_TOLERANCE);
 
         correct_particle = (dm < ABSOLUTE_TOLERANCE) &&
                            (dqm < ABSOLUTE_TOLERANCE) &&
@@ -1097,9 +1093,6 @@ double Cell::checkCellParticles(int check_point_num, double *x, double *y, doubl
                            (dpy < PARTICLE_TOLERANCE) &&
                            (dpz < PARTICLE_TOLERANCE);
 
-        if (!correct_particle && check_point_num == 270 && (int) p.sort == 1) {
-
-        }
         num += correct_particle;
     }
 
@@ -1107,9 +1100,6 @@ double Cell::checkCellParticles(int check_point_num, double *x, double *y, doubl
         t = ((double) num) / num_sort;
     } else {
         t = 1.0;
-    }
-
-    if ((t > 0) && (fabs(m) < 1e-3) && (check_point_num >= 270) && (num > 0)) {
     }
 
     return t;

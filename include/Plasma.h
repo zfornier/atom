@@ -138,7 +138,7 @@ private:
 
     void CellOrder_StepAllCells(int);
 
-    double checkControlPointParticlesOneSort(int, const char * , GPUCell **, int, int);
+    double checkControlPointParticlesOneSort(const char * , GPUCell **, int, int);
 
     double checkControlPointParticles(int, const char *, int);
 

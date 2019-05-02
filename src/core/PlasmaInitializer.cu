@@ -158,23 +158,23 @@ void PlasmaInitializer::Alloc() {
     p->Qy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->Qz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-#ifdef DEBUG // todo: change to DEBUG (seg fault with DEBUG here now
-    p->dbgEx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    p->dbgEy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    p->dbgEz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+    if (p->checkFile != NULL) {
+        p->dbgEx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->dbgEy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->dbgEz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-    p->dbgHx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    p->dbgHy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    p->dbgHz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+        p->dbgHx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->dbgHy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->dbgHz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-    p->dbgJx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    p->dbgJy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    p->dbgJz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
+        p->dbgJx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->dbgJy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->dbgJz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-    p->dbg_Qx  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    p->dbg_Qy  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-    p->dbg_Qz  = new double[(Nx + 2)*(Ny + 2)*(Nz + 2)];
-#endif
+        p->dbg_Qx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->dbg_Qy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->dbg_Qz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    }
 }
 
 void PlasmaInitializer::InitFields() {
@@ -188,14 +188,14 @@ void PlasmaInitializer::InitFields() {
         p->Hy[i] = 0.0;
         p->Hz[i] = 0.0;
 
-#ifdef DEBUG
-        p->dbgEx[i] = 0.0;
-        p->dbgEy[i] = 0.0;
-        p->dbgEz[i] = 0.0;
-        p->dbgHx[i] = 0.0;
-        p->dbgHy[i] = 0.0;
-        p->dbgHz[i] = 0.0;
-#endif
+        if (p->checkFile != NULL) {
+            p->dbgEx[i] = 0.0;
+            p->dbgEy[i] = 0.0;
+            p->dbgEz[i] = 0.0;
+            p->dbgHx[i] = 0.0;
+            p->dbgHy[i] = 0.0;
+            p->dbgHz[i] = 0.0;
+        }
     }
 }
 
@@ -226,11 +226,11 @@ void PlasmaInitializer::InitCurrents() {
         p->Jz[i] = 0.0;
         p->Rho[i] = 0.0;
 
-#ifdef DEBUG
-        p->dbgJx[i] = 0.0;
-        p->dbgJy[i] = 0.0;
-        p->dbgJz[i] = 0.0;
-#endif
+        if (p->checkFile != NULL) {
+            p->dbgJx[i] = 0.0;
+            p->dbgJy[i] = 0.0;
+            p->dbgJz[i] = 0.0;
+        }
     }
 }
 

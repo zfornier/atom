@@ -33,23 +33,23 @@ Plasma::~Plasma() {
     delete[] pd->Qy;
     delete[] pd->Qz;
 
-#ifdef DEBUG
-    delete[] pd->dbgEx;
-    delete[] pd->dbgEy;
-    delete[] pd->dbgEz;
+    if (pd->checkFile != NULL) {
+        delete[] pd->dbgEx;
+        delete[] pd->dbgEy;
+        delete[] pd->dbgEz;
 
-    delete[] pd->dbgHx;
-    delete[] pd->dbgHy;
-    delete[] pd->dbgHz;
+        delete[] pd->dbgHx;
+        delete[] pd->dbgHy;
+        delete[] pd->dbgHz;
 
-    delete[] pd->dbgJx;
-    delete[] pd->dbgJy;
-    delete[] pd->dbgJz;
+        delete[] pd->dbgJx;
+        delete[] pd->dbgJy;
+        delete[] pd->dbgJz;
 
-    delete[] pd->dbg_Qx;
-    delete[] pd->dbg_Qy;
-    delete[] pd->dbg_Qz;
-#endif
+        delete[] pd->dbg_Qx;
+        delete[] pd->dbg_Qy;
+        delete[] pd->dbg_Qz;
+    }
 }
 
 void Plasma::copyCells(int nt) {
@@ -97,10 +97,6 @@ double Plasma::checkGPUArray(double *a, double *d_a, std::string name, std::stri
     char fname[1000];
     double res;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
-
-#ifndef CHECK_ARRAY_OUTPUT
-    return 0.0;
-#endif
 
     sprintf(fname, "diff_%s_at_%s_nt%08d.dat", name.c_str(), where.c_str(), nt);
 
@@ -534,17 +530,21 @@ void Plasma::AssignCellsToArraysGPU() {
     size_t sz;
     dim3 dimGrid(Nx, Ny, Nz), dimBlockExt(CellExtent, CellExtent, CellExtent);
 
+#ifdef DEBUG
     err = cudaDeviceGetLimit(&sz, cudaLimitStackSize);
     CHECK_ERROR("DEVICE LIMIT", err);
     printf("%s:%d - stack limit %d\n", __FILE__, __LINE__, ((int) sz));
-
+#endif
     err = cudaDeviceSetLimit(cudaLimitStackSize, 64 * 1024);
     CHECK_ERROR("DEVICE LIMIT", err);
+#ifdef DEBUG
     printf("%s:%d - set stack limit \n", __FILE__, __LINE__);
-
+#endif
+#ifdef DEBUG
     err = cudaDeviceGetLimit(&sz, cudaLimitStackSize);
     CHECK_ERROR("DEVICE LIMIT", err);
     printf("%s:%d - stack limit %d \n", __FILE__, __LINE__, ((int) sz));
+#endif
 
     void *args[] = {(void *) &pd->d_CellArray, &pd->d_Ex, &pd->d_Ey, &pd->d_Ez, &pd->d_Hx, &pd->d_Hy, &pd->d_Hz, 0};
     err = cudaLaunchKernel(
@@ -588,18 +588,17 @@ void Plasma::readControlPoint(const char * fn, int field_assign,
 }
 
 void Plasma::checkControlPoint(int num, int nt) {
-#ifdef DEBUG
+    if (pd->checkFile == NULL) return;
+
     double t_ex, t_ey, t_ez, t_hx, t_hy, t_hz, t_jx, t_jy, t_jz;
     double t_qx, t_qy, t_qz;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
     if ((nt != pd->lst) || (num != 600)) {
-#ifndef CONTROL_POINT_CHECK
         return;
-#endif
     }
 
-    if (pd->checkFile == NULL || nt % FORTRAN_NUMBER_OF_SMALL_STEPS != 0) return;
+    if (nt % FORTRAN_NUMBER_OF_SMALL_STEPS != 0) return;
 
     memory_monitor("checkControlPoint1", nt);
 
@@ -690,7 +689,6 @@ void Plasma::checkControlPoint(int num, int nt) {
     fclose(pd->f_prec_report);
 
     memory_monitor("checkControlPoint6", nt);
-#endif
 }
 
 double Plasma::CheckGPUArraySilent(double *a, double *d_a) {
@@ -943,11 +941,10 @@ void Plasma::CellOrder_StepAllCells(int nt) {
     reorder_particles(nt);
 }
 
-double Plasma::checkControlPointParticlesOneSort(int check_point_num, const char * filename, GPUCell **copy_cells, int nt, int sort) {
+double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell **copy_cells, int nt, int sort) {
 
     double t = 0.0;
-    int size = 1;
-#ifdef DEBUG
+    int size;
     double q_m, m;
 
     memory_monitor("checkControlPointParticlesOneSort", nt);
@@ -973,7 +970,7 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, const char
     for (int i = 0; i < size; i++) {
         GPUCell c = *(copy_cells[i]);
 
-        t += c.checkCellParticles(check_point_num, pd->dbg_x, pd->dbg_y, pd->dbg_z, pd->dbg_px, pd->dbg_py, pd->dbg_pz, q_m, m);
+        t += c.checkCellParticles(pd->dbg_x, pd->dbg_y, pd->dbg_z, pd->dbg_px, pd->dbg_py, pd->dbg_pz, q_m, m);
     }
 
     memory_monitor("checkControlPointParticlesOneSort3", nt);
@@ -987,31 +984,28 @@ double Plasma::checkControlPointParticlesOneSort(int check_point_num, const char
     delete[] pd->dbg_pz;
 
     memory_monitor("checkControlPointParticlesOneSort4", nt);
-#endif
+
     return t / size;
 }
 
 double Plasma::checkControlPointParticles(int check_point_num, const char * filename, int nt) {
-    double te = 0.0, ti = 0.0, tb = 0.0;
+    double te, ti, tb;
 
-#ifdef DEBUG
     copyCells(nt);
 
     memory_monitor("checkControlPointParticles", nt);
 
-    ti = checkControlPointParticlesOneSort(check_point_num, filename, pd->cp, nt, ION);
+    ti = checkControlPointParticlesOneSort(filename, pd->cp, nt, ION);
 
     memory_monitor("checkControlPointParticles1", nt);
 
-    te = checkControlPointParticlesOneSort(check_point_num, filename, pd->cp, nt, PLASMA_ELECTRON);
+    te = checkControlPointParticlesOneSort(filename, pd->cp, nt, PLASMA_ELECTRON);
 
     memory_monitor("checkControlPointParticles1.5", nt);
 
-    tb = checkControlPointParticlesOneSort(check_point_num, filename, pd->cp, nt, BEAM_ELECTRON);
+    tb = checkControlPointParticlesOneSort(filename, pd->cp, nt, BEAM_ELECTRON);
 
     memory_monitor("checkControlPointParticles2", nt);
-
-#endif
 
     return (te + ti + tb) / 3.0;
 }

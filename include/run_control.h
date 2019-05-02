@@ -7,6 +7,5 @@
 #define PARTICLE_TOLERANCE 1e-10
 
 #define DEBUG_PLASMA
-#define CHECK_ARRAY_OUTPUT
 
 #endif

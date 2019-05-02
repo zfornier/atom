@@ -301,7 +301,7 @@ public:
 #endif
     compareToCell(Cell &src);
 
-    double checkCellParticles(int check_point_num, double *x, double *y, double *z, double *px, double *py, double *pz, double q_m, double m);
+    double checkCellParticles(double *x, double *y, double *z, double *px, double *py, double *pz, double q_m, double m);
 
     __host__ __device__
     void SetControlSystemToParticles();

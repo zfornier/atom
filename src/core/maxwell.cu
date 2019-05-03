@@ -179,7 +179,6 @@ double rnd_gaussian(double a, double b, int dbg_print) {
     return (double) wrapg05dde_(&a, &b, dbg_print);
 }
 
-
 int in_range(double z0, double z, double z1) {
     return ((z > z0) && (z < z1)) || ((fabs(z - z0) < 1e-13) && (fabs(z - z1) < 1e-13));
 }
@@ -350,25 +349,20 @@ int InitUniformMaxwellianParticles(int beamf, int jmb,
 #endif
     }
 
-    free(ux);
-    free(uy);
-    free(uz);
-
-#ifdef DEBUG_INITIAL_PARTICLE_PRINTS
-    //    exit(0);
-#endif
+    delete[] ux;
+    delete[] uy;
+    delete[] uz;
 
     return 0;
 } /* start_ */
 
 int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons, double ni, double rbd, int lp) {
-    //int lp = ((double)N)/(Nx*Ny*Nz);
-    electrons->m[0] = -ni / lp / 2.0;     //!!!!!!
     ions->m[0] = (ni + rbd) / lp;
+    electrons->m[0] = -ni / lp / 2.0;     //!!!!!!
     beam_electrons->m[0] = -rbd / lp;
 
-    electrons->q_m = -1.0;
     ions->q_m = 1.0 / 1836.0;
+    electrons->q_m = -1.0;
     beam_electrons->q_m = -1.0;
 
     return 0;
@@ -421,14 +415,12 @@ int convertParticleArraysToSTLvector(
 int getUniformMaxwellianParticles(std::vector <Particle> &ion_vp,
                                   std::vector <Particle> &el_vp,
                                   std::vector <Particle> &beam_vp,
+                                  ParticleArrays &ions, ParticleArrays &electrons, ParticleArrays &beam,
                                   double tex0, double tey0, double tez0,
                                   double Tb, double rimp, double rbd,
                                   double ni, int lp, int meh,
                                   double lx, double ly, double lz,
                                   int nx, int ny, int nz) {
-
-    ParticleArrays ions, electrons, beam;
-
     int total = nx * ny * nz * lp;
     int jmb;
 

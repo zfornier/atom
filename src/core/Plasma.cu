@@ -93,12 +93,9 @@ void Plasma::copyCells(int nt) {
     memory_monitor("afterCopyCells", nt);
 }
 
-double Plasma::checkGPUArray(double *a, double *d_a, std::string name, std::string where, int nt) {
-    char fname[1000];
+double Plasma::checkGPUArray(double *a, double *d_a) {
     double res;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
-
-    sprintf(fname, "diff_%s_at_%s_nt%08d.dat", name.c_str(), where.c_str(), nt);
 
     int err;
     err = MemoryCopy(this->temp, d_a, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
@@ -136,7 +133,6 @@ void Plasma::emeGPUIterate(int3 s, int3 f, double *E, double *H1, double *H2, do
     );
 
     CHECK_ERROR("Launch kernel", cudaStatus);
-
 }
 
 void Plasma::GetElectricFieldStartsDirs(int3 *start, int3 *d1, int3 *d2, int dir) {
@@ -639,13 +635,13 @@ void Plasma::checkControlPoint(int num, int nt) {
 
         sprintf(wh, "%d", num);
 
-        t_jx = checkGPUArray(pd->dbgJx, pd->d_Jx, "Jx", wh, nt);
-        t_jy = checkGPUArray(pd->dbgJy, pd->d_Jy, "Jy", wh, nt);
-        t_jz = checkGPUArray(pd->dbgJz, pd->d_Jz, "Jz", wh, nt);
+        t_jx = checkGPUArray(pd->dbgJx, pd->d_Jx);
+        t_jy = checkGPUArray(pd->dbgJy, pd->d_Jy);
+        t_jz = checkGPUArray(pd->dbgJz, pd->d_Jz);
 
-        t_ex = checkGPUArray(pd->dbgEx, pd->d_Ex, "Ex", wh, nt);
-        t_ey = checkGPUArray(pd->dbgEy, pd->d_Ey, "Ey", wh, nt);
-        t_ez = checkGPUArray(pd->dbgEz, pd->d_Ez, "Ez", wh, nt);
+        t_ex = checkGPUArray(pd->dbgEx, pd->d_Ex);
+        t_ey = checkGPUArray(pd->dbgEy, pd->d_Ey);
+        t_ez = checkGPUArray(pd->dbgEz, pd->d_Ez);
 
     } else {
 
@@ -660,9 +656,9 @@ void Plasma::checkControlPoint(int num, int nt) {
 
     memory_monitor("checkControlPoint4", nt);
 
-    double t_cmp_jx = checkGPUArray(pd->dbgJx, pd->d_Jx, "Jx", "step", nt);
-    double t_cmp_jy = checkGPUArray(pd->dbgJy, pd->d_Jy, "Jy", "step", nt);
-    double t_cmp_jz = checkGPUArray(pd->dbgJz, pd->d_Jz, "Jz", "step", nt);
+    double t_cmp_jx = checkGPUArray(pd->dbgJx, pd->d_Jx);
+    double t_cmp_jy = checkGPUArray(pd->dbgJy, pd->d_Jy);
+    double t_cmp_jz = checkGPUArray(pd->dbgJz, pd->d_Jz);
 
 #ifdef CONTROL_DIFF_GPU_PRINTS
     printf("GPU: Ex %15.5e Ey %15.5e Ez %15.5e \n",t_ex,t_ey,t_ez);
@@ -673,7 +669,7 @@ void Plasma::checkControlPoint(int num, int nt) {
 
     memory_monitor("checkControlPoint5", nt);
 
-    double cp = checkControlPointParticles(num, pd->checkFile, nt);
+    double cp = checkControlPointParticles(pd->checkFile, nt);
     cout << "STEP: " <<  nt << endl;
     pd->f_prec_report = fopen("control_points.dat", "at");
 
@@ -943,7 +939,6 @@ void Plasma::CellOrder_StepAllCells(int nt) {
 }
 
 double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell **copy_cells, int nt, int sort) {
-
     double t = 0.0;
     int size;
     double q_m, m;
@@ -989,7 +984,7 @@ double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell 
     return t / size;
 }
 
-double Plasma::checkControlPointParticles(int check_point_num, const char * filename, int nt) {
+double Plasma::checkControlPointParticles(const char * filename, int nt) {
     double te, ti, tb;
 
     copyCells(nt);
@@ -1036,6 +1031,7 @@ void Plasma::writeDataToFile(int step) {
     step_str = ss.str();
     string filename = dataFileStartPattern + step_str + dataFileEndPattern;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
+    int nb_particles = Nx * Ny * Nz * pd->lp;
 
     NcFile dataFile(filename, NcFile::replace);
     dataFile.close();
@@ -1044,6 +1040,10 @@ void Plasma::writeDataToFile(int step) {
     NetCDFManipulator::plsm_add_dimension(filename.c_str(), "x", NX);
     NetCDFManipulator::plsm_add_dimension(filename.c_str(), "y", NY);
     NetCDFManipulator::plsm_add_dimension(filename.c_str(), "z", NZ);
+
+    NetCDFManipulator::plsm_add_dimension(filename.c_str(), (SORT_0_LABEL + "_DIM").c_str(), nb_particles);
+    NetCDFManipulator::plsm_add_dimension(filename.c_str(), (SORT_1_LABEL + "_DIM").c_str(), nb_particles * 2);
+    NetCDFManipulator::plsm_add_dimension(filename.c_str(), (SORT_2_LABEL + "_DIM").c_str(), nb_particles);
 
     int err;
 
@@ -1087,6 +1087,75 @@ void Plasma::writeDataToFile(int step) {
     CHECK_ERROR("MEM COPY", err);
     writeOne3DArray(filename.c_str(), this->temp, MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL, UNITS_NO, DESC_HALFSTEP + MAGNETIC_HALF_STEP_FIELD_LABEL + Z_LABEL);
 
+    int size = (*pd->AllCells).size();
+    int io = 0, e = 0, b = 0;
+
+    copyCells(step);
+
+    for (int i = 0; i < size; i++) {
+        GPUCell c = *(pd->cp[i]);
+        for (int j = 0; j < c.number_of_particles; j++) {
+            Particle p;
+            p = c.readParticleFromSurfaceDevice(j);
+            if(p.sort == ION) {
+                pd->ions.dbg_x[io] = p.x;
+                pd->ions.dbg_y[io] = p.y;
+                pd->ions.dbg_z[io] = p.z;
+                pd->ions.dbg_px[io] = p.pu;
+                pd->ions.dbg_py[io] = p.pv;
+                pd->ions.dbg_pz[io] = p.pw;
+                ++io;
+            } else if (p.sort == PLASMA_ELECTRON) {
+                pd->electrons.dbg_x[e] = p.x;
+                pd->electrons.dbg_y[e] = p.y;
+                pd->electrons.dbg_z[e] = p.z;
+                pd->electrons.dbg_px[e] = p.pu;
+                pd->electrons.dbg_py[e] = p.pv;
+                pd->electrons.dbg_pz[e] = p.pw;
+                ++e;
+            } else if (p.sort == BEAM_ELECTRON) {
+                pd->beam.dbg_x[b] = p.x;
+                pd->beam.dbg_y[b] = p.y;
+                pd->beam.dbg_z[b] = p.z;
+                pd->beam.dbg_px[b] = p.pu;
+                pd->beam.dbg_py[b] = p.pv;
+                pd->beam.dbg_pz[b] = p.pw;
+                ++b;
+            }
+        }
+    }
+
+    NetCDFManipulator::plsm_save_int(filename.c_str(), &nb_particles, (NB_PARTICLES_LABEL + SORT_0_LABEL).c_str(), UNITS_NB_PARTICLES.c_str(), (DESC_NB_PARTICLES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_double(filename.c_str(), &pd->ions.q_m, (CHARGE_LABEL + SORT_0_LABEL).c_str(), UNITS_CHARGE_PARTICLES.c_str(), (DESC_CHARGE + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_double(filename.c_str(), pd->ions.m, (MASS_LABEL + SORT_0_LABEL).c_str(), UNITS_MASS_PARTICLES.c_str(), (DESC_MASS + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_x, (COORDINATES_LABEL + X_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (X_LABEL + DESC_COORDINATES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_x, (COORDINATES_LABEL + Y_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Y_LABEL + DESC_COORDINATES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_x, (COORDINATES_LABEL + Z_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Z_LABEL + DESC_COORDINATES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_px, (IMPULSES_LABEL + X_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (X_LABEL + DESC_IMPULSES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_py, (IMPULSES_LABEL + Y_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Y_LABEL + DESC_IMPULSES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_pz, (IMPULSES_LABEL + Z_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Z_LABEL + DESC_IMPULSES + SORT_0_LABEL).c_str());
+    nb_particles *= 2;
+
+    NetCDFManipulator::plsm_save_int(filename.c_str(), &nb_particles, (NB_PARTICLES_LABEL + SORT_1_LABEL).c_str(), UNITS_NB_PARTICLES.c_str(), (DESC_NB_PARTICLES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_double(filename.c_str(), &pd->electrons.q_m, (CHARGE_LABEL + SORT_1_LABEL).c_str(), UNITS_CHARGE_PARTICLES.c_str(), (DESC_CHARGE + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_double(filename.c_str(), pd->electrons.m, (MASS_LABEL + SORT_1_LABEL).c_str(), UNITS_MASS_PARTICLES.c_str(), (DESC_MASS + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_x, (COORDINATES_LABEL + X_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (X_LABEL + DESC_COORDINATES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_x, (COORDINATES_LABEL + Y_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Y_LABEL + DESC_COORDINATES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_x, (COORDINATES_LABEL + Z_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Z_LABEL + DESC_COORDINATES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_px, (IMPULSES_LABEL + X_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (X_LABEL + DESC_IMPULSES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_py, (IMPULSES_LABEL + Y_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Y_LABEL + DESC_IMPULSES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_pz, (IMPULSES_LABEL + Z_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Z_LABEL + DESC_IMPULSES + SORT_1_LABEL).c_str());
+    nb_particles /= 2;
+
+    NetCDFManipulator::plsm_save_int(filename.c_str(), &nb_particles, (NB_PARTICLES_LABEL + SORT_2_LABEL).c_str(), UNITS_NB_PARTICLES.c_str(), (DESC_NB_PARTICLES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_double(filename.c_str(), &pd->beam.q_m, (CHARGE_LABEL + SORT_2_LABEL).c_str(), UNITS_CHARGE_PARTICLES.c_str(), (DESC_CHARGE + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_double(filename.c_str(), pd->beam.m, (MASS_LABEL + SORT_2_LABEL).c_str(), UNITS_MASS_PARTICLES.c_str(), (DESC_MASS + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_x, (COORDINATES_LABEL + X_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (X_LABEL + DESC_COORDINATES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_x, (COORDINATES_LABEL + Y_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Y_LABEL + DESC_COORDINATES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_x, (COORDINATES_LABEL + Z_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Z_LABEL + DESC_COORDINATES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_px, (IMPULSES_LABEL + X_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (X_LABEL + DESC_IMPULSES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_py, (IMPULSES_LABEL + Y_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Y_LABEL + DESC_IMPULSES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_pz, (IMPULSES_LABEL + Z_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Z_LABEL + DESC_IMPULSES + SORT_2_LABEL).c_str());
 }
 
 /**

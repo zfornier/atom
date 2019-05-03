@@ -7,6 +7,7 @@
 
 #include <string>
 #include "gpucell.h"
+#include "maxwell.h"
 
 typedef struct {
     double tempX;                // plasma electron temperature along X
@@ -40,6 +41,7 @@ typedef struct {
     int startSave;               // start save from startSave step
     const char * checkFile;      // file to check with
 
+    ParticleArrays ions, electrons, beam;
     int jmp;
     int total_particles;
     double ami, amb, amf;

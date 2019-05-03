@@ -88,7 +88,7 @@ namespace plasmanetcdf {
 		\param unit	       Units of the 1d array
 		\param desc	       Description of the 1d array   
 	*/
-	static Error_t plsm_save_1D_double_array(const char* fileName, double * pTab, char* label, char* dim_label,const char* unit,const char* desc);
+	static Error_t plsm_save_1D_double_array(const char* fileName, double * pTab, const char* label, const char* dim_label, const char* unit, const char* desc);
 
 	/*!
 		Save a double variable in the NetCDF file
@@ -98,7 +98,7 @@ namespace plasmanetcdf {
 		\param unit	       Units of the value
 		\param desc	       Description of this value
 	*/
-	static Error_t plsm_save_double(const char* fileName, double* pTab, char* label,const char* unit,const char* desc);
+	static Error_t plsm_save_double(const char* fileName, double* pTab, const char* label, const char* unit, const char* desc);
 
 	/*!
 		Save a integer variable in the NetCDF file
@@ -108,7 +108,7 @@ namespace plasmanetcdf {
 		\param unit	       Units of the value
 		\param desc	       Description of this value
 	*/
-	static Error_t plsm_save_int(const char* fileName, int* pTab, char* label, const char* unit,const char* desc);
+	static Error_t plsm_save_int(const char* fileName, int* pTab, const char* label, const char* unit, const char* desc);
 
 
 	/*!

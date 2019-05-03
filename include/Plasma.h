@@ -16,6 +16,7 @@
 #include "PlasmaTypes.h"
 #include "PlasmaInitializer.h"
 #include "archAPI.h"
+#include "maxwell.h"
 
 using namespace std;
 
@@ -39,7 +40,7 @@ public:
 private:
     void copyCells(int);
 
-    double checkGPUArray(double *, double *, std::string, std::string, int);
+    double checkGPUArray(double *, double *);
 
     void virtual emeGPUIterate(int3, int3, double *, double *, double *, double *, double, double, double, int3, int3);
 
@@ -123,7 +124,7 @@ private:
 
     double checkControlPointParticlesOneSort(const char * , GPUCell **, int, int);
 
-    double checkControlPointParticles(int, const char *, int);
+    double checkControlPointParticles(const char *, int);
 
     int memory_monitor(std::string, int);
 

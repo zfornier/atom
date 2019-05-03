@@ -8,9 +8,6 @@
 #ifndef MAXWELL_H_
 #define MAXWELL_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <vector>
 #include <iostream>
 

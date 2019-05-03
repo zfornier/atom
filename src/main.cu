@@ -1,6 +1,6 @@
-#include <stdlib.h>
-#include <getopt.h>
+#include <cstdlib>
 #include <cstring>
+#include <getopt.h>
 
 #include "../include/mpi_shortcut.h"
 #include "../include/Plasma.h"

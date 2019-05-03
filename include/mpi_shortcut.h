@@ -9,7 +9,7 @@
 #define MPI_SHORTCUT_H_
 
 #include <mpi.h>
-#include <stdio.h>
+
 #include "archAPI.h"
 
 

@@ -9,9 +9,6 @@
 #include <thrust/sort.h>
 #include <thrust/copy.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 #include "particle.h"
 #include "compare.h"
 #include "archAPI.h"

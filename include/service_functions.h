@@ -8,9 +8,8 @@
 #ifndef SERVICE_FUNCTIONS_H_
 #define SERVICE_FUNCTIONS_H_
 
-#include <string>
-#include <stdio.h>
 #include <iostream>
+
 #include "archAPI.h"
 #include "particle.h"
 

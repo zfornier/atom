@@ -1,26 +1,11 @@
 #ifndef ATOM_PLASMA_H_
 #define ATOM_PLASMA_H_
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <string>
-#include <errno.h>
-
 #ifdef __CUDACC__
 #include <cuda.h>
 #include <nvToolsExtCuda.h>
 #include <nvToolsExtCudaRt.h>
 #endif
-
-#include <sys/resource.h>
-#include <stdint.h>
-#include <sys/sysinfo.h>
-#include <iostream>
-#include <vector>
 
 #include "mpi_shortcut.h"
 #include "service_functions.h"
@@ -31,8 +16,6 @@
 #include "PlasmaTypes.h"
 #include "PlasmaInitializer.h"
 #include "archAPI.h"
-
-#define FORTRAN_ORDER
 
 using namespace std;
 

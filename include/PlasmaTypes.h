@@ -39,6 +39,7 @@ typedef struct {
     int lst;                     // last step
     int saveStep;                // save every saveStep step
     int startSave;               // start save from startSave step
+    int checkStep;               // check on checkStep step
     const char * checkFile;      // file to check with
 
     ParticleArrays ions, electrons, beam;

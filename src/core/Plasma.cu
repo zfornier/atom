@@ -93,20 +93,6 @@ void Plasma::copyCells(int nt) {
     memory_monitor("afterCopyCells", nt);
 }
 
-double Plasma::checkGPUArray(double *a, double *d_a) {
-    double res;
-    int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
-
-    int err;
-    err = MemoryCopy(this->temp, d_a, sizeof(double) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
-    CHECK_ERROR("MEM COPY", err);
-
-    int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
-    res = CheckArraySilent(a, this->temp, size);
-
-    return res;
-}
-
 void Plasma::emeGPUIterate(int3 s, int3 f, double *E, double *H1, double *H2, double *J, double c1, double c2, double tau, int3 d1, int3 d2) {
     dim3 dimGrid(f.x - s.x + 1, 1, 1), dimBlock(1, f.y - s.y + 1, f.z - s.z + 1);
 
@@ -159,25 +145,12 @@ int Plasma::ElectricFieldTrace(double *E, double *H1, double *H2, double *J, int
     return 0;
 }
 
-int Plasma::checkFields_beforeMagneticStageOne(int nt) {
-    memory_monitor("beforeComputeField_FirstHalfStep", nt);
-
-    return 0;
-}
-
-int Plasma::checkFields_afterMagneticStageOne(int nt) {
-    checkControlPoint(50, nt);
-    memory_monitor("afterComputeField_FirstHalfStep", nt);
-
-    return 0;
-}
-
 void Plasma::ComputeField_FirstHalfStep(int nt) {
-    checkFields_beforeMagneticStageOne(nt);
+    memory_monitor("beforeComputeField_FirstHalfStep", nt);
 
     MagneticStageOne(pd->d_Qx, pd->d_Qy, pd->d_Qz, pd->d_Hx, pd->d_Hy, pd->d_Hz, pd->d_Ex, pd->d_Ey, pd->d_Ez);
 
-    checkFields_afterMagneticStageOne(nt);
+    memory_monitor("afterComputeField_FirstHalfStep", nt);
 
     AssignCellsToArraysGPU();
 }
@@ -210,13 +183,9 @@ void Plasma::ElectricFieldEvaluate(double *locEx, double *locEy, double *locEz, 
     ElectricFieldComponentEvaluateTrace(locEy, locHx, locHz, loc_npJy, 1, c1.z, c1.x, pd->tau);
     ElectricFieldComponentEvaluateTrace(locEz, locHy, locHx, loc_npJz, 2, c1.x, c1.y, pd->tau);
 
-    checkControlPoint(550, nt);
-
     ElectricFieldComponentEvaluatePeriodic(locEx, 0, 1, 0, Nx, 1, Nz, Ny, 2, 0, Nx, 0, Ny + 1, Nz);
     ElectricFieldComponentEvaluatePeriodic(locEy, 1, 0, 0, Ny, 1, Nz, Nx, 2, 0, Nx + 1, 0, Ny, Nz);
     ElectricFieldComponentEvaluatePeriodic(locEz, 2, 0, 1, Ny, 0, Nz, Nx, 1, 0, Nx + 1, 0, Nz, Ny);
-
-    checkControlPoint(600, nt);
 
     memory_monitor("after_ComputeField_SecondHalfStep", nt);
 }
@@ -249,8 +218,6 @@ void Plasma::MagneticFieldStageTwo(double *Hx, double *Hy, double *Hz, int nt, d
     SimpleMagneticFieldTrace(c, Qx, Hx, Nx + 1, Ny, Nz);
     SimpleMagneticFieldTrace(c, Qy, Hy, Nx, Ny + 1, Nz);
     SimpleMagneticFieldTrace(c, Qz, Hz, Nx, Ny, Nz + 1);
-
-    checkControlPoint(500, nt);
 }
 
 int Plasma::PushParticles(int nt) {
@@ -260,8 +227,6 @@ int Plasma::PushParticles(int nt) {
     std::cout << "cell_order" << std::endl;
 
     memory_monitor("after_CellOrder_StepAllCells", nt);
-
-    checkControlPoint(270, nt);
 
     return 0;
 }
@@ -296,7 +261,7 @@ double Plasma::getElectricEnergy() {
             0
     );
 
-    CHECK_ERROR("Launch kernel", cudaStatus);
+    CHECK_ERROR("GPU_getCellEnergy", cudaStatus);
 
     cudaStatus = MemoryCopy(&ee, d_ee, sizeof(double), DEVICE_TO_HOST);
 
@@ -365,7 +330,7 @@ int Plasma::MagneticFieldTrace(double *Q, double *H, double *E1, double *E2, int
             0
     );
 
-    CHECK_ERROR("Launch kernel", cudaStatus);
+    CHECK_ERROR("GPU_emh1", cudaStatus);
 
     return 0;
 }
@@ -394,7 +359,7 @@ int Plasma::SimpleMagneticFieldTrace(Cell &c, double *Q, double *H, int i_end, i
             0
     );
 
-    CHECK_ERROR("Launch kernel", cudaStatus);
+    CHECK_ERROR("GPU_emh2", cudaStatus);
 
     return 0;
 }
@@ -423,7 +388,7 @@ int Plasma::PeriodicBoundaries(double *E, int dir, int start1, int end1, int sta
             0
     );
 
-    CHECK_ERROR("Launch kernel", cudaStatus);
+    CHECK_ERROR("GPU_periodic", cudaStatus);
 
     int one = 1;
     int N1 = N + 1;
@@ -446,7 +411,7 @@ int Plasma::PeriodicBoundaries(double *E, int dir, int start1, int end1, int sta
             0
     );
 
-    CHECK_ERROR("Launch kernel", cudaStatus);
+    CHECK_ERROR("GPU_periodic", cudaStatus);
 
     return 0;
 }
@@ -510,14 +475,11 @@ int Plasma::SetPeriodicCurrentComponent(GPUCell **cells, double *J, int dir, uns
 void Plasma::SetPeriodicCurrents(int nt) {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
-    memory_monitor("before275", nt);
+    memory_monitor("before_SetPeriodicCurrents", nt);
 
-    checkControlPoint(275, nt);
     SetPeriodicCurrentComponent(pd->d_CellArray, pd->d_Jx, 0, Nx, Ny, Nz);
     SetPeriodicCurrentComponent(pd->d_CellArray, pd->d_Jy, 1, Nx, Ny, Nz);
     SetPeriodicCurrentComponent(pd->d_CellArray, pd->d_Jz, 2, Nx, Ny, Nz);
-
-    checkControlPoint(400, nt);
 }
 
 void Plasma::AssignCellsToArraysGPU() {
@@ -583,18 +545,11 @@ void Plasma::readControlPoint(const char * fn, int field_assign,
     if (field_assign == 1) pi->AssignArraysToCells();
 }
 
-void Plasma::checkControlPoint(int num, int nt) {
-    if (pd->checkFile == NULL) return;
-
-    double t_ex, t_ey, t_ez, t_hx, t_hy, t_hz, t_jx, t_jy, t_jz;
-    double t_qx, t_qy, t_qz;
-    int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
-
-    if ((nt != pd->lst) || (num != 600)) {
-        return;
-    }
-
-    if (nt % FORTRAN_NUMBER_OF_SMALL_STEPS != 0) return;
+void Plasma::checkControlPoint(int nt) {
+    double t_ex, t_ey, t_ez,
+           t_hx, t_hy, t_hz,
+           t_jx, t_jy, t_jz,
+           t_qx, t_qy, t_qz;
 
     memory_monitor("checkControlPoint1", nt);
 
@@ -606,76 +561,34 @@ void Plasma::checkControlPoint(int num, int nt) {
 
     memory_monitor("checkControlPoint2", nt);
 
-    int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
-
-    t_ex = CheckArraySilent(pd->Ex, pd->dbgEx, size);
-    t_ey = CheckArraySilent(pd->Ey, pd->dbgEy, size);
-    t_ez = CheckArraySilent(pd->Ez, pd->dbgEz, size);
-    t_hx = CheckArraySilent(pd->Hx, pd->dbgHx, size);
-    t_hy = CheckArraySilent(pd->Hy, pd->dbgHy, size);
-    t_hz = CheckArraySilent(pd->Hz, pd->dbgHz, size);
-    t_jx = CheckArraySilent(pd->Jx, pd->dbgJx, size);
-    t_jy = CheckArraySilent(pd->Jy, pd->dbgJy, size);
-    t_jz = CheckArraySilent(pd->Jz, pd->dbgJz, size);
-
-    memory_monitor("checkControlPoint3", nt);
-
     t_ex = CheckGPUArraySilent(pd->dbgEx, pd->d_Ex);
     t_ey = CheckGPUArraySilent(pd->dbgEy, pd->d_Ey);
     t_ez = CheckGPUArraySilent(pd->dbgEz, pd->d_Ez);
+
     t_hx = CheckGPUArraySilent(pd->dbgHx, pd->d_Hx);
     t_hy = CheckGPUArraySilent(pd->dbgHy, pd->d_Hy);
     t_hz = CheckGPUArraySilent(pd->dbgHz, pd->d_Hz);
+
     t_qx = CheckGPUArraySilent(pd->dbg_Qx, pd->d_Qx);
     t_qy = CheckGPUArraySilent(pd->dbg_Qy, pd->d_Qy);
     t_qz = CheckGPUArraySilent(pd->dbg_Qz, pd->d_Qz);
-
-    if (num >= 500) {
-        char wh[100];
-
-        sprintf(wh, "%d", num);
-
-        t_jx = checkGPUArray(pd->dbgJx, pd->d_Jx);
-        t_jy = checkGPUArray(pd->dbgJy, pd->d_Jy);
-        t_jz = checkGPUArray(pd->dbgJz, pd->d_Jz);
-
-        t_ex = checkGPUArray(pd->dbgEx, pd->d_Ex);
-        t_ey = checkGPUArray(pd->dbgEy, pd->d_Ey);
-        t_ez = checkGPUArray(pd->dbgEz, pd->d_Ez);
-
-    } else {
-
-        t_ex = CheckGPUArraySilent(pd->dbgEx, pd->d_Ex);
-        t_ey = CheckGPUArraySilent(pd->dbgEy, pd->d_Ey);
-        t_ez = CheckGPUArraySilent(pd->dbgEz, pd->d_Ez);
-    }
 
     t_jx = CheckGPUArraySilent(pd->dbgJx, pd->d_Jx);
     t_jy = CheckGPUArraySilent(pd->dbgJy, pd->d_Jy);
     t_jz = CheckGPUArraySilent(pd->dbgJz, pd->d_Jz);
 
-    memory_monitor("checkControlPoint4", nt);
 
-    double t_cmp_jx = checkGPUArray(pd->dbgJx, pd->d_Jx);
-    double t_cmp_jy = checkGPUArray(pd->dbgJy, pd->d_Jy);
-    double t_cmp_jz = checkGPUArray(pd->dbgJz, pd->d_Jz);
-
-#ifdef CONTROL_DIFF_GPU_PRINTS
-    printf("GPU: Ex %15.5e Ey %15.5e Ez %15.5e \n",t_ex,t_ey,t_ez);
-    printf("GPU: Hx %15.5e Hy %15.5e Ez %15.5e \n",t_hx,t_hy,t_hz);
-    printf("GPU: Jx %15.5e Jy %15.5e Jz %15.5e \n",t_jx,t_jy,t_jz);
-    printf("GPU compare : Jx %15.5e Jy %15.5e Jz %15.5e \n",t_cmp_jx,t_cmp_jy,t_cmp_jz);
-#endif
-
-    memory_monitor("checkControlPoint5", nt);
+    memory_monitor("checkControlPoint3", nt);
 
     double cp = checkControlPointParticles(pd->checkFile, nt);
+
     cout << "STEP: " <<  nt << endl;
+
     pd->f_prec_report = fopen("control_points.dat", "at");
 
     fprintf(pd->f_prec_report,
-            " nt %5d\n num %6d\n Ex %15.5e\n Ey %15.5e\n Ez %15.5e\n Hx %15.5e\n Hy %15.5e\n Hz %15.5e\n Jx %15.5e\n Jy %15.5e\n Jz %15.5e\n Qx %15.5e\n Qy %15.5e\n Qz %15.5e\n particles %15.5e\n",
-            nt, num,
+            " nt %5d\n Ex %15.5e\n Ey %15.5e\n Ez %15.5e\n Hx %15.5e\n Hy %15.5e\n Hz %15.5e\n Jx %15.5e\n Jy %15.5e\n Jz %15.5e\n Qx %15.5e\n Qy %15.5e\n Qz %15.5e\n particles %15.5e\n",
+            nt,
             t_ex, t_ey, t_ez,
             t_hx, t_hy, t_hz,
             t_jx, t_jy, t_jz,
@@ -685,7 +598,7 @@ void Plasma::checkControlPoint(int num, int nt) {
 
     fclose(pd->f_prec_report);
 
-    memory_monitor("checkControlPoint6", nt);
+    memory_monitor("checkControlPoint4", nt);
 }
 
 double Plasma::CheckGPUArraySilent(double *a, double *d_a) {
@@ -724,7 +637,7 @@ int Plasma::SetCurrentsInCellsToZero() {
     dim3 dimGrid((unsigned int)(Nx + 2), (unsigned int)(Ny + 2), (unsigned int)(Nz + 2)), dimBlockExt(CellExtent, CellExtent, CellExtent);
 
     void *args[] = {(void *) &pd->d_CellArray, 0};
-    cudaLaunchKernel(
+    int err = cudaLaunchKernel(
             (const void *) GPU_SetAllCurrentsToZero, // pointer to kernel func.
             dimGrid,                                 // grid
             dimBlockExt,                             // block
@@ -733,11 +646,7 @@ int Plasma::SetCurrentsInCellsToZero() {
             0
     );
 
-    return 0;
-}
-
-int Plasma::StepAllCells_fore_diagnostic(int nt) {
-    memory_monitor("CellOrder_StepAllCells3", nt);
+    CHECK_ERROR("GPU_SetAllCurrentsToZero", err);
 
     return 0;
 }
@@ -786,10 +695,6 @@ int Plasma::StepAllCells(int nt) {
     std::cout << "end step-12" << std::endl;
 
     return 0;
-}
-
-void Plasma::StepAllCells_post_diagnostic(int nt) {
-    memory_monitor("CellOrder_StepAllCells4", nt);
 }
 
 int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
@@ -845,7 +750,6 @@ int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) 
             16000,
             0
     );
-
     CHECK_ERROR("Launch kernel", err);
 
     err = cudaDeviceSynchronize();
@@ -855,15 +759,6 @@ int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) 
     CHECK_ERROR("MEM COPY", err);
 
     return err;
-}
-
-int Plasma::inter_stage_diagnostic(int *stage, int nt) {
-    if (stage[0] == TOO_MANY_PARTICLES) {
-        printf("too many particles flying to (%d,%d,%d) from (%d,%d,%d) \n", stage[1], stage[2], stage[3], stage[4], stage[5], stage[6]);
-        exit(0);
-    }
-
-    return 0;
 }
 
 int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1) {
@@ -902,7 +797,10 @@ int Plasma::reorder_particles(int nt) {
 
     MakeParticleList(nt, stage, &d_stage, &d_stage1);
 
-    inter_stage_diagnostic(stage, nt);
+    if (stage[0] == TOO_MANY_PARTICLES) {
+        printf("too many particles flying to (%d,%d,%d) from (%d,%d,%d) \n", stage[1], stage[2], stage[3], stage[4], stage[5], stage[6]);
+        exit(0);
+    }
 
     err = reallyPassParticlesToAnotherCells(nt, stage1, d_stage1);
 
@@ -910,12 +808,12 @@ int Plasma::reorder_particles(int nt) {
 }
 
 void Plasma::Push(int nt) {
-    StepAllCells_fore_diagnostic(nt);
+    memory_monitor("CellOrder_StepAllCells3", nt);
 
     StepAllCells(nt);
     std::cout << "after StepAllCell" << std::endl;
 
-    StepAllCells_post_diagnostic(nt);
+    memory_monitor("CellOrder_StepAllCells4", nt);
 }
 
 int Plasma::SetCurrentsToZero() {
@@ -1173,6 +1071,16 @@ void Plasma::Step(int step) {
     ComputeField_SecondHalfStep(step);
     cout << "field computed-2" << endl;
 
+    // save file
+    if ((pd->startSave <= step) && pd->saveStep > 0 && ((step - pd->startSave) % pd->saveStep == 0)) {
+        writeDataToFile(step);
+    }
+
+    // check data
+    if (pd->checkFile != NULL && pd->checkStep == step) {
+        checkControlPoint(step);
+    }
+
     sumMPI((Nx + 2) * (Ny + 2) * (Nz + 2), pd->d_Jx, pd->d_Jy, pd->d_Jz);
 
     Diagnose(step);
@@ -1193,11 +1101,6 @@ int Plasma::Compute() {
         memory_monitor("before step", step);
 
         Step(step);
-
-        // save file
-        if ((pd->startSave <= step) && pd->saveStep > 0 && ((step - pd->startSave) % pd->saveStep == 0)) {
-            writeDataToFile(step);
-        }
 
         memory_monitor("after step", step);
 

@@ -40,17 +40,13 @@ public:
 private:
     void copyCells(int);
 
-    double checkGPUArray(double *, double *);
+    double CheckGPUArraySilent(double *, double *);
 
     void virtual emeGPUIterate(int3, int3, double *, double *, double *, double *, double, double, double, int3, int3);
 
     void GetElectricFieldStartsDirs(int3 *, int3 *, int3 *, int);
 
     int virtual ElectricFieldTrace(double *, double *, double *, double *, int, double, double, double);
-
-    int checkFields_beforeMagneticStageOne(int);
-
-    int checkFields_afterMagneticStageOne(int);
 
     void ComputeField_FirstHalfStep(int);
 
@@ -92,25 +88,17 @@ private:
 
     void readControlPoint(const char *, int, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *, double *);
 
-    void checkControlPoint(int, int);
-
-    double CheckGPUArraySilent(double *, double *);
+    void checkControlPoint(int);
 
     int SetCurrentArraysToZero();
 
     int SetCurrentsInCellsToZero();
 
-    int StepAllCells_fore_diagnostic(int);
-
     int StepAllCells(int);
-
-    void StepAllCells_post_diagnostic(int);
 
     int WriteCurrentsFromCellsToArrays(int);
 
     int MakeParticleList(int, int *, int **, int **);
-
-    int inter_stage_diagnostic(int *, int);
 
     int reallyPassParticlesToAnotherCells(int, int *, int *);
 

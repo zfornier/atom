@@ -122,6 +122,7 @@ PlasmaConfig initConfig(std::ifstream &is) {
         conf.lst = properties.stringToInt(properties.getProperty("lst"));
         conf.saveStep = properties.stringToInt(properties.getProperty("saveStep"));
         conf.startSave = properties.stringToInt(properties.getProperty("startSave"));
+        conf.checkStep = properties.stringToInt(properties.getProperty("checkStep"));
         std::string file = properties.getProperty("checkFile");
         if (file.empty()) {
             conf.checkFile = NULL;

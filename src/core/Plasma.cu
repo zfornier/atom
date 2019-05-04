@@ -6,7 +6,6 @@
 
 Plasma::Plasma(PlasmaConfig *p) {
     this->pd = p;
-    this->temp = new double[(pd->nx + 2) * (pd->ny + 2) * (pd->nz + 2)];
 
     dataFileStartPattern = "data0";
     dataFileEndPattern = ".nc";
@@ -14,15 +13,19 @@ Plasma::Plasma(PlasmaConfig *p) {
 
 Plasma::~Plasma() {
     delete[] temp;
+
     delete[] pd->Ex;
     delete[] pd->Ey;
     delete[] pd->Ez;
+
     delete[] pd->Hx;
     delete[] pd->Hy;
     delete[] pd->Hz;
+
     delete[] pd->Jx;
     delete[] pd->Jy;
     delete[] pd->Jz;
+
     delete[] pd->Rho;
 
     delete[] pd->npJx;
@@ -50,47 +53,38 @@ Plasma::~Plasma() {
         delete[] pd->dbg_Qy;
         delete[] pd->dbg_Qz;
     }
+    memory_monitor("Plasma destructor");
 }
 
 void Plasma::copyCells(int nt) {
-    static int first = 1;
-    size_t m_free, m_total;
     int size = (int)(*pd->AllCells).size();
-    struct sysinfo info;
 
-    if (first == 1) {
-        pd->cp = (GPUCell **) malloc(size * sizeof(GPUCell *));
-    }
+//    if (first == 1) {
+//        pd->cp = (GPUCell **) malloc(size * sizeof(GPUCell *));
+//    }
 
-    unsigned long m1, m2, delta, accum = 0;
-    memory_monitor("beforeCopyCells", nt);
+    memory_monitor("beforeCopyCells");
 
     for (int i = 0; i < size; i++) {
-        int err = cudaMemGetInfo(&m_free, &m_total);
-        CHECK_ERROR("MEM GET INFO", err);
 
-        sysinfo(&info);
-        m1 = info.freeram;
+//        sysinfo(&info);
+//        m1 = info.freeram;
         GPUCell c, *d_c, *z0;
         z0 = pd->h_CellArray[i];
-        if (first == 1) {
-            d_c = c.allocateCopyCellFromDevice();
-            pd->cp[i] = d_c;
-        } else {
+//        if (first == 1) {
+//            d_c = c.allocateCopyCellFromDevice();
+//            pd->cp[i] = d_c;
+//        } else {
             d_c = pd->cp[i];
-        }
+//        }
         c.copyCellFromDevice(z0, d_c);
-        m2 = info.freeram;
+//        m2 = info.freeram;
 
-        delta = m1 - m2;
-        accum += delta;
+//        delta = m1 - m2;
+//        accum += delta;
     }
 
-    if (first == 1) {
-        first = 0;
-    }
-
-    memory_monitor("afterCopyCells", nt);
+    memory_monitor("afterCopyCells");
 }
 
 void Plasma::emeGPUIterate(int3 s, int3 f, double *E, double *H1, double *H2, double *J, double c1, double c2, double tau, int3 d1, int3 d2) {
@@ -187,7 +181,7 @@ void Plasma::ElectricFieldEvaluate(double *locEx, double *locEy, double *locEz, 
     ElectricFieldComponentEvaluatePeriodic(locEy, 1, 0, 0, Ny, 1, Nz, Nx, 2, 0, Nx + 1, 0, Ny, Nz);
     ElectricFieldComponentEvaluatePeriodic(locEz, 2, 0, 1, Ny, 0, Nz, Nx, 1, 0, Nx + 1, 0, Nz, Ny);
 
-    memory_monitor("after_ComputeField_SecondHalfStep", nt);
+    memory_monitor("after_ComputeField_SecondHalfStep");
 }
 
 double3 Plasma::getMagneticFieldTimeMeshFactors() {
@@ -221,12 +215,12 @@ void Plasma::MagneticFieldStageTwo(double *Hx, double *Hy, double *Hz, int nt, d
 }
 
 int Plasma::PushParticles(int nt) {
-    memory_monitor("before_CellOrder_StepAllCells", nt);
+    memory_monitor("before_CellOrder_StepAllCells");
 
     CellOrder_StepAllCells(nt);
     std::cout << "cell_order" << std::endl;
 
-    memory_monitor("after_CellOrder_StepAllCells", nt);
+    memory_monitor("after_CellOrder_StepAllCells");
 
     return 0;
 }
@@ -475,7 +469,7 @@ int Plasma::SetPeriodicCurrentComponent(GPUCell **cells, double *J, int dir, uns
 void Plasma::SetPeriodicCurrents(int nt) {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
-    memory_monitor("before_SetPeriodicCurrents", nt);
+    memory_monitor("before_SetPeriodicCurrents");
 
     SetPeriodicCurrentComponent(pd->d_CellArray, pd->d_Jx, 0, Nx, Ny, Nz);
     SetPeriodicCurrentComponent(pd->d_CellArray, pd->d_Jy, 1, Nx, Ny, Nz);
@@ -524,8 +518,6 @@ void Plasma::readControlPoint(const char * fn, int field_assign,
                               double *jx, double *jy, double *jz,
                               double *qx, double *qy, double *qz
 ) {
-    std::cout << "Control point " << " | " <<  "Values to check with are read from file: " << fn << std::endl;
-
     readVar(fn, "Ex", (void *) ex);
     readVar(fn, "Ey", (void *) ey);
     readVar(fn, "Ez", (void *) ez);
@@ -551,7 +543,9 @@ void Plasma::checkControlPoint(int nt) {
            t_jx, t_jy, t_jz,
            t_qx, t_qy, t_qz;
 
-    memory_monitor("checkControlPoint1", nt);
+    std::cout << "Check control point " << " | " <<  "Values to check with are read from file: " << pd->checkFile << std::endl;
+
+    memory_monitor("checkControlPoint1");
 
     readControlPoint(pd->checkFile, 0,
                      pd->dbgEx, pd->dbgEy, pd->dbgEz,
@@ -559,7 +553,7 @@ void Plasma::checkControlPoint(int nt) {
                      pd->dbgJx, pd->dbgJy, pd->dbgJz,
                      pd->dbg_Qx, pd->dbg_Qy, pd->dbg_Qz);
 
-    memory_monitor("checkControlPoint2", nt);
+    memory_monitor("checkControlPoint2");
 
     t_ex = CheckGPUArraySilent(pd->dbgEx, pd->d_Ex);
     t_ey = CheckGPUArraySilent(pd->dbgEy, pd->d_Ey);
@@ -578,7 +572,7 @@ void Plasma::checkControlPoint(int nt) {
     t_jz = CheckGPUArraySilent(pd->dbgJz, pd->d_Jz);
 
 
-    memory_monitor("checkControlPoint3", nt);
+    memory_monitor("checkControlPoint3");
 
     double cp = checkControlPointParticles(pd->checkFile, nt);
 
@@ -598,7 +592,7 @@ void Plasma::checkControlPoint(int nt) {
 
     fclose(pd->f_prec_report);
 
-    memory_monitor("checkControlPoint4", nt);
+    memory_monitor("checkControlPoint4");
 }
 
 double Plasma::CheckGPUArraySilent(double *a, double *d_a) {
@@ -720,7 +714,7 @@ int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
             0
     );
 
-    memory_monitor("CellOrder_StepAllCells5", nt);
+    memory_monitor("GPU_WriteAllCurrents");
 
     return 0;
 }
@@ -787,7 +781,7 @@ int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1
     err = MemoryCopy(stage1, d_stage1, sizeof(int) * (Nx + 2) * (Ny + 2) * (Nz + 2), DEVICE_TO_HOST);
     CHECK_ERROR("MEM COPY", err);
 
-    memory_monitor("CellOrder_StepAllCells7", nt);
+    memory_monitor("after reallyPassParticlesToAnotherCells");
 
     return err;
 }
@@ -808,12 +802,12 @@ int Plasma::reorder_particles(int nt) {
 }
 
 void Plasma::Push(int nt) {
-    memory_monitor("CellOrder_StepAllCells3", nt);
+    memory_monitor("CellOrder_StepAllCells1");
 
     StepAllCells(nt);
     std::cout << "after StepAllCell" << std::endl;
 
-    memory_monitor("CellOrder_StepAllCells4", nt);
+    memory_monitor("CellOrder_StepAllCells2");
 }
 
 int Plasma::SetCurrentsToZero() {
@@ -841,7 +835,7 @@ double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell 
     int size;
     double q_m, m;
 
-    memory_monitor("checkControlPointParticlesOneSort", nt);
+    memory_monitor("checkControlPointParticlesOneSort1");
 
     Cell c0 = (*pd->AllCells)[0];
 
@@ -857,7 +851,7 @@ double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell 
 
     readBinaryParticleArraysOneSort(filename, pd->dbg_x, pd->dbg_y, pd->dbg_z, pd->dbg_px, pd->dbg_py, pd->dbg_pz, pd->total_particles, nt, sort);
 
-    memory_monitor("checkControlPointParticlesOneSort2", nt);
+    memory_monitor("checkControlPointParticlesOneSort3");
 
     size = (*pd->AllCells).size();
 
@@ -867,7 +861,7 @@ double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell 
         t += c.checkCellParticles(pd->dbg_x, pd->dbg_y, pd->dbg_z, pd->dbg_px, pd->dbg_py, pd->dbg_pz, q_m, m);
     }
 
-    memory_monitor("checkControlPointParticlesOneSort3", nt);
+    memory_monitor("checkControlPointParticlesOneSort4");
 
     delete[] pd->dbg_x;
     delete[] pd->dbg_y;
@@ -877,7 +871,7 @@ double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell 
     delete[] pd->dbg_py;
     delete[] pd->dbg_pz;
 
-    memory_monitor("checkControlPointParticlesOneSort4", nt);
+    memory_monitor("checkControlPointParticlesOneSort5");
 
     return t / size;
 }
@@ -887,36 +881,21 @@ double Plasma::checkControlPointParticles(const char * filename, int nt) {
 
     copyCells(nt);
 
-    memory_monitor("checkControlPointParticles", nt);
+    memory_monitor("checkControlPointParticles");
 
     ti = checkControlPointParticlesOneSort(filename, pd->cp, nt, ION);
 
-    memory_monitor("checkControlPointParticles1", nt);
+    memory_monitor("checkControlPointParticles1");
 
     te = checkControlPointParticlesOneSort(filename, pd->cp, nt, PLASMA_ELECTRON);
 
-    memory_monitor("checkControlPointParticles1.5", nt);
+    memory_monitor("checkControlPointParticles1.5");
 
     tb = checkControlPointParticlesOneSort(filename, pd->cp, nt, BEAM_ELECTRON);
 
-    memory_monitor("checkControlPointParticles2", nt);
+    memory_monitor("checkControlPointParticles2");
 
     return (te + ti + tb) / 3.0;
-}
-
-int Plasma::memory_monitor(std::string legend, int nt) {
-#ifdef DEBUG
-    size_t m_free, m_total;
-    struct sysinfo info;
-
-    int err = cudaMemGetInfo(&m_free, &m_total);
-    CHECK_ERROR("cudaMemGetInfo", err);
-
-    sysinfo(&info);
-    printf("step %10d %50s GPU memory total %10d MB | free %10d MB | free CPU memory %10u MB\n", nt, legend.c_str(), (int) (m_total / 1024 / 1024), (int) (m_free / 1024 / 1024), (int) (info.freeram / 1024 / 1024));
-#endif
-
-    return 0;
 }
 
 /**
@@ -1088,9 +1067,6 @@ void Plasma::Step(int step) {
 
 int Plasma::Compute() {
     cout << "----------------------------------------------------------- " << endl;
-    size_t m_free, m_total;
-
-    cudaMemGetInfo(&m_free, &m_total);
 
     if (pd->st <= 0 || pd->lst <= 0) {
         cout << "Invalid computation parameters values!" << endl;
@@ -1114,5 +1090,6 @@ int Plasma::Compute() {
 
 void Plasma::Initialize() {
     pi = new PlasmaInitializer(pd);
+    this->temp = new double[(pd->nx + 2) * (pd->ny + 2) * (pd->nz + 2)];
     pi->Initialize();
 }

@@ -89,11 +89,6 @@ void Cell::removeParticleFromSurfaceDevice(int n, Particle *p, int *number_of_pa
     *p = readParticleFromSurfaceDevice(n);
 
     i = *number_of_particles - 1;
-    if (this->i == 1 && this->l == 0 && this->k == 0) {
-#ifdef STRAY_DEBUG_PRINTS
-        printf("deleteLAST FN %10d n %d i %d num %d \n",p->fortran_number,n,i,*number_of_particles);
-#endif
-    }
 
     if (n < i) {
 
@@ -105,12 +100,6 @@ void Cell::removeParticleFromSurfaceDevice(int n, Particle *p, int *number_of_pa
     }
 
     (*number_of_particles)--;
-
-    if (this->i == 1 && this->l == 0 && this->k == 0) {
-#ifdef STRAY_DEBUG_PRINTS
-        printf("deleteLAST FN %10d n %d i %d num %d \n",p->fortran_number,n,i,*number_of_particles);
-#endif
-    }
 }
 
 __host__ __device__

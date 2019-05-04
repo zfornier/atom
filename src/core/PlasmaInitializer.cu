@@ -73,7 +73,7 @@ void PlasmaInitializer::InitializeCPU() {
 void PlasmaInitializer::Initialize() {
     InitializeCPU();
 
-    copyCellsWithParticlesToGPU();
+    allocMemoryForCopyCells();
 
     InitializeGPU();
 }
@@ -84,8 +84,6 @@ void PlasmaInitializer::InitGPUParticles() {
     GPUCell *n;
 
     size = (int)(*p->AllCells).size();
-    size_t m_free, m_total;
-
     h_ctrl = new GPUCell;
     n = new GPUCell;
 
@@ -104,29 +102,9 @@ void PlasmaInitializer::InitGPUParticles() {
 
         d_c = c.copyCellToDevice();
 
-        err = cudaMemGetInfo(&m_free, &m_total);
-        CHECK_ERROR("CUDA MEM GET INFO", err);
-
-#ifdef COPY_CELL_PRINTS
-        double mfree, mtot;
-        mtot  = m_total;
-        mfree = m_free;
-        printf("cell %10d Device cell array allocated error %d %s memory: free %10.2f total %10.2f\n",i,err,getErrorString(err),mfree/1024/1024/1024,mtot/1024/1024/1024);
-
-        dbgPrintGPUParticleAttribute(d_c,50,1," CO2DEV " );
-        std::cout << "COPY----------------------------------" << std::endl;
-#endif
-
         p->h_CellArray[i] = d_c;
         err = MemoryCopy(h_ctrl, d_c, sizeof(Cell), DEVICE_TO_HOST);
         CHECK_ERROR("MEM COPY", err);
-
-#ifdef InitGPUParticles_PRINTS
-        dbgPrintGPUParticleAttribute(d_c,50,1," CPY " );
-
-        printf("i %d l %d k n %d %d %e src %e num %d\n",h_ctrl->i,h_ctrl->l,h_ctrl->k,i, c.ParticleArrayRead(0,7),c.number_of_particles);
-        printf("GPU cell %d ended ******************************************************\n",i);
-#endif
     }
 
     err = MemoryCopy(p->d_CellArray, p->h_CellArray, size * sizeof(Cell * ), HOST_TO_DEVICE);
@@ -141,12 +119,15 @@ void PlasmaInitializer::Alloc() {
     p->Ex = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->Ey = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->Ez = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+
     p->Hx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->Hy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->Hz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+
     p->Jx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->Jy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->Jz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+
     p->Rho = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
     p->npJx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
@@ -208,9 +189,6 @@ void PlasmaInitializer::InitCells() {
                 GPUCell *c = new GPUCell(i, l, k, Lx, Ly, Lz, Nx, Ny, Nz, p->tau);
                 c->Init();
                 (*p->AllCells).push_back(*c);
-#ifdef INIT_CELLS_DEBUG_PRINT
-                printf("%5d %5d %5d size %d \n",i,l,k,(*p->AllCells).size());
-#endif
             }
         }
     }
@@ -276,10 +254,8 @@ int PlasmaInitializer::initControlPointFile() {
     return 0;
 }
 
-int PlasmaInitializer::copyCellsWithParticlesToGPU() {
+int PlasmaInitializer::allocMemoryForCopyCells() {
     int Nx = p->nx, Ny = p->ny, Nz = p->nz;
-
-    Cell c000 = (*p->AllCells)[0];
 
     int size = (Nx + 2) * (Ny + 2) * (Nz + 2);
 

@@ -498,9 +498,6 @@ void periodicCurrentElement(Cell *c, int i, int k, double *E, int dir, int dirE,
     int n_Nm2 = c->getGlobalBoundaryCellNumber(i, k, dir, N - 2);
     int n0 = c->getGlobalBoundaryCellNumber(i, k, dir, 0);
 
-#ifdef PERIODIC_CURRENT_PRINTS
-    printf("%e %e \n",E[n0],E[n_Nm2]);
-#endif
     E[n0] += E[n_Nm2];
     E[n_Nm2] = E[n0];
 }

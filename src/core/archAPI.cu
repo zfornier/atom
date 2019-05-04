@@ -57,3 +57,30 @@ const char *getErrorString(int err) {
     return "";
 }
 #endif
+
+#ifdef __CUDACC__
+int memory_monitor(std::string legend) {
+#ifdef DEBUG
+    size_t m_free, m_total;
+    struct sysinfo info;
+
+    int err = cudaMemGetInfo(&m_free, &m_total);
+    CHECK_ERROR("cudaMemGetInfo", err);
+
+    sysinfo(&info);
+    printf("%40s | GPU memory: total %8d MB | free %8d MB | CPU memory: total %8u MB | free %8u MB | buffer %8u MB\n",
+           legend.c_str(),
+           (int) (m_total / 1024 / 1024),
+           (int) (m_free / 1024 / 1024),
+           (int) (info.totalram / 1024 / 1024),
+           (int) (info.freeram / 1024 / 1024),
+           (int) (info.bufferram / 1024 / 1024));
+#endif
+
+    return 0;
+}
+#else
+int memory_monitor(std::string legend) {
+    return 0;
+}
+#endif

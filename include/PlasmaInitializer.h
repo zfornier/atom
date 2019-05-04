@@ -44,7 +44,7 @@ private:
 
     int initControlPointFile();
 
-    int copyCellsWithParticlesToGPU();
+    int allocMemoryForCopyCells();
 
 };
 

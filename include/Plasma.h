@@ -114,8 +114,6 @@ private:
 
     double checkControlPointParticles(const char *, int);
 
-    int memory_monitor(std::string, int);
-
     void writeDataToFile(int);
 
 };

@@ -1,6 +1,12 @@
 #ifndef ARCHAPI_H_
 #define ARCHAPI_H_
 
+#include <string>
+#include <iostream>
+
+#include <sys/sysinfo.h>
+#include <stdio.h>
+
 #define HOST_TO_DEVICE   -131313
 #define HOST_TO_HOST     -131314
 #define DEVICE_TO_HOST   -131315
@@ -42,5 +48,7 @@ int MemoryCopy(void* dst,void *src,size_t size,int dir);
 int MemoryAllocate(void** dst,size_t size);
 
 int getLastError();
+
+int memory_monitor(std::string);
 
 #endif /* ARCHAPI_H_ */

@@ -140,11 +140,11 @@ int Plasma::ElectricFieldTrace(double *E, double *H1, double *H2, double *J, int
 }
 
 void Plasma::ComputeField_FirstHalfStep(int nt) {
-    memory_monitor("beforeComputeField_FirstHalfStep", nt);
+    memory_monitor("beforeComputeField_FirstHalfStep");
 
     MagneticStageOne(pd->d_Qx, pd->d_Qy, pd->d_Qz, pd->d_Hx, pd->d_Hy, pd->d_Hz, pd->d_Ex, pd->d_Ey, pd->d_Ez);
 
-    memory_monitor("afterComputeField_FirstHalfStep", nt);
+    memory_monitor("afterComputeField_FirstHalfStep");
 
     AssignCellsToArraysGPU();
 }

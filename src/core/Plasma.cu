@@ -1074,11 +1074,11 @@ int Plasma::Compute() {
     }
 
     for (int step = pd->st; step <= pd->lst; step++) {
-        memory_monitor("before step", step);
+        memory_monitor("before step");
 
         Step(step);
 
-        memory_monitor("after step", step);
+        memory_monitor("after step");
 
         cout << "step " << step << " ===================" << endl;
     }

@@ -20,47 +20,29 @@ typedef struct ParticleArrays {
     int total;
 } ParticleArrays;
 
-void AllocateBinaryParticlesArrays(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons);
+typedef struct ParticlesConfig {
+    ParticleArrays *ions, *electrons, *beam;
+    double tempX, tempY, tempZ;
+    double beamVelDisp, beamImp, beamPlasmaDensityRat, plsmDensity;
+    int lp, meh;
+    double lx, ly, lz;
+    double beam_lx, beam_ly, beam_lz;
+    int nx, ny, nz;
+    int beamPlasma;
+} ParticlesConfig;
+
+void AllocateBinaryParticlesArrays(ParticleArrays *, ParticleArrays *, ParticleArrays *);
 
 double rnd_gaussian(double, double, int);
 
-int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons, double ni, double rbd, int lp);
+int getMassCharge(ParticleArrays *, ParticleArrays *, ParticleArrays *, double, double, int);
 
-int InitUniformMaxwellianParticles(int beamf, int jmb,
-                                   double tex0, double tey0, double tez0,
-                                   double beam_lx, double beam_ly, double beam_lz,
-                                   int *jmb_real,
-                                   double lx, double ly, double lz,
-                                   int meh, double Tb, double rimp, double rbd,
-                                   double *xi, double *yi, double *zi, double *ui, double *vi, double *wi,
-                                   double *xb, double *yb, double *zb, double *ub, double *vb, double *wb,
-                                   double *xf, double *yf, double *zf, double *uf, double *vf, double *wf
-);
+int InitUniformMaxwellianParticles(ParticlesConfig *, int, int *);
 
-int getUniformMaxwellianParticles(std::vector <Particle> &ion_vp,
-                                  std::vector <Particle> &el_vp,
-                                  std::vector <Particle> &beam_vp,
-                                  ParticleArrays &,ParticleArrays &,ParticleArrays &,
-                                  double tex0, double tey0, double tez0,
-                                  double Tb, double rimp, double rbd,
-                                  double ni, int lp, int meh,
-                                  double lx, double ly, double lz,
-                                  int nx, int ny, int nz);
+int getUniformMaxwellianParticles(std::vector <Particle> &, std::vector <Particle> &, std::vector <Particle> &, ParticlesConfig *);
 
-int convertParticleArraysToSTLvector(
-        double *dbg_x,
-        double *dbg_y,
-        double *dbg_z,
-        double *dbg_px,
-        double *dbg_py,
-        double *dbg_pz,
-        double q_m,
-        double m,
-        int total_particles,
-        particle_sorts sort,
-        std::vector <Particle> &vp
-);
+int convertParticleArraysToSTLvector(ParticleArrays *, particle_sorts sort, std::vector <Particle> &vp);
 
-int AllocateBinaryParticleArraysOneSort(double **dbg_x, double **dbg_y, double **dbg_z, double **dbg_px, double **dbg_py, double **dbg_pz, double **m, int total_particles);
+int AllocateBinaryParticleArraysOneSort(double **, double **, double **, double **, double **, double **, double **, int);
 
 #endif /* INIT_H_ */

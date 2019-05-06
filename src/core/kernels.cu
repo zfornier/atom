@@ -100,7 +100,7 @@ __global__ void GPU_WriteControlSystem(Cell **cells) {
 //            E. 4th to write arriving particles
 
 
-__global__ void GPU_MakeDepartureLists(GPUCell **cells, int nt, int *d_stage) {
+__global__ void GPU_MakeDepartureLists(GPUCell **cells, int *d_stage) {
     unsigned int nx = blockIdx.x;
     unsigned int ny = blockIdx.y;
     unsigned int nz = blockIdx.z;
@@ -162,7 +162,7 @@ __global__ void GPU_MakeDepartureLists(GPUCell **cells, int nt, int *d_stage) {
     }
 }
 
-__global__ void GPU_ArrangeFlights(GPUCell **cells, int nt, int *d_stage) {
+__global__ void GPU_ArrangeFlights(GPUCell **cells, int *d_stage) {
     unsigned int nx = blockIdx.x;
     unsigned int ny = blockIdx.y;
     unsigned int nz = blockIdx.z;

@@ -53,10 +53,9 @@ Plasma::~Plasma() {
         delete[] pd->dbg_Qy;
         delete[] pd->dbg_Qz;
     }
-    memory_monitor("Plasma destructor");
 }
 
-void Plasma::copyCells(int nt) {
+void Plasma::copyCells() {
     int size = (int)(*pd->AllCells).size();
 
 //    if (first == 1) {
@@ -139,7 +138,7 @@ int Plasma::ElectricFieldTrace(double *E, double *H1, double *H2, double *J, int
     return 0;
 }
 
-void Plasma::ComputeField_FirstHalfStep(int nt) {
+void Plasma::ComputeField_FirstHalfStep() {
     memory_monitor("beforeComputeField_FirstHalfStep");
 
     MagneticStageOne(pd->d_Qx, pd->d_Qy, pd->d_Qz, pd->d_Hx, pd->d_Hy, pd->d_Hz, pd->d_Ex, pd->d_Ey, pd->d_Ez);
@@ -149,10 +148,10 @@ void Plasma::ComputeField_FirstHalfStep(int nt) {
     AssignCellsToArraysGPU();
 }
 
-void Plasma::ComputeField_SecondHalfStep(int nt) {
-    SetPeriodicCurrents(nt);
-    MagneticFieldStageTwo(pd->d_Hx, pd->d_Hy, pd->d_Hz, nt, pd->d_Qx, pd->d_Qy, pd->d_Qz);
-    ElectricFieldEvaluate(pd->d_Ex, pd->d_Ey, pd->d_Ez, nt, pd->d_Hx, pd->d_Hy, pd->d_Hz, pd->d_Jx, pd->d_Jy, pd->d_Jz);
+void Plasma::ComputeField_SecondHalfStep() {
+    SetPeriodicCurrents();
+    MagneticFieldStageTwo(pd->d_Hx, pd->d_Hy, pd->d_Hz, pd->d_Qx, pd->d_Qy, pd->d_Qz);
+    ElectricFieldEvaluate(pd->d_Ex, pd->d_Ey, pd->d_Ez, pd->d_Hx, pd->d_Hy, pd->d_Hz, pd->d_Jx, pd->d_Jy, pd->d_Jz);
 }
 
 void Plasma::ElectricFieldComponentEvaluateTrace(double *E, double *H1, double *H2, double *J, int dir, double c1, double c2, double tau) {
@@ -169,7 +168,7 @@ void Plasma::ElectricFieldComponentEvaluatePeriodic(double *E, int dir, int dir_
     }
 }
 
-void Plasma::ElectricFieldEvaluate(double *locEx, double *locEy, double *locEz, int nt, double *locHx, double *locHy, double *locHz, double *loc_npJx, double *loc_npJy, double *loc_npJz) {
+void Plasma::ElectricFieldEvaluate(double *locEx, double *locEy, double *locEz, double *locHx, double *locHy, double *locHz, double *loc_npJx, double *loc_npJy, double *loc_npJz) {
     double3 c1 = getMagneticFieldTimeMeshFactors();
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
@@ -205,7 +204,7 @@ void Plasma::MagneticStageOne(double *Qx, double *Qy, double *Qz, double *Hx, do
 
 }
 
-void Plasma::MagneticFieldStageTwo(double *Hx, double *Hy, double *Hz, int nt, double *Qx, double *Qy, double *Qz) {
+void Plasma::MagneticFieldStageTwo(double *Hx, double *Hy, double *Hz, double *Qx, double *Qy, double *Qz) {
     Cell c = (*pd->AllCells)[0];
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
@@ -214,10 +213,10 @@ void Plasma::MagneticFieldStageTwo(double *Hx, double *Hy, double *Hz, int nt, d
     SimpleMagneticFieldTrace(c, Qz, Hz, Nx, Ny, Nz + 1);
 }
 
-int Plasma::PushParticles(int nt) {
+int Plasma::PushParticles() {
     memory_monitor("before_CellOrder_StepAllCells");
 
-    CellOrder_StepAllCells(nt);
+    CellOrder_StepAllCells();
     std::cout << "cell_order" << std::endl;
 
     memory_monitor("after_CellOrder_StepAllCells");
@@ -466,7 +465,7 @@ int Plasma::SetPeriodicCurrentComponent(GPUCell **cells, double *J, int dir, uns
     return 0;
 }
 
-void Plasma::SetPeriodicCurrents(int nt) {
+void Plasma::SetPeriodicCurrents() {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
     memory_monitor("before_SetPeriodicCurrents");
@@ -645,7 +644,7 @@ int Plasma::SetCurrentsInCellsToZero() {
     return 0;
 }
 
-int Plasma::StepAllCells(int nt) {
+int Plasma::StepAllCells() {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
     dim3 dimGrid((unsigned int)(Nx + 2), (unsigned int)(Ny + 2), (unsigned int)(Nz + 2)), dimBlock(512, 1, 1);
 
@@ -666,7 +665,7 @@ int Plasma::StepAllCells(int nt) {
     );
     CHECK_ERROR("GPU_StepAllCells", err);
 
-    void *args1[] = {(void *) &pd->d_CellArray, &nt, 0};
+    void *args1[] = {(void *) &pd->d_CellArray, 0};
     err = cudaFuncSetCacheConfig((const void *) GPU_CurrentsAllCells, cudaFuncCachePreferShared);
     CHECK_ERROR("cudaFuncSetCacheConfig", err);
 
@@ -691,7 +690,7 @@ int Plasma::StepAllCells(int nt) {
     return 0;
 }
 
-int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
+int Plasma::WriteCurrentsFromCellsToArrays() {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
     dim3 dimGrid((unsigned int)(Nx + 2), (unsigned int)(Ny + 2), (unsigned int)(Nz + 2));
     dim3 dimExt(CellExtent, CellExtent, CellExtent);
@@ -719,7 +718,7 @@ int Plasma::WriteCurrentsFromCellsToArrays(int nt) {
     return 0;
 }
 
-int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) {
+int Plasma::MakeParticleList(int *stage, int **d_stage, int **d_stage1) {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
     int err;
     dim3 dimGrid((unsigned int)(Nx + 2), (unsigned int)(Ny + 2), (unsigned int)(Nz + 2)), dimBlockOne(1, 1, 1);
@@ -732,7 +731,6 @@ int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) 
 
     void *args[] = {
             (void *) &pd->d_CellArray,
-            (void *) &nt,
             (void *) d_stage,
             0};
 
@@ -755,7 +753,7 @@ int Plasma::MakeParticleList(int nt, int *stage, int **d_stage, int **d_stage1) 
     return err;
 }
 
-int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1) {
+int Plasma::reallyPassParticlesToAnotherCells(int *stage1, int *d_stage1) {
     int err;
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
@@ -764,7 +762,6 @@ int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1
 
     void *args[] = {
             (void *) &pd->d_CellArray,
-            (void *) &nt,
             (void *) &d_stage1,
             0};
 
@@ -786,25 +783,25 @@ int Plasma::reallyPassParticlesToAnotherCells(int nt, int *stage1, int *d_stage1
     return err;
 }
 
-int Plasma::reorder_particles(int nt) {
+int Plasma::reorder_particles() {
     int stage[4000], stage1[4000], *d_stage, *d_stage1, err;
 
-    MakeParticleList(nt, stage, &d_stage, &d_stage1);
+    MakeParticleList(stage, &d_stage, &d_stage1);
 
     if (stage[0] == TOO_MANY_PARTICLES) {
         printf("too many particles flying to (%d,%d,%d) from (%d,%d,%d) \n", stage[1], stage[2], stage[3], stage[4], stage[5], stage[6]);
         exit(0);
     }
 
-    err = reallyPassParticlesToAnotherCells(nt, stage1, d_stage1);
+    err = reallyPassParticlesToAnotherCells(stage1, d_stage1);
 
     return err;
 }
 
-void Plasma::Push(int nt) {
+void Plasma::Push() {
     memory_monitor("CellOrder_StepAllCells1");
 
-    StepAllCells(nt);
+    StepAllCells();
     std::cout << "after StepAllCell" << std::endl;
 
     memory_monitor("CellOrder_StepAllCells2");
@@ -816,18 +813,18 @@ int Plasma::SetCurrentsToZero() {
     return SetCurrentsInCellsToZero();
 }
 
-void Plasma::CellOrder_StepAllCells(int nt) {
+void Plasma::CellOrder_StepAllCells() {
     SetCurrentsToZero();
 
-    Push(nt);
+    Push();
 
     std::cout << "Push" << std::endl;
 
-    WriteCurrentsFromCellsToArrays(nt);
+    WriteCurrentsFromCellsToArrays();
 
     std::cout << "writeCut2arr" << std::endl;
 
-    reorder_particles(nt);
+    reorder_particles();
 }
 
 double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell **copy_cells, int nt, int sort) {
@@ -879,7 +876,7 @@ double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell 
 double Plasma::checkControlPointParticles(const char * filename, int nt) {
     double te, ti, tb;
 
-    copyCells(nt);
+    copyCells();
 
     memory_monitor("checkControlPointParticles");
 
@@ -967,7 +964,7 @@ void Plasma::writeDataToFile(int step) {
     int size = (*pd->AllCells).size();
     int io = 0, e = 0, b = 0;
 
-    copyCells(step);
+    copyCells();
 
     for (int i = 0; i < size; i++) {
         GPUCell c = *(pd->cp[i]);
@@ -1041,13 +1038,13 @@ void Plasma::writeDataToFile(int step) {
 void Plasma::Step(int step) {
     int Nx = pd->nx, Ny = pd->ny, Nz = pd->nz;
 
-    ComputeField_FirstHalfStep(step);
+    ComputeField_FirstHalfStep();
 
-    PushParticles(step);
+    PushParticles();
 
     cout << "push ended" << endl;
 
-    ComputeField_SecondHalfStep(step);
+    ComputeField_SecondHalfStep();
     cout << "field computed-2" << endl;
 
     // save file

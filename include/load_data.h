@@ -17,17 +17,11 @@
 #include "NetCdf/read_file.h"
 #include "archAPI.h"
 
-void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, std::string name, int sort);
+void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, char *name, int sort);
 
-void readParticleParamsOneSort(const char *, int * total_particles, double *qq_m, double *mm, int sort);
+void readParticleParamsOneSort(const char *, int *, double *, double *, int);
 
-void readBinaryParticleArraysOneSort(
-        const char * filename,
-        double *dbg_x, double *dbg_y, double *dbg_z, double *dbg_px, double *dbg_py, double *dbg_pz,
-        int total_particles,
-        int nt,
-        int sort
-);
+void readBinaryParticleArraysOneSort(const char *, double *, double *, double *, double *, double *, double *, int, int, int);
 
 namespace patch {
     template<typename T>

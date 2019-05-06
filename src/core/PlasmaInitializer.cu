@@ -57,15 +57,37 @@ void PlasmaInitializer::AssignArraysToCells() {
 }
 
 void PlasmaInitializer::InitializeCPU() {
-    std::vector <Particle> ion_vp1, el_vp1, beam_vp1;
-    double Lx = p->lx, Ly = p->ly, Lz = p->lz;
-    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
+    std::vector <Particle> ion_vp, el_vp, beam_vp;
 
     initMeshArrays();
 
-    getUniformMaxwellianParticles(ion_vp1, el_vp1, beam_vp1, p->ions, p->electrons, p->beam, p->tempX, p->tempY, p->tempZ, p->beamVelDisp, p->beamImp, p->beamPlasmaDensityRat, p->plsmDensity, p->lp, p->meh, Lx, Ly, Lz, Nx, Ny, Nz);
+    ParticlesConfig pC;
+    pC.nx = p->nx;
+    pC.ny = p->ny;
+    pC.nz = p->nz;
+    pC.lp = p->lp;
+    pC.lx = p->lx;
+    pC.ly = p->ly;
+    pC.lz = p->lz;
+    pC.beam_lx = p->lx;
+    pC.beam_ly = p->ly;
+    pC.beam_lz = p->lz;
+    pC.ions = &(p->ions);
+    pC.electrons = &(p->electrons);
+    pC.beam = &(p->beam);
+    pC.tempX = p->tempX;
+    pC.tempY = p->tempY;
+    pC.tempZ = p->tempZ;
+    pC.meh = p->meh;
+    pC.beamVelDisp = p->beamVelDisp;
+    pC.beamImp= p->beamImp;
+    pC.beamPlasmaDensityRat = p->beamPlasmaDensityRat;
+    pC.plsmDensity= p->plsmDensity;
+    pC.beamPlasma = p->beamPlasma;
 
-    addAllParticleListsToCells(ion_vp1, el_vp1, beam_vp1);
+    getUniformMaxwellianParticles(ion_vp, el_vp, beam_vp, &pC);
+
+    addAllParticleListsToCells(ion_vp, el_vp, beam_vp);
 
     AssignArraysToCells();
 }

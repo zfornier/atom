@@ -38,7 +38,7 @@ public:
     virtual ~Plasma();
 
 private:
-    void copyCells(int);
+    void copyCells();
 
     double CheckGPUArraySilent(double *, double *);
 
@@ -48,23 +48,23 @@ private:
 
     int virtual ElectricFieldTrace(double *, double *, double *, double *, int, double, double, double);
 
-    void ComputeField_FirstHalfStep(int);
+    void ComputeField_FirstHalfStep();
 
-    virtual void ComputeField_SecondHalfStep(int);
+    virtual void ComputeField_SecondHalfStep();
 
     void ElectricFieldComponentEvaluateTrace(double *, double *, double *, double *, int, double, double, double);
 
     void ElectricFieldComponentEvaluatePeriodic(double *, int, int, int, int, int, int, int, int, int, int, int, int, int);
 
-    void ElectricFieldEvaluate(double *, double *, double *, int, double *, double *, double *, double *, double *, double *);
+    void ElectricFieldEvaluate(double *, double *, double *, double *, double *, double *, double *, double *, double *);
 
     double3 getMagneticFieldTimeMeshFactors();
 
     virtual void MagneticStageOne(double *, double *, double *, double *, double *, double *, double *, double *, double *);
 
-    virtual void MagneticFieldStageTwo(double *, double *, double *Hz, int, double *, double *, double *);
+    virtual void MagneticFieldStageTwo(double *, double *, double *Hz, double *, double *, double *);
 
-    int PushParticles(int);
+    int PushParticles();
 
     void Step(int);
 
@@ -82,7 +82,7 @@ private:
 
     int SetPeriodicCurrentComponent(GPUCell **, double *, int, unsigned int, unsigned int, unsigned int);
 
-    void SetPeriodicCurrents(int);
+    void SetPeriodicCurrents();
 
     void AssignCellsToArraysGPU();
 
@@ -94,21 +94,21 @@ private:
 
     int SetCurrentsInCellsToZero();
 
-    int StepAllCells(int);
+    int StepAllCells();
 
-    int WriteCurrentsFromCellsToArrays(int);
+    int WriteCurrentsFromCellsToArrays();
 
-    int MakeParticleList(int, int *, int **, int **);
+    int MakeParticleList(int *, int **, int **);
 
-    int reallyPassParticlesToAnotherCells(int, int *, int *);
+    int reallyPassParticlesToAnotherCells(int *, int *);
 
-    int reorder_particles(int);
+    int reorder_particles();
 
-    void Push(int);
+    void Push();
 
     int SetCurrentsToZero();
 
-    void CellOrder_StepAllCells(int);
+    void CellOrder_StepAllCells();
 
     double checkControlPointParticlesOneSort(const char * , GPUCell **, int, int);
 

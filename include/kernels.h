@@ -11,7 +11,7 @@
 #include "gpucell.h"
 #include "archAPI.h"
 
-__device__ double cuda_atomicAdd(double *address, double val);
+__device__ double cuda_atomicAdd(double *, double);
 
 __global__ void GPU_getCellEnergy(GPUCell **, double *, double *, double *, double *);
 
@@ -23,9 +23,9 @@ __global__ void GPU_WriteAllCurrents(GPUCell **, int, double *, double *, double
 
 __global__ void GPU_WriteControlSystem(Cell **);
 
-__global__ void GPU_MakeDepartureLists(GPUCell **, int, int *);
+__global__ void GPU_MakeDepartureLists(GPUCell **, int *);
 
-__global__ void GPU_ArrangeFlights(GPUCell **, int, int *);
+__global__ void GPU_ArrangeFlights(GPUCell **, int *);
 
 __device__ void writeCurrentComponent(CellDouble *, CurrentTensorComponent *, CurrentTensorComponent *, int);
 

@@ -29,11 +29,9 @@ void readParticleParamsOneSort(const char * filename, int * total_particles, dou
     int total;
 
     //Reading total_particles for sort "sort"
-
     readVar(filename, (std::string("Nb_particles_") + patch::to_string(sort)).c_str(), &total);
 
     //Reading charge for sort "sort"
-
     readVar(filename, (std::string("Charge_") + patch::to_string(sort)).c_str(), &q_m);
 
     //Reading mass for sort "sort"
@@ -46,36 +44,33 @@ void readParticleParamsOneSort(const char * filename, int * total_particles, dou
 
 void readBinaryParticleArraysOneSort(
         const char * filename,
-        double *dbg_x, double *dbg_y, double *dbg_z, double *dbg_px, double *dbg_py, double *dbg_pz,
-        int total_particles,
-        int nt,
-        int sort
+        double *x, double *y, double *z, double *px, double *py, double *pz,
+        int total_particles, int nt, int sort
 ) {
-
     //Reading X coordinates for particles of sort "sort"
-    readVar(filename, (std::string("Coordinates_x") + patch::to_string(sort)).c_str(), (void *) dbg_x);
+    readVar(filename, (std::string("Coordinates_x") + patch::to_string(sort)).c_str(), (void *) x);
 
     //Reading Y coordinates for particles of sort "sort"
-    readVar(filename, (std::string("Coordinates_y") + patch::to_string(sort)).c_str(), (void *) dbg_y);
+    readVar(filename, (std::string("Coordinates_y") + patch::to_string(sort)).c_str(), (void *) y);
 
     //Reading Z coordinates for particles of sort "sort"
-    readVar(filename, (std::string("Coordinates_z") + patch::to_string(sort)).c_str(), (void *) dbg_z);
+    readVar(filename, (std::string("Coordinates_z") + patch::to_string(sort)).c_str(), (void *) z);
 
     //Reading X impulses for particles of sort "sort"
-    readVar(filename, (std::string("Impulses_x") + patch::to_string(sort)).c_str(), (void *) dbg_px);
+    readVar(filename, (std::string("Impulses_x") + patch::to_string(sort)).c_str(), (void *) px);
 
     //Reading Y impulses for particles of sort "sort"
-    readVar(filename, (std::string("Impulses_y") + patch::to_string(sort)).c_str(), (void *) dbg_py);
+    readVar(filename, (std::string("Impulses_y") + patch::to_string(sort)).c_str(), (void *) py);
 
     //Reading Z impulses for particles of sort "sort"
-    readVar(filename, (std::string("Impulses_z") + patch::to_string(sort)).c_str(), (void *) dbg_pz);
+    readVar(filename, (std::string("Impulses_z") + patch::to_string(sort)).c_str(), (void *) pz);
 
-    debugPrintParticleCharacteristicArray(dbg_x, total_particles, nt, (char*)"x", sort);
-    debugPrintParticleCharacteristicArray(dbg_y, total_particles, nt, (char*)"y", sort);
-    debugPrintParticleCharacteristicArray(dbg_z, total_particles, nt, (char*)"z", sort);
-    debugPrintParticleCharacteristicArray(dbg_px, total_particles, nt, (char*)"px", sort);
-    debugPrintParticleCharacteristicArray(dbg_py, total_particles, nt, (char*)"py", sort);
-    debugPrintParticleCharacteristicArray(dbg_pz, total_particles, nt, (char*)"pz", sort);
+    debugPrintParticleCharacteristicArray(x, total_particles, nt, (char*)"x", sort);
+    debugPrintParticleCharacteristicArray(y, total_particles, nt, (char*)"y", sort);
+    debugPrintParticleCharacteristicArray(z, total_particles, nt, (char*)"z", sort);
+    debugPrintParticleCharacteristicArray(px, total_particles, nt, (char*)"px", sort);
+    debugPrintParticleCharacteristicArray(py, total_particles, nt, (char*)"py", sort);
+    debugPrintParticleCharacteristicArray(pz, total_particles, nt, (char*)"pz", sort);
 
 }
 

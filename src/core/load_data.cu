@@ -7,23 +7,6 @@
 
 #include "../../include/load_data.h"
 
-void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, char *name, int sort) {
-
-#ifndef PRINT_PARTICLE_INITIALS
-    return;
-#else
-    sprintf(fname,"particle_init_%s_%05d_sort%02d.dat",name,nt,sort);
-
-    if((f = fopen(fname,"wt")) == NULL) return;
-
-    for (int i = 0;i < np;i++) {
-        fprintf(f,"%10d %10d %25.16e \n",i,i+1,p_ch[i]);
-    }
-
-    fclose(f);
-#endif
-}
-
 void readParticleParamsOneSort(const char * filename, int * total_particles, double *qq_m, double *mm, int sort) {
     double q_m, m;
     int total;
@@ -42,11 +25,7 @@ void readParticleParamsOneSort(const char * filename, int * total_particles, dou
     *total_particles = total;
 }
 
-void readBinaryParticleArraysOneSort(
-        const char * filename,
-        double *x, double *y, double *z, double *px, double *py, double *pz,
-        int total_particles, int nt, int sort
-) {
+void readBinaryParticleArraysOneSort(const char * filename, double *x, double *y, double *z, double *px, double *py, double *pz, int sort) {
     //Reading X coordinates for particles of sort "sort"
     readVar(filename, (std::string("Coordinates_x") + patch::to_string(sort)).c_str(), (void *) x);
 
@@ -64,14 +43,6 @@ void readBinaryParticleArraysOneSort(
 
     //Reading Z impulses for particles of sort "sort"
     readVar(filename, (std::string("Impulses_z") + patch::to_string(sort)).c_str(), (void *) pz);
-
-    debugPrintParticleCharacteristicArray(x, total_particles, nt, (char*)"x", sort);
-    debugPrintParticleCharacteristicArray(y, total_particles, nt, (char*)"y", sort);
-    debugPrintParticleCharacteristicArray(z, total_particles, nt, (char*)"z", sort);
-    debugPrintParticleCharacteristicArray(px, total_particles, nt, (char*)"px", sort);
-    debugPrintParticleCharacteristicArray(py, total_particles, nt, (char*)"py", sort);
-    debugPrintParticleCharacteristicArray(pz, total_particles, nt, (char*)"pz", sort);
-
 }
 
 

@@ -110,9 +110,9 @@ private:
 
     void CellOrder_StepAllCells();
 
-    double checkControlPointParticlesOneSort(const char * , GPUCell **, int, int);
+    double checkControlPointParticlesOneSort(const char * , GPUCell **, int);
 
-    double checkControlPointParticles(const char *, int);
+    double checkControlPointParticles(const char *);
 
     void writeDataToFile(int);
 

@@ -58,29 +58,13 @@ Plasma::~Plasma() {
 void Plasma::copyCells() {
     int size = (int)(*pd->AllCells).size();
 
-//    if (first == 1) {
-//        pd->cp = (GPUCell **) malloc(size * sizeof(GPUCell *));
-//    }
-
     memory_monitor("beforeCopyCells");
 
     for (int i = 0; i < size; i++) {
-
-//        sysinfo(&info);
-//        m1 = info.freeram;
         GPUCell c, *d_c, *z0;
         z0 = pd->h_CellArray[i];
-//        if (first == 1) {
-//            d_c = c.allocateCopyCellFromDevice();
-//            pd->cp[i] = d_c;
-//        } else {
-            d_c = pd->cp[i];
-//        }
+        d_c = pd->cp[i];
         c.copyCellFromDevice(z0, d_c);
-//        m2 = info.freeram;
-
-//        delta = m1 - m2;
-//        accum += delta;
     }
 
     memory_monitor("afterCopyCells");
@@ -573,7 +557,7 @@ void Plasma::checkControlPoint(int nt) {
 
     memory_monitor("checkControlPoint3");
 
-    double cp = checkControlPointParticles(pd->checkFile, nt);
+    double cp = checkControlPointParticles(pd->checkFile);
 
     cout << "STEP: " <<  nt << endl;
 
@@ -827,7 +811,7 @@ void Plasma::CellOrder_StepAllCells() {
     reorder_particles();
 }
 
-double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell **copy_cells, int nt, int sort) {
+double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell **copy_cells, int sort) {
     double t = 0.0;
     int size;
     double q_m, m;
@@ -846,7 +830,7 @@ double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell 
     pd->dbg_py = new double[pd->total_particles];
     pd->dbg_pz = new double[pd->total_particles];
 
-    readBinaryParticleArraysOneSort(filename, pd->dbg_x, pd->dbg_y, pd->dbg_z, pd->dbg_px, pd->dbg_py, pd->dbg_pz, pd->total_particles, nt, sort);
+    readBinaryParticleArraysOneSort(filename, pd->dbg_x, pd->dbg_y, pd->dbg_z, pd->dbg_px, pd->dbg_py, pd->dbg_pz, sort);
 
     memory_monitor("checkControlPointParticlesOneSort3");
 
@@ -873,22 +857,22 @@ double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell 
     return t / size;
 }
 
-double Plasma::checkControlPointParticles(const char * filename, int nt) {
+double Plasma::checkControlPointParticles(const char * filename) {
     double te, ti, tb;
 
     copyCells();
 
     memory_monitor("checkControlPointParticles");
 
-    ti = checkControlPointParticlesOneSort(filename, pd->cp, nt, ION);
+    ti = checkControlPointParticlesOneSort(filename, pd->cp, ION);
 
     memory_monitor("checkControlPointParticles1");
 
-    te = checkControlPointParticlesOneSort(filename, pd->cp, nt, PLASMA_ELECTRON);
+    te = checkControlPointParticlesOneSort(filename, pd->cp, PLASMA_ELECTRON);
 
     memory_monitor("checkControlPointParticles1.5");
 
-    tb = checkControlPointParticlesOneSort(filename, pd->cp, nt, BEAM_ELECTRON);
+    tb = checkControlPointParticlesOneSort(filename, pd->cp, BEAM_ELECTRON);
 
     memory_monitor("checkControlPointParticles2");
 

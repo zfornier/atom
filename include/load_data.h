@@ -17,11 +17,9 @@
 #include "NetCdf/read_file.h"
 #include "archAPI.h"
 
-void debugPrintParticleCharacteristicArray(double *p_ch, int np, int nt, char *name, int sort);
-
 void readParticleParamsOneSort(const char *, int *, double *, double *, int);
 
-void readBinaryParticleArraysOneSort(const char *, double *, double *, double *, double *, double *, double *, int, int, int);
+void readBinaryParticleArraysOneSort(const char *, double *, double *, double *, double *, double *, double *, int);
 
 namespace patch {
     template<typename T>

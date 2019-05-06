@@ -7,25 +7,6 @@
 
 #include "../../include/gpucell.h"
 
-void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char *name) {
-    double t;
-    Cell *h_c;
-    int shift = (attribute + n_particle * sizeof(Particle) / sizeof(double));
-    int err;
-
-    h_c = new Cell;
-
-    err = MemoryCopy(h_c, d_c, sizeof(Cell), DEVICE_TO_HOST);
-    CHECK_ERROR("pyFieldsToGPU err", err);
-
-    double *vec = h_c->doubParticleArray + shift;
-
-    err = MemoryCopy(&t, vec, sizeof(double), DEVICE_TO_HOST);
-    CHECK_ERROR("pyFieldsToGPU err", err);
-
-    printf("%s %10.3e \n", name, t);
-}
-
 __host__ __device__
 GPUCell::GPUCell() {}
 

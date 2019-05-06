@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
         } catch (std::bad_alloc &e) {
             std::cerr << "Unable to allocate memory" << std::endl;
         } catch (std::exception &e) {
-            std::cout << e.what() << std::endl;
+            std::cout << "Unexpected termination of program. Explanatory string: " << e.what() << std::endl;
         }
 
         deinitConfig(conf);

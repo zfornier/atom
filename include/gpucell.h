@@ -11,8 +11,6 @@
 #include "cell.h"
 #include "archAPI.h"
 
-void dbgPrintGPUParticleAttribute(Cell *d_c, int n_particle, int attribute, char *name);
-
 class GPUCell : public Cell {
 public:
 

@@ -101,15 +101,9 @@ PlasmaConfig initConfig(std::ifstream &is) {
         conf.beamVelDisp = properties.stringToDouble(properties.getProperty("beamVelDisp"));
         conf.beamPlasmaDensityRat = properties.stringToDouble(properties.getProperty("beamPlasmaDensityRat"));
         conf.plsmDensity = properties.stringToDouble(properties.getProperty("plsmDensity"));
-        conf.externalMagnFieldX = properties.stringToDouble(properties.getProperty("externalMagnFieldX"));
         conf.lx = properties.stringToDouble(properties.getProperty("lx"));
         conf.ly = properties.stringToDouble(properties.getProperty("ly"));
         conf.lz = properties.stringToDouble(properties.getProperty("lz"));
-        conf.px = properties.stringToDouble(properties.getProperty("px"));
-        conf.py = properties.stringToDouble(properties.getProperty("py"));
-        conf.bx = properties.stringToDouble(properties.getProperty("bx"));
-        conf.by = properties.stringToDouble(properties.getProperty("by"));
-        conf.bz = properties.stringToDouble(properties.getProperty("bz"));
         conf.lp = properties.stringToInt(properties.getProperty("lp"));
         conf.nx = properties.stringToInt(properties.getProperty("nx"));
         conf.ny = properties.stringToInt(properties.getProperty("ny"));
@@ -118,6 +112,14 @@ PlasmaConfig initConfig(std::ifstream &is) {
         conf.beamPlasma = properties.stringToInt(properties.getProperty("beamPlasma"));
         conf.meh = properties.stringToInt(properties.getProperty("meh"));
 
+/* unused now
+        conf.externalMagnFieldX = properties.stringToDouble(properties.getProperty("externalMagnFieldX"));
+        conf.px = properties.stringToDouble(properties.getProperty("px"));
+        conf.py = properties.stringToDouble(properties.getProperty("py"));
+        conf.bx = properties.stringToDouble(properties.getProperty("bx"));
+        conf.by = properties.stringToDouble(properties.getProperty("by"));
+        conf.bz = properties.stringToDouble(properties.getProperty("bz"));
+*/
         conf.st = properties.stringToInt(properties.getProperty("st"));
         conf.lst = properties.stringToInt(properties.getProperty("lst"));
         conf.saveStep = properties.stringToInt(properties.getProperty("saveStep"));

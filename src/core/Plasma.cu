@@ -815,20 +815,21 @@ double Plasma::checkControlPointParticlesOneSort(const char * filename, GPUCell 
     double t = 0.0;
     int size;
     double q_m, m;
+    int total_particles;
 
     memory_monitor("checkControlPointParticlesOneSort1");
 
     Cell c0 = (*pd->AllCells)[0];
 
-    readParticleParamsOneSort(filename, &pd->total_particles, &q_m, &m, sort);
+    readParticleParamsOneSort(filename, &total_particles, &q_m, &m, sort);
 
-    pd->dbg_y = new double[pd->total_particles];
-    pd->dbg_x = new double[pd->total_particles];
-    pd->dbg_z = new double[pd->total_particles];
+    pd->dbg_y = new double[total_particles];
+    pd->dbg_x = new double[total_particles];
+    pd->dbg_z = new double[total_particles];
 
-    pd->dbg_px = new double[pd->total_particles];
-    pd->dbg_py = new double[pd->total_particles];
-    pd->dbg_pz = new double[pd->total_particles];
+    pd->dbg_px = new double[total_particles];
+    pd->dbg_py = new double[total_particles];
+    pd->dbg_pz = new double[total_particles];
 
     readBinaryParticleArraysOneSort(filename, pd->dbg_x, pd->dbg_y, pd->dbg_z, pd->dbg_px, pd->dbg_py, pd->dbg_pz, sort);
 
@@ -956,28 +957,28 @@ void Plasma::writeDataToFile(int step) {
             Particle p;
             p = c.readParticleFromSurfaceDevice(j);
             if(p.sort == ION) {
-                pd->ions.dbg_x[io] = p.x;
-                pd->ions.dbg_y[io] = p.y;
-                pd->ions.dbg_z[io] = p.z;
-                pd->ions.dbg_px[io] = p.pu;
-                pd->ions.dbg_py[io] = p.pv;
-                pd->ions.dbg_pz[io] = p.pw;
+                pd->ions.x[io] = p.x;
+                pd->ions.y[io] = p.y;
+                pd->ions.z[io] = p.z;
+                pd->ions.px[io] = p.pu;
+                pd->ions.py[io] = p.pv;
+                pd->ions.pz[io] = p.pw;
                 ++io;
             } else if (p.sort == PLASMA_ELECTRON) {
-                pd->electrons.dbg_x[e] = p.x;
-                pd->electrons.dbg_y[e] = p.y;
-                pd->electrons.dbg_z[e] = p.z;
-                pd->electrons.dbg_px[e] = p.pu;
-                pd->electrons.dbg_py[e] = p.pv;
-                pd->electrons.dbg_pz[e] = p.pw;
+                pd->electrons.x[e] = p.x;
+                pd->electrons.y[e] = p.y;
+                pd->electrons.z[e] = p.z;
+                pd->electrons.px[e] = p.pu;
+                pd->electrons.py[e] = p.pv;
+                pd->electrons.pz[e] = p.pw;
                 ++e;
             } else if (p.sort == BEAM_ELECTRON) {
-                pd->beam.dbg_x[b] = p.x;
-                pd->beam.dbg_y[b] = p.y;
-                pd->beam.dbg_z[b] = p.z;
-                pd->beam.dbg_px[b] = p.pu;
-                pd->beam.dbg_py[b] = p.pv;
-                pd->beam.dbg_pz[b] = p.pw;
+                pd->beam.x[b] = p.x;
+                pd->beam.y[b] = p.y;
+                pd->beam.z[b] = p.z;
+                pd->beam.px[b] = p.pu;
+                pd->beam.py[b] = p.pv;
+                pd->beam.pz[b] = p.pw;
                 ++b;
             }
         }
@@ -986,34 +987,34 @@ void Plasma::writeDataToFile(int step) {
     NetCDFManipulator::plsm_save_int(filename.c_str(), &nb_particles, (NB_PARTICLES_LABEL + SORT_0_LABEL).c_str(), UNITS_NB_PARTICLES.c_str(), (DESC_NB_PARTICLES + SORT_0_LABEL).c_str());
     NetCDFManipulator::plsm_save_double(filename.c_str(), &pd->ions.q_m, (CHARGE_LABEL + SORT_0_LABEL).c_str(), UNITS_CHARGE_PARTICLES.c_str(), (DESC_CHARGE + SORT_0_LABEL).c_str());
     NetCDFManipulator::plsm_save_double(filename.c_str(), pd->ions.m, (MASS_LABEL + SORT_0_LABEL).c_str(), UNITS_MASS_PARTICLES.c_str(), (DESC_MASS + SORT_0_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_x, (COORDINATES_LABEL + X_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (X_LABEL + DESC_COORDINATES + SORT_0_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_x, (COORDINATES_LABEL + Y_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Y_LABEL + DESC_COORDINATES + SORT_0_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_x, (COORDINATES_LABEL + Z_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Z_LABEL + DESC_COORDINATES + SORT_0_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_px, (IMPULSES_LABEL + X_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (X_LABEL + DESC_IMPULSES + SORT_0_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_py, (IMPULSES_LABEL + Y_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Y_LABEL + DESC_IMPULSES + SORT_0_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.dbg_pz, (IMPULSES_LABEL + Z_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Z_LABEL + DESC_IMPULSES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.x, (COORDINATES_LABEL + X_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (X_LABEL + DESC_COORDINATES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.y, (COORDINATES_LABEL + Y_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Y_LABEL + DESC_COORDINATES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.z, (COORDINATES_LABEL + Z_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Z_LABEL + DESC_COORDINATES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.px, (IMPULSES_LABEL + X_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (X_LABEL + DESC_IMPULSES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.py, (IMPULSES_LABEL + Y_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Y_LABEL + DESC_IMPULSES + SORT_0_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->ions.pz, (IMPULSES_LABEL + Z_LABEL + SORT_0_LABEL).c_str(), (SORT_0_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Z_LABEL + DESC_IMPULSES + SORT_0_LABEL).c_str());
     nb_particles *= 2;
 
     NetCDFManipulator::plsm_save_int(filename.c_str(), &nb_particles, (NB_PARTICLES_LABEL + SORT_1_LABEL).c_str(), UNITS_NB_PARTICLES.c_str(), (DESC_NB_PARTICLES + SORT_1_LABEL).c_str());
     NetCDFManipulator::plsm_save_double(filename.c_str(), &pd->electrons.q_m, (CHARGE_LABEL + SORT_1_LABEL).c_str(), UNITS_CHARGE_PARTICLES.c_str(), (DESC_CHARGE + SORT_1_LABEL).c_str());
     NetCDFManipulator::plsm_save_double(filename.c_str(), pd->electrons.m, (MASS_LABEL + SORT_1_LABEL).c_str(), UNITS_MASS_PARTICLES.c_str(), (DESC_MASS + SORT_1_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_x, (COORDINATES_LABEL + X_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (X_LABEL + DESC_COORDINATES + SORT_1_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_x, (COORDINATES_LABEL + Y_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Y_LABEL + DESC_COORDINATES + SORT_1_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_x, (COORDINATES_LABEL + Z_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Z_LABEL + DESC_COORDINATES + SORT_1_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_px, (IMPULSES_LABEL + X_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (X_LABEL + DESC_IMPULSES + SORT_1_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_py, (IMPULSES_LABEL + Y_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Y_LABEL + DESC_IMPULSES + SORT_1_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.dbg_pz, (IMPULSES_LABEL + Z_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Z_LABEL + DESC_IMPULSES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.x, (COORDINATES_LABEL + X_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (X_LABEL + DESC_COORDINATES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.y, (COORDINATES_LABEL + Y_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Y_LABEL + DESC_COORDINATES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.z, (COORDINATES_LABEL + Z_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Z_LABEL + DESC_COORDINATES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.px, (IMPULSES_LABEL + X_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (X_LABEL + DESC_IMPULSES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.py, (IMPULSES_LABEL + Y_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Y_LABEL + DESC_IMPULSES + SORT_1_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->electrons.pz, (IMPULSES_LABEL + Z_LABEL + SORT_1_LABEL).c_str(), (SORT_1_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Z_LABEL + DESC_IMPULSES + SORT_1_LABEL).c_str());
     nb_particles /= 2;
 
     NetCDFManipulator::plsm_save_int(filename.c_str(), &nb_particles, (NB_PARTICLES_LABEL + SORT_2_LABEL).c_str(), UNITS_NB_PARTICLES.c_str(), (DESC_NB_PARTICLES + SORT_2_LABEL).c_str());
     NetCDFManipulator::plsm_save_double(filename.c_str(), &pd->beam.q_m, (CHARGE_LABEL + SORT_2_LABEL).c_str(), UNITS_CHARGE_PARTICLES.c_str(), (DESC_CHARGE + SORT_2_LABEL).c_str());
     NetCDFManipulator::plsm_save_double(filename.c_str(), pd->beam.m, (MASS_LABEL + SORT_2_LABEL).c_str(), UNITS_MASS_PARTICLES.c_str(), (DESC_MASS + SORT_2_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_x, (COORDINATES_LABEL + X_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (X_LABEL + DESC_COORDINATES + SORT_2_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_x, (COORDINATES_LABEL + Y_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Y_LABEL + DESC_COORDINATES + SORT_2_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_x, (COORDINATES_LABEL + Z_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Z_LABEL + DESC_COORDINATES + SORT_2_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_px, (IMPULSES_LABEL + X_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (X_LABEL + DESC_IMPULSES + SORT_2_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_py, (IMPULSES_LABEL + Y_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Y_LABEL + DESC_IMPULSES + SORT_2_LABEL).c_str());
-    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.dbg_pz, (IMPULSES_LABEL + Z_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Z_LABEL + DESC_IMPULSES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.x, (COORDINATES_LABEL + X_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (X_LABEL + DESC_COORDINATES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.y, (COORDINATES_LABEL + Y_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Y_LABEL + DESC_COORDINATES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.z, (COORDINATES_LABEL + Z_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_NO.c_str(), (Z_LABEL + DESC_COORDINATES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.px, (IMPULSES_LABEL + X_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (X_LABEL + DESC_IMPULSES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.py, (IMPULSES_LABEL + Y_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Y_LABEL + DESC_IMPULSES + SORT_2_LABEL).c_str());
+    NetCDFManipulator::plsm_save_1D_double_array(filename.c_str(), pd->beam.pz, (IMPULSES_LABEL + Z_LABEL + SORT_2_LABEL).c_str(), (SORT_2_LABEL + "_DIM").c_str(), UNITS_IMPULSES.c_str(), (Z_LABEL + DESC_IMPULSES + SORT_2_LABEL).c_str());
 }
 
 /**

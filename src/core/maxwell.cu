@@ -198,16 +198,16 @@ int AllocateBinaryParticleArraysOneSort(double **x, double **y, double **z, doub
 }
 
 void AllocateBinaryParticlesArrays(ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons) {
-    AllocateBinaryParticleArraysOneSort(&(ions->dbg_x), &(ions->dbg_y), &(ions->dbg_z),
-                                        &(ions->dbg_px), &(ions->dbg_py), &(ions->dbg_pz),
+    AllocateBinaryParticleArraysOneSort(&(ions->x), &(ions->y), &(ions->z),
+                                        &(ions->px), &(ions->py), &(ions->pz),
                                         &(ions->m), ions->total);
 
-    AllocateBinaryParticleArraysOneSort(&(electrons->dbg_x), &(electrons->dbg_y), &(electrons->dbg_z),
-                                        &(electrons->dbg_px), &(electrons->dbg_py), &(electrons->dbg_pz),
+    AllocateBinaryParticleArraysOneSort(&(electrons->x), &(electrons->y), &(electrons->z),
+                                        &(electrons->px), &(electrons->py), &(electrons->pz),
                                         &(electrons->m), electrons->total);
 
-    AllocateBinaryParticleArraysOneSort(&(beam_electrons->dbg_x), &(beam_electrons->dbg_y), &(beam_electrons->dbg_z),
-                                        &(beam_electrons->dbg_px), &(beam_electrons->dbg_py), &(beam_electrons->dbg_pz),
+    AllocateBinaryParticleArraysOneSort(&(beam_electrons->x), &(beam_electrons->y), &(beam_electrons->z),
+                                        &(beam_electrons->px), &(beam_electrons->py), &(beam_electrons->pz),
                                         &(beam_electrons->m), beam_electrons->total);
 }
 
@@ -218,9 +218,9 @@ int InitUniformMaxwellianParticles(ParticlesConfig *pC, int jmb, int *jmb_real) 
     double lx = pC->lx, ly = pC->ly, lz = pC->lz;
     double Tb = pC->beamVelDisp, rimp = pC->beamImp, rbd = pC->beamPlasmaDensityRat;
 
-    double *xi = pC->ions->dbg_x, *yi = pC->ions->dbg_y, *zi = pC->ions->dbg_z, *ui = pC->ions->dbg_px, *vi = pC->ions->dbg_py, *wi = pC->ions->dbg_pz;
-    double *xb = pC->beam->dbg_x, *yb = pC->beam->dbg_y, *zb = pC->beam->dbg_z, *ub = pC->beam->dbg_px, *vb = pC->beam->dbg_py, *wb = pC->beam->dbg_pz;
-    double *xf = pC->electrons->dbg_x, *yf = pC->electrons->dbg_y, *zf = pC->electrons->dbg_z, *uf = pC->electrons->dbg_px, *vf = pC->electrons->dbg_py, *wf = pC->electrons->dbg_pz;
+    double *xi = pC->ions->x, *yi = pC->ions->y, *zi = pC->ions->z, *ui = pC->ions->px, *vi = pC->ions->py, *wi = pC->ions->pz;
+    double *xb = pC->beam->x, *yb = pC->beam->y, *zb = pC->beam->z, *ub = pC->beam->px, *vb = pC->beam->py, *wb = pC->beam->pz;
+    double *xf = pC->electrons->x, *yf = pC->electrons->y, *zf = pC->electrons->z, *uf = pC->electrons->px, *vf = pC->electrons->py, *wf = pC->electrons->pz;
 
     double x, y, z, vb0, d__1, d__2, d__3, vy, vz, termx, gb0;
     double vf01, vf02, pinv1, pinv2, mfrq = 0.0;
@@ -375,12 +375,12 @@ int convertParticleArraysToSTLvector(ParticleArrays *pA, particle_sorts sort, st
     double x, y, z, px, py, pz;
 
     for (int i = 0; i < pA->total; i++) {
-        x = pA->dbg_x[i];
-        y = pA->dbg_y[i];
-        z = pA->dbg_z[i];
-        px = pA->dbg_px[i];
-        py = pA->dbg_py[i];
-        pz = pA->dbg_pz[i];
+        x = pA->x[i];
+        y = pA->y[i];
+        z = pA->z[i];
+        px = pA->px[i];
+        py = pA->py[i];
+        pz = pA->pz[i];
 
         Particle p(x, y, z, px, py, pz, pA->m[0], pA->q_m);
 

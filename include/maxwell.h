@@ -16,7 +16,7 @@
 #include "archAPI.h"
 
 typedef struct ParticleArrays {
-    double *dbg_x, *dbg_y, *dbg_z, *dbg_px, *dbg_py, *dbg_pz, q_m, *m;
+    double *x, *y, *z, *px, *py, *pz, q_m, *m;
     int total;
 } ParticleArrays;
 

@@ -15,13 +15,13 @@ class GPUCell : public Cell {
 public:
 
     __host__ __device__
-    GPUCell();
+    GPUCell() {}
 
     __host__ __device__
-    ~GPUCell();
+    ~GPUCell() {}
 
     __host__ __device__
-    GPUCell(int i1, int l1, int k1, double Lx, double Ly, double Lz, int Nx1, int Ny1, int Nz1, double tau1);
+    GPUCell(int i1, int l1, int k1, double Lx, double Ly, double Lz, int Nx1, int Ny1, int Nz1, double tau1) : Cell(i1, l1, k1, Lx, Ly, Lz, Nx1, Ny1, Nz1, tau1) {}
 
     GPUCell *copyCellToDevice();
 

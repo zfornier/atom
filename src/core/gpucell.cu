@@ -7,15 +7,6 @@
 
 #include "../../include/gpucell.h"
 
-__host__ __device__
-GPUCell::GPUCell() {}
-
-__host__ __device__
-GPUCell::~GPUCell() {}
-
-__host__ __device__
-GPUCell::GPUCell(int i1, int l1, int k1, double Lx, double Ly, double Lz, int Nx1, int Ny1, int Nz1, double tau1) : Cell(i1, l1, k1, Lx, Ly, Lz, Nx1, Ny1, Nz1, tau1) {}
-
 GPUCell *GPUCell::copyCellToDevice() {
     GPUCell *h_src, *d_dst;
     int err;

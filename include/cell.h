@@ -355,29 +355,10 @@ public:
 
     __host__ __device__
     int getWrapCellNumberTriplet(int *i, int *l, int *k) {
-        if (*i >= Nx) {
-            *i -= Nx;
-        } else {
-            if (*i < 0) {
-                *i += Nx;
-            }
-        }
+        *i = (*i + Nx) % Nx;
+        *l = (*l + Ny) % Ny;
+        *k = (*k + Nz) % Nz;
 
-        if (*l >= Ny) {
-            *l -= Ny;
-        } else {
-            if (*l < 0) {
-                *l += Ny;
-            }
-        }
-
-        if (*k >= Nz) {
-            *k -= Nz;
-        } else {
-            if (*k < 0) {
-                *k += Nz;
-            }
-        }
         return 0;
     }
 
@@ -946,14 +927,12 @@ public:
 // Simple : C++ (i+i1) ----->>>> F(i+i1-1)
     __host__ __device__
     void readField(double *E, CellDouble &Ec, uint3 threadIdx) {
-        int i_f, l_f, k_f;
         int i1, l1, k1;
 
         i1 = threadIdx.x;
         l1 = threadIdx.y;
         k1 = threadIdx.z;
-        int n = getFortranCellNumber(i + i1 - 1, l + l1 - 1, k + k1 - 1);
-        getFortranCellTriplet(n, &i_f, &l_f, &k_f);
+
         double t = getFortranArrayValue(E, i + i1 - 1, l + l1 - 1, k + k1 - 1);
 
         Ec.M[i1][l1][k1] = t;
@@ -961,13 +940,9 @@ public:
 
     __host__ __device__
     void readField(double *E, CellDouble &Ec) {
-        int i_f, l_f, k_f;
-
         for (int i1 = 0; i1 < CellExtent; i1++) {
             for (int l1 = 0; l1 < CellExtent; l1++) {
                 for (int k1 = 0; k1 < CellExtent; k1++) {
-                    int n = getFortranCellNumber(i + i1 - 1, l + l1 - 1, k + k1 - 1);
-                    getFortranCellTriplet(n, &i_f, &l_f, &k_f);
                     double t = getFortranArrayValue(E, i + i1 - 1, l + l1 - 1, k + k1 - 1);
                     Ec.M[i1][l1][k1] = t;
                 }

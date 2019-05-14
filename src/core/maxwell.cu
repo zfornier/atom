@@ -361,10 +361,10 @@ int getMassCharge(ParticleArrays *ions, ParticleArrays *electrons, ParticleArray
     return 0;
 }
 
-int AllocateMemoryForArrays(int N, ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons) {
-    ions->total = N;
-    electrons->total = 2 * N;
-    beam_electrons->total = N;
+int AllocateMemoryForArrays(int total, ParticleArrays *ions, ParticleArrays *electrons, ParticleArrays *beam_electrons) {
+    ions->total = total;
+    electrons->total = 2 * total;
+    beam_electrons->total = total;
 
     AllocateBinaryParticlesArrays(ions, electrons, beam_electrons);
 

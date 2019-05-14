@@ -55,6 +55,15 @@ namespace plasmanetcdf {
         return 0;
     }
 
+    Error_t NetCDFManipulator::plsm_get_dim_var(const char *fileName, const char *name, int *dimVar) {
+        NcFile dataFile(fileName, NcFile::read);
+        NcDim dim = dataFile.getDim(name);
+        *dimVar = (int)dim.getSize();
+        dataFile.close();
+
+        return 0;
+    }
+
     Error_t NetCDFManipulator::plsm_save_3D_double_array(const char *fileName, double *pTab, char *label, const char *unit, const char *desc) {
         NcFile dataFile(fileName, NcFile::write);
         try {

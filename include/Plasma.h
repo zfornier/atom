@@ -13,6 +13,7 @@
 #include "gpucell.h"
 #include "kernels.h"
 #include "NetCdf/read_file.h"
+#include "NetCdf/NetCdfData.h"
 #include "PlasmaTypes.h"
 #include "PlasmaInitializer.h"
 #include "archAPI.h"
@@ -34,6 +35,8 @@ public:
     int Compute();
 
     void Initialize();
+
+    void Initialize(const char *);
 
     virtual ~Plasma();
 

@@ -1071,7 +1071,19 @@ int Plasma::Compute() {
 }
 
 void Plasma::Initialize() {
-    pi = new PlasmaInitializer(pd);
     this->temp = new double[(pd->nx + 2) * (pd->ny + 2) * (pd->nz + 2)];
+    pi = new PlasmaInitializer(pd);
     pi->Initialize();
+}
+
+void Plasma::Initialize(const char * is) {
+    this->temp = new double[(pd->nx + 2) * (pd->ny + 2) * (pd->nz + 2)];
+
+    NetCdfData * data = getDataFromFile(is);
+    pd->nx = data->nx - 2;
+    pd->ny = data->ny - 2;
+    pd->nz = data->nz - 2;
+
+    pi = new PlasmaInitializer(pd);
+    pi->Initialize(data);
 }

@@ -60,6 +60,8 @@ namespace plasmanetcdf {
 	*/
 	static Error_t plsm_get_var(const char* fileName, const char * name, void* array);
 
+	static Error_t plsm_get_dim_var(const char* fileName, const char * name, int* dimVar);
+
 	/*!
 		Get a list of all arrays names in the NetCDF file (Not working yet)
 		\param fileName    Name of the NetCDF file to open in writing mode

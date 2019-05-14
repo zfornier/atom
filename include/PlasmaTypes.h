@@ -43,6 +43,7 @@ typedef struct {
     int startSave;               // start save from startSave step
     int checkStep;               // check on checkStep step
     const char * checkFile;      // file to check with
+    const char * computeFromFile;// path to file with data to start computation
 
     ParticleArrays ions, electrons, beam;
     GPUCell **h_CellArray, **d_CellArray;

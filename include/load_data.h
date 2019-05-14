@@ -15,11 +15,14 @@
 #include "particle.h"
 #include "maxwell.h"
 #include "NetCdf/read_file.h"
+#include "NetCdf/NetCdfData.h"
 #include "archAPI.h"
 
 void readParticleParamsOneSort(const char *, int *, double *, double *, int);
 
 void readBinaryParticleArraysOneSort(const char *, double *, double *, double *, double *, double *, double *, int);
+
+NetCdfData * getDataFromFile(const char *);
 
 namespace patch {
     template<typename T>

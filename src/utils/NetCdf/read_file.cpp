@@ -234,6 +234,10 @@ void readVar(const char *fileName, const char *name, void *array) {
     NetCDFManipulator::plsm_get_var(fileName, name, array);
 }
 
+void readDimVar(const char *fileName, const char *name, int *dimVar) {
+    NetCDFManipulator::plsm_get_dim_var(fileName, name, dimVar);
+}
+
 int writeOne3DArray(const char *filename, double *tdArray, string label, string unit, string desc) {
     int res;
 

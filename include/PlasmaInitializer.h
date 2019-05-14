@@ -9,6 +9,8 @@
 #include "maxwell.h"
 #include "service_functions.h"
 #include "archAPI.h"
+#include "NetCdf/read_file.h"
+#include "NetCdf/NetCdfData.h"
 
 class PlasmaInitializer {
 private:
@@ -17,6 +19,8 @@ public:
     PlasmaInitializer(PlasmaConfig * plasma);
 
     void Initialize();
+
+    void Initialize(NetCdfData *);
 
     void AssignArraysToCells();
 
@@ -28,6 +32,8 @@ private:
 
     virtual void InitializeCPU();
 
+    virtual void InitializeCPU(NetCdfData *);
+
     void InitGPUParticles();
 
     virtual void Alloc();
@@ -35,8 +41,6 @@ private:
     virtual void InitFields();
 
     virtual void InitCells();
-
-    virtual void InitCurrents();
 
     int addParticleListToCells(std::vector <Particle> &vp);
 

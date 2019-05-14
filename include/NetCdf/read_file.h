@@ -87,6 +87,8 @@ int copyFile(const char *binaryFileName, const char *netCdfFileName);
 
 void readVar(const char *fileName, const char *name, void *array);
 
+void readDimVar(const char *fileName, const char *name, int *array);
+
 int writeOne3DArray(const char *filename, double *tdArray, string label, string unit, string desc);
 
 #endif

@@ -29,3 +29,4 @@ startSave=1                         # start save from startSave step
 saveStep=1                          # save every saveStep step
 checkStep=5                         # check on checkStep step
 checkFile=mumu60000000005.nc        # path to file to check with, if file is not set the check will not be performed
+computeFromFile=                    # path to file with data to start computation

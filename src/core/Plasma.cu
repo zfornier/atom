@@ -36,6 +36,30 @@ Plasma::~Plasma() {
     delete[] pd->Qy;
     delete[] pd->Qz;
 
+    delete[] pd->ions.m;
+    delete[] pd->ions.x;
+    delete[] pd->ions.y;
+    delete[] pd->ions.z;
+    delete[] pd->ions.px;
+    delete[] pd->ions.py;
+    delete[] pd->ions.pz;
+
+    delete[] pd->electrons.m;
+    delete[] pd->electrons.x;
+    delete[] pd->electrons.y;
+    delete[] pd->electrons.z;
+    delete[] pd->electrons.px;
+    delete[] pd->electrons.py;
+    delete[] pd->electrons.pz;
+
+    delete[] pd->beam.m;
+    delete[] pd->beam.x;
+    delete[] pd->beam.y;
+    delete[] pd->beam.z;
+    delete[] pd->beam.px;
+    delete[] pd->beam.py;
+    delete[] pd->beam.pz;
+
     if (pd->checkFile != NULL) {
         delete[] pd->dbgEx;
         delete[] pd->dbgEy;

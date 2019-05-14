@@ -1,0 +1,31 @@
+tempX=1e-3                          # plasma electron temperature along X
+tempY=1e-3                          # plasma electron temperature along Y
+tempZ=1e-3                          # plasma electron temperature along Z
+beamImp=0.2                         # beam impulse
+beamVelDisp=0.14                    # beam velocity dispersion
+beamPlasmaDensityRat=2.0e-3         # beam and plasma density ratio
+plsmDensity=1.0                     # plasma density
+lx=1.1424                           # domain size X
+ly=0.05                             # domain size Y
+lz=0.05                             # domain size Z
+lp=1000                             # average number of particles in cell
+nx=100                              # number of mesh nodes along X
+ny=4                                # number of mesh nodes along Y
+nz=4                                # number of mesh nodes along Z
+tau=0.001                           # timestep
+beamPlasma=1                        # 1 if beam-plasma interaction, 0 if beam-beam
+meh=0                               # horizontal process number (with mixed decomposition)
+
+externalMagnFieldX=8.0              # external magnetic field (along X)
+px=12                               # plasma size X
+py=13                               # plasma size Y
+bx=14                               # beam size X
+by=15                               # beam size Y
+bz=16                               # beam size Z
+
+st=1                                # start step
+lst=5                               # last step
+startSave=1                         # start save from startSave step
+saveStep=1                          # save every saveStep step
+checkStep=5                         # check on checkStep step
+checkFile=mumu60000000005.nc        # path to file to check with, if file is not set the check will not be performed

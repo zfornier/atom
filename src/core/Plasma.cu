@@ -557,7 +557,7 @@ void Plasma::checkControlPoint(int nt) {
 
     memory_monitor("checkControlPoint3");
 
-    double cp = checkControlPointParticles(pd->checkFile);
+    double cp = 1.;//checkControlPointParticles(pd->checkFile);
 
     cout << "STEP: " <<  nt << endl;
 

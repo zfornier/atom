@@ -44,8 +44,6 @@ int PlasmaInitializer::initMeshArrays() {
 
     InitFields();
 
-    InitCurrents();
-
     return 0;
 }
 
@@ -92,8 +90,82 @@ void PlasmaInitializer::InitializeCPU() {
     AssignArraysToCells();
 }
 
+void PlasmaInitializer::InitializeCPU(NetCdfData * data) {
+    std::vector <Particle> ion_vp, el_vp, beam_vp;
+
+    initMeshArrays();
+
+    p->Ex = data->Ex;
+    p->Ey = data->Ey;
+    p->Ez = data->Ez;
+
+    p->Hx = data->Hx;
+    p->Hy = data->Hy;
+    p->Hz = data->Hz;
+
+    p->Qx = data->Qx;
+    p->Qy = data->Qy;
+    p->Qz = data->Qz;
+
+    p->Jx = data->Jx;
+    p->Jy = data->Jy;
+    p->Jz = data->Jz;
+
+    ParticlesConfig pC;
+
+    pC.ions = &(p->ions);
+    pC.electrons = &(p->electrons);
+    pC.beam = &(p->beam);
+
+    pC.ions->m = &data->massIons;
+    pC.ions->q_m = data->chargeIons;
+    pC.ions->total = data->ionTotal;
+    pC.ions->x = data->ionsX;
+    pC.ions->y = data->ionsY;
+    pC.ions->z = data->ionsZ;
+    pC.ions->px = data->ionsPx;
+    pC.ions->py = data->ionsPy;
+    pC.ions->pz = data->ionsPz;
+
+    pC.electrons->m = &data->massElectrons;
+    pC.electrons->q_m = data->chargeElectrons;
+    pC.electrons->total = data->electronsTotal;
+    pC.electrons->x = data->electronsX;
+    pC.electrons->y = data->electronsY;
+    pC.electrons->z = data->electronsZ;
+    pC.electrons->px = data->electronsPx;
+    pC.electrons->py = data->electronsPy;
+    pC.electrons->pz = data->electronsPz;
+
+    pC.beam->m = &data->massBeam;
+    pC.beam->q_m = data->chargeBeam;
+    pC.beam->total = data->beamTotal;
+    pC.beam->x = data->beamX;
+    pC.beam->y = data->beamY;
+    pC.beam->z = data->beamZ;
+    pC.beam->px = data->beamPx;
+    pC.beam->py = data->beamPy;
+    pC.beam->pz = data->beamPz;
+
+    convertParticleArraysToSTLvector(pC.beam, BEAM_ELECTRON, beam_vp);
+    convertParticleArraysToSTLvector(pC.ions, ION, ion_vp);
+    convertParticleArraysToSTLvector(pC.electrons, PLASMA_ELECTRON, el_vp);
+
+    addAllParticleListsToCells(ion_vp, el_vp, beam_vp);
+
+    AssignArraysToCells();
+}
+
 void PlasmaInitializer::Initialize() {
     InitializeCPU();
+
+    allocMemoryForCopyCells();
+
+    InitializeGPU();
+}
+
+void PlasmaInitializer::Initialize(NetCdfData * data) {
+    InitializeCPU(data);
 
     allocMemoryForCopyCells();
 
@@ -138,27 +210,29 @@ void PlasmaInitializer::Alloc() {
     p->AllCells = new std::vector<GPUCell>;
     int Nx = p->nx, Ny = p->ny, Nz = p->nz;
 
-    p->Ex = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    p->Ey = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    p->Ez = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    if (p->computeFromFile == NULL) {
+        p->Ex = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->Ey = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->Ez = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-    p->Hx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    p->Hy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    p->Hz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->Hx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->Hy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->Hz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
-    p->Jx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    p->Jy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    p->Jz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->Jx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->Jy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->Jz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+
+        p->Qx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->Qy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+        p->Qz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
+    }
 
     p->Rho = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
     p->npJx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->npJy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
     p->npJz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-
-    p->Qx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    p->Qy = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
-    p->Qz = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
 
     if (p->checkFile != NULL) {
         p->dbgEx = new double[(Nx + 2) * (Ny + 2) * (Nz + 2)];
@@ -183,12 +257,19 @@ void PlasmaInitializer::InitFields() {
     int Nx = p->nx, Ny = p->ny, Nz = p->nz;
 
     for (int i = 0; i < (Nx + 2) * (Ny + 2) * (Nz + 2); i++) {
-        p->Ex[i] = 0.0;
-        p->Ey[i] = 0.0;
-        p->Ez[i] = 0.0;
-        p->Hx[i] = 0.0;
-        p->Hy[i] = 0.0;
-        p->Hz[i] = 0.0;
+        if (p->computeFromFile == NULL) {
+            p->Ex[i] = 0.0;
+            p->Ey[i] = 0.0;
+            p->Ez[i] = 0.0;
+            p->Hx[i] = 0.0;
+            p->Hy[i] = 0.0;
+            p->Hz[i] = 0.0;
+            p->Jx[i] = 0.0;
+            p->Jy[i] = 0.0;
+            p->Jz[i] = 0.0;
+        }
+
+        p->Rho[i] = 0.0;
 
         if (p->checkFile != NULL) {
             p->dbgEx[i] = 0.0;
@@ -197,6 +278,9 @@ void PlasmaInitializer::InitFields() {
             p->dbgHx[i] = 0.0;
             p->dbgHy[i] = 0.0;
             p->dbgHz[i] = 0.0;
+            p->dbgJx[i] = 0.0;
+            p->dbgJy[i] = 0.0;
+            p->dbgJz[i] = 0.0;
         }
     }
 }
@@ -212,23 +296,6 @@ void PlasmaInitializer::InitCells() {
                 c->Init();
                 (*p->AllCells).push_back(*c);
             }
-        }
-    }
-}
-
-void PlasmaInitializer::InitCurrents() {
-    int Nx = p->nx, Ny = p->ny, Nz = p->nz;
-
-    for (int i = 0; i < (Nx + 2) * (Ny + 2) * (Nz + 2); i++) {
-        p->Jx[i] = 0.0;
-        p->Jy[i] = 0.0;
-        p->Jz[i] = 0.0;
-        p->Rho[i] = 0.0;
-
-        if (p->checkFile != NULL) {
-            p->dbgJx[i] = 0.0;
-            p->dbgJy[i] = 0.0;
-            p->dbgJz[i] = 0.0;
         }
     }
 }

@@ -46,10 +46,10 @@ int main(int argc, char *argv[]) {
             conf = initConfig(myfile);
         } else {
             cout << "Unable to open file: " << config << endl;
-            return 0;
+            return -1;
         }
 
-        if(conf.checkFile != NULL && !isFileExist(conf.checkFile)) {
+        if (conf.checkFile != NULL && !isFileExist(conf.checkFile)) {
             std::cerr << "Check file: " << conf.checkFile << " does not exist" << std::endl;
             return -1;
         }
@@ -60,7 +60,19 @@ int main(int argc, char *argv[]) {
 
         try {
             plasma = new Plasma(&conf);
-            plasma->Initialize();
+
+            if (conf.computeFromFile != NULL) {
+
+                if (isFileExist(conf.computeFromFile)) {
+                    plasma->Initialize(conf.computeFromFile);
+                } else {
+                    cout << "Unable to open file: " << conf.computeFromFile << endl;
+                    return -1;
+                }
+            } else {
+                plasma->Initialize();
+            }
+
 
             plasma->Compute();
 
@@ -125,14 +137,23 @@ PlasmaConfig initConfig(std::ifstream &is) {
         conf.saveStep = properties.stringToInt(properties.getProperty("saveStep"));
         conf.startSave = properties.stringToInt(properties.getProperty("startSave"));
         conf.checkStep = properties.stringToInt(properties.getProperty("checkStep"));
-        std::string file = properties.getProperty("checkFile");
-        if (file.empty()) {
+        std::string checkFile = properties.getProperty("checkFile");
+        if (checkFile.empty()) {
             conf.checkFile = NULL;
         }
         else {
-            int l = (int)file.length() + 1;
+            int l = (int)checkFile.length() + 1;
             conf.checkFile = new char[l + 1];
-            memcpy((void*)conf.checkFile, (void*)file.c_str(), (size_t)l + 1);
+            memcpy((void*)conf.checkFile, (void*)checkFile.c_str(), (size_t)l + 1);
+        }
+        std::string computeFile = properties.getProperty("computeFromFile");
+        if (computeFile.empty()) {
+            conf.computeFromFile = NULL;
+        }
+        else {
+            int l = (int)computeFile.length() + 1;
+            conf.computeFromFile = new char[l + 1];
+            memcpy((void*)conf.computeFromFile, (void*)computeFile.c_str(), (size_t)l + 1);
         }
     }
     catch (std::exception &e) {

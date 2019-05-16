@@ -36,6 +36,33 @@ Plasma::~Plasma() {
     delete[] pd->Qy;
     delete[] pd->Qz;
 
+    if (pd->computeFromFile == NULL) {
+        delete[] pd->ions.m;
+        delete[] pd->electrons.m;
+        delete[] pd->beam.m;
+    }
+
+    delete[] pd->ions.x;
+    delete[] pd->ions.y;
+    delete[] pd->ions.z;
+    delete[] pd->ions.px;
+    delete[] pd->ions.py;
+    delete[] pd->ions.pz;
+
+    delete[] pd->electrons.x;
+    delete[] pd->electrons.y;
+    delete[] pd->electrons.z;
+    delete[] pd->electrons.px;
+    delete[] pd->electrons.py;
+    delete[] pd->electrons.pz;
+
+    delete[] pd->beam.x;
+    delete[] pd->beam.y;
+    delete[] pd->beam.z;
+    delete[] pd->beam.px;
+    delete[] pd->beam.py;
+    delete[] pd->beam.pz;
+
     if (pd->checkFile != NULL) {
         delete[] pd->dbgEx;
         delete[] pd->dbgEy;
@@ -1071,7 +1098,19 @@ int Plasma::Compute() {
 }
 
 void Plasma::Initialize() {
-    pi = new PlasmaInitializer(pd);
     this->temp = new double[(pd->nx + 2) * (pd->ny + 2) * (pd->nz + 2)];
+    pi = new PlasmaInitializer(pd);
     pi->Initialize();
+}
+
+void Plasma::Initialize(const char * is) {
+    this->temp = new double[(pd->nx + 2) * (pd->ny + 2) * (pd->nz + 2)];
+
+    NetCdfData * data = getDataFromFile(is);
+    pd->nx = data->nx - 2;
+    pd->ny = data->ny - 2;
+    pd->nz = data->nz - 2;
+
+    pi = new PlasmaInitializer(pd);
+    pi->Initialize(data);
 }

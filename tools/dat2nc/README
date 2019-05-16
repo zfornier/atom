@@ -1,0 +1,10 @@
+This tool is to convert old mumu data files in to NetCDF format.
+
+Use this line to compile the code:
+g++ read_file.cpp  plasma_netcdf.cpp  -I $(netcdf-cxx4)/cxx4/ -L $(netcdf-cxx4)/build/cxx4/ -lnetcdf-cxx4 -o convert
+
+
+To perform the convertion use:
+LD_LIBRARY_PATH=$(netcdf-cxx4)/build/cxx4:$LD_LIBRARY_PATH ./convert -i ./mumu60000036960.dat  -o ./mumu60000036960.nc
+
+

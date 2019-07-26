@@ -63,35 +63,8 @@ LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11 ${CXX_OPTS} -Wall")
 
 LIST(APPEND CMAKE_CUDA_FLAGS "${NVCC_OPTS} ${CUDARCH} --maxrregcount=128 ")
 
-# find NetCdf-cxx4 lib
-find_path (NETCDF_CXX_INCLUDES_C netcdf PATHS "$ENV{NETCDF_CXX_DIR}" "${CMAKE_SOURCE_DIR}/external/NetCdf-cxx4/include")
-find_library (NETCDF_CXX_LIBRARIES_C  libnetcdf-cxx4.a PATHS "$ENV{NETCDF_CXX_LIB_DIR}" "${CMAKE_SOURCE_DIR}/external/NetCdf-cxx4/lib")
 
-message(${NETCDF_CXX_LIBRARIES_C})
-
-set(BUILD_NETCDF_CXX4 FALSE)
-if( NOT NETCDF_CXX_INCLUDES_C OR
-    NOT NETCDF_CXX_LIBRARIES_C)
-    message(STATUS "NetCDF-cxx4 components not found. The package will be downloaded and compiled.")
-    include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
-    set(NETCDF_EXTERNAL_PATH "${CMAKE_SOURCE_DIR}/external/NetCdf-cxx4")
-    set(NETCDF_CXX_INCLUDES_C "${NETCDF_EXTERNAL_PATH}/include")
-    set(NETCDF_CXX_LIBRARIES_C "${NETCDF_EXTERNAL_PATH}/lib/libnetcdf-cxx4.a")
-    set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{LD_LIBRARY_PATH})
-    externalproject_add(netcdf_cxx4
-        PREFIX ${NETCDF_EXTERNAL_PATH}
-        INSTALL_DIR ${NETCDF_EXTERNAL_PATH}
-        GIT_REPOSITORY "https://github.com/Unidata/netcdf-cxx4.git"
-        CMAKE_ARGS
-            -DCMAKE_BUILD_TYPE:STRING=Release
-            -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-            -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
-	        -DBUILD_SHARED_LIBS:STRING=OFF
-    )
-    set(BUILD_NETCDF_CXX4 TRUE)
-endif()
-
-INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS} ${MPI_INCLUDE_PATH} ${NETCDF_CXX_INCLUDES_C})
+INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS} ${MPI_INCLUDE_PATH})
 
 set(SOURCES
         src/main.cu src/core/mpi_shortcut.cxx src/core/service_functions.cu src/core/compare.cxx src/core/maxwell.cu src/core/load_data.cu
@@ -101,9 +74,5 @@ ADD_SUBDIRECTORY(src/utils/NetCdf)
 ADD_SUBDIRECTORY(src/utils/ConfigParser)
 ADD_EXECUTABLE(atom ${SOURCES})
 
-if(BUILD_NETCDF_CXX4)
-       add_dependencies(netcdf_lib netcdf_cxx4)
-       add_dependencies(atom netcdf_cxx4)
-endif()
-TARGET_LINK_LIBRARIES(atom ${CUDA_LIBRARIES} ${MPI_LIBRARIES} netcdf_lib ${NETCDF_CXX_LIBRARIES_C} "-lnetcdf" confparser_lib)
+TARGET_LINK_LIBRARIES(atom ${CUDA_LIBRARIES} ${MPI_LIBRARIES} netcdf_lib "-lnetcdf" confparser_lib)
 

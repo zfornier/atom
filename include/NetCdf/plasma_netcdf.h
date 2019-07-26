@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 #include <cstdlib>
-#include <netcdf>
+#include <netcdf.h>
 #include <vector>
 #include <unistd.h>
 
@@ -13,8 +13,6 @@
 typedef int Error_t;
 
 using namespace std;
-using namespace netCDF;
-using namespace netCDF::exceptions;
 
 #define UNITS string("units")
 #define DESCRIPTION string("description")

@@ -1,0 +1,51 @@
+
+{
+	"sources" : 
+	[
+		
+		{
+			"file" : "/home/students/zoe/atom/build/CMakeFiles/netcdf_cxx4"
+		},
+		
+		{
+			"file" : "/home/students/zoe/atom/build/CMakeFiles/netcdf_cxx4.rule"
+		},
+		
+		{
+			"file" : "/home/students/zoe/atom/build/CMakeFiles/netcdf_cxx4-complete.rule"
+		},
+		
+		{
+			"file" : "/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-install.rule"
+		},
+		
+		{
+			"file" : "/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-mkdir.rule"
+		},
+		
+		{
+			"file" : "/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-download.rule"
+		},
+		
+		{
+			"file" : "/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-update.rule"
+		},
+		
+		{
+			"file" : "/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-patch.rule"
+		},
+		
+		{
+			"file" : "/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-configure.rule"
+		},
+		
+		{
+			"file" : "/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-build.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : [ "netcdf_cxx4" ],
+		"name" : "netcdf_cxx4"
+	}
+}

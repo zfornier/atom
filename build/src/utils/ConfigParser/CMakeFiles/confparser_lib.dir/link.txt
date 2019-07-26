@@ -1,0 +1,2 @@
+/usr/bin/ar qc libconfparser_lib.a  CMakeFiles/confparser_lib.dir/Properties.cpp.o
+/usr/bin/ranlib libconfparser_lib.a

@@ -1,0 +1,13 @@
+# Target labels
+ netcdf_cxx4
+# Source files and their labels
+/home/students/zoe/atom/build/CMakeFiles/netcdf_cxx4
+/home/students/zoe/atom/build/CMakeFiles/netcdf_cxx4.rule
+/home/students/zoe/atom/build/CMakeFiles/netcdf_cxx4-complete.rule
+/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-install.rule
+/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-mkdir.rule
+/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-download.rule
+/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-update.rule
+/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-patch.rule
+/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-configure.rule
+/home/students/zoe/atom/external/NetCdf-cxx4/src/netcdf_cxx4-stamp/netcdf_cxx4-build.rule

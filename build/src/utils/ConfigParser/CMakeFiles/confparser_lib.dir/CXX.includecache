@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/students/zoe/atom/include/ConfigParser/Properties.h
+map
+-
+string
+-
+iostream
+-
+fstream
+-
+algorithm
+-
+vector
+-
+sstream
+-
+
+/home/students/zoe/atom/src/utils/ConfigParser/Properties.cpp
+../../../include/ConfigParser/Properties.h
+/home/students/zoe/atom/include/ConfigParser/Properties.h
+

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnetcdf_lib.a  CMakeFiles/netcdf_lib.dir/plasma_netcdf.cpp.o CMakeFiles/netcdf_lib.dir/read_file.cpp.o
+/usr/bin/ranlib libnetcdf_lib.a

@@ -1,0 +1,10 @@
+/home/students/zoe/atom/build/CMakeFiles/rebuild_cache.dir
+/home/students/zoe/atom/build/CMakeFiles/edit_cache.dir
+/home/students/zoe/atom/build/CMakeFiles/atom.dir
+/home/students/zoe/atom/build/CMakeFiles/netcdf_cxx4.dir
+/home/students/zoe/atom/build/src/utils/NetCdf/CMakeFiles/rebuild_cache.dir
+/home/students/zoe/atom/build/src/utils/NetCdf/CMakeFiles/edit_cache.dir
+/home/students/zoe/atom/build/src/utils/NetCdf/CMakeFiles/netcdf_lib.dir
+/home/students/zoe/atom/build/src/utils/ConfigParser/CMakeFiles/edit_cache.dir
+/home/students/zoe/atom/build/src/utils/ConfigParser/CMakeFiles/rebuild_cache.dir
+/home/students/zoe/atom/build/src/utils/ConfigParser/CMakeFiles/confparser_lib.dir
